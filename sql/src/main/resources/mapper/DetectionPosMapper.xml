@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.til.water_detection.sql.mapper.DetectionPosMapper">
+
+    <insert id="addDetectionPos">
+        insert into water_detection_data.detection (user_id, another_name)
+        values (#{userId}, #{anotherName})
+    </insert>
+
+    <delete id="removeDetectionPosById">
+        delete
+        from water_detection_data.detection
+        where id = #{id}
+    </delete>
+
+    <update id="updateDetectionPosAnotherNameById">
+        update water_detection_data.detection
+        set another_name = #{anotherName}
+        where id = #{id}
+    </update>
+
+    <update id="updateDetectionPosTimeById">
+        update water_detection_data.detection
+        set up_time = CURRENT_TIMESTAMP
+        where id = #{id}
+    </update>
+
+    <update id="updateDetectionPosCoordinate">
+        update water_detection_data.detection
+        set longitude = #{longitude},
+            latitude  = #{latitude},
+            up_time   = CURRENT_TIMESTAMP
+        where id = #{id}
+    </update>
+
+    <select id="getDetectionPosById" resultType="com.til.water_detection.data.Detection">
+        select *
+        from water_detection_data.detection
+        where id = #{id}
+    </select>
+
+    <select id="getDetectionListByUserId" resultType="com.til.water_detection.data.Detection">
+        select *
+        from water_detection_data.detection
+        where user_id = #{userId}
+    </select>
+
+</mapper>

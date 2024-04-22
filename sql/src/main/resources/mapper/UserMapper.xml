@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.til.water_detection.sql.mapper.UserMapper">
+
+    <insert id="addUser">
+
+        insert into water_detection_data.user ( username, password, salt, email, phone)
+        values (#{username}, #{password}, #{salt}, #{email}, #{phone})
+
+    </insert>
+
+    <update id="setUserPhotoById">
+        update water_detection_data.user
+        set phone = #{phone}
+        where id = #{id}
+    </update>
+
+    <update id="setUserEmailById">
+        update  water_detection_data.user
+        set email = #{email}
+        where id = #{id}
+    </update>
+
+    <select id="getUserByID" resultType="com.til.water_detection.data.User">
+        select *
+        from  water_detection_data.user
+        where id == #{id}
+    </select>
+
+    <select id="getUserByUsername" resultType="com.til.water_detection.data.User">
+        select  *
+        from  water_detection_data.user
+        where username = #{username}
+    </select>
+
+</mapper>

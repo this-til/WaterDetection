@@ -1,0 +1,6 @@
+
+
+rootProject.name = 'WaterDetection'
+include 'data'
+include 'sql'
+
