@@ -3,4 +3,5 @@
 rootProject.name = 'WaterDetection'
 include 'data'
 include 'sql'
+include 'wab'
 
