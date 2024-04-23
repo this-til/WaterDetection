@@ -10,40 +10,40 @@ public interface UserMapper {
             insert into water_detection_data.user ( username, password, salt)
             values (#{username}, #{password}, #{salt})
             """)
-    int addUser(@Param("username") String username,  @Param("password") String password,  @Param("salt") String salt);
+    int addUser(@Param("username") String username, @Param("password") String password, @Param("salt") String salt);
 
     @Update("""
             update water_detection_data.user
             set phone = #{phone}
             where id = #{id}
             """)
-    int setUserPhoneById(@Param("id") int id, @Param("phone") String phone);
+    int updateUserPhone(@Param("id") int id, @Param("phone") String phone);
 
     @Update("""
             update  water_detection_data.user
             set email = #{email}
             where id = #{id}
             """)
-    int setUserEmailById(@Param("id") int id, @Param("email") String email);
+    int updateUserEmail(@Param("id") int id, @Param("email") String email);
 
     @Update("""
             update  water_detection_data.user
             set password = #{password}
             where id = #{id}
             """)
-    int setUserPasswordById(@Param("id") int id, @Param("password") String password);
+    int updateUserPassword(@Param("id") int id, @Param("password") String password);
 
     @Select("""
             select *
             from  water_detection_data.user
             where id = #{id}
             """)
-    User getUserByID(int id);
+    User getUser(int id);
 
     @Select("""
             select  *
-            from  water_detection_data.user
+            from water_detection_data.user
             where username = #{username}
             """)
-    User getUserByUsername(String username);
+    User getUser(String username);
 }

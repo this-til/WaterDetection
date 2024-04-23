@@ -12,5 +12,5 @@ public interface DataTypeService {
     @Nullable
     DataType getDatatypeById(int id, int userId);
 
-    void updateDataTypeAnotherNameById(int id,int userId, String anotherName);
+    int updateDataTypeAnotherNameById(int id,int userId, String anotherName);
 }

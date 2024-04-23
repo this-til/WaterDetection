@@ -30,12 +30,12 @@ public class DetectionServiceImpl implements DetectionService {
     }
 
     @Override
-    public void setDetectionAnotherNameById(int id, int userId, String anotherName) {
-        detectionMapper.updateDetectionPosAnotherNameById(id, userId, anotherName);
+    public int updateDetectionAnotherNameById(int id, int userId, String anotherName) {
+        return detectionMapper.updateDetectionAnotherNameById(id, userId, anotherName);
     }
 
     @Override
-    public void updateDetectionPosTimeById(int id, int userId) {
-        detectionMapper.updateDetectionPosTimeById(id, userId);
+    public int updateDetectionTimeById(int id, int userId) {
+        return detectionMapper.updateDetectionTimeById(id, userId);
     }
 }

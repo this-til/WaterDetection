@@ -6,12 +6,10 @@ import com.til.water_detection.data.ResultType;
 import com.til.water_detection.wab.service.DetectionService;
 import com.til.water_detection.wab.util.FinalString;
 import jakarta.servlet.http.HttpServletRequest;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -44,9 +42,13 @@ public class DetectionController {
     public Result<Detection> getDetectionById(HttpServletRequest request, int id) {
         int userId = (int) request.getAttribute(FinalString.ID);
         Detection detection = detectionService.getDetectionById(userId, id);
-        if (detection == null) {
-            return Result.fail("未找到对应id的检测器");
-        }
-        return new Result<>(ResultType.SUCCESSFUL, null, detection);
+        return new Result<>(detection != null ? ResultType.SUCCESSFUL : ResultType.FAIL, null, detection);
+    }
+
+    @PutMapping("/updateDetectionAnotherNameById")
+    public Result<Void> updateDetectionAnotherNameById(HttpServletRequest request, int id, @Param(FinalString.VERIFY_1_30) String anotherName) {
+        int userId = (int) request.getAttribute(FinalString.ID);
+        int i = detectionService.updateDetectionAnotherNameById(id, userId, anotherName);
+        return new Result<>(i > 0 ? ResultType.SUCCESSFUL : ResultType.FAIL, i + "条数据被更改", null);
     }
 }

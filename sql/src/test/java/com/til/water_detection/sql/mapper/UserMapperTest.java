@@ -22,16 +22,16 @@ public class UserMapperTest {
     public void setUserPhotoByIdTest() {
         SqlSession sqlSession = SqlSessionUtil.getSqlSession();
         UserMapper mapper = sqlSession.getMapper(UserMapper.class);
-        mapper.setUserPhoneById(18, "114514");
+        mapper.updateUserPhone(18, "114514");
         sqlSession.commit();
         sqlSession.close();
     }
 
     @Test
-    public void setUserEmailByIdTest() {
+    public void updateUserEmailTest() {
         SqlSession sqlSession = SqlSessionUtil.getSqlSession();
         UserMapper mapper = sqlSession.getMapper(UserMapper.class);
-        mapper.setUserEmailById(18, "114514@163.com");
+        mapper.updateUserEmail(18, "114514@163.com");
         sqlSession.commit();
         sqlSession.close();
     }

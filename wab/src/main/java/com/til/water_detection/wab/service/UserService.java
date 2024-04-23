@@ -4,15 +4,15 @@ import com.til.water_detection.data.User;
 
 public interface UserService {
 
-    User getUserByUsername(String username);
+    User getUser(String username);
 
-    User getUserById(int id);
+    User getUser(int id);
 
     void register(String username, String password);
 
-    void setUserPhotoById(int id, String path);
+    void updateUserPhoto(int id, String path);
 
-    void setUserEmailById(int id, String email);
+    void updateUserEmail(int id, String email);
 
-    void setUserPasswordById(int id, String password);
+    void updateUserPassword(int id, String password);
 }

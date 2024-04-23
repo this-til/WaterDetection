@@ -14,8 +14,8 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public User getUserByUsername(String username) {
-        return userMapper.getUserByUsername(username);
+    public User getUser(String username) {
+        return userMapper.getUser(username);
     }
 
     @Override
@@ -25,23 +25,23 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getUserById(int id) {
-        return userMapper.getUserByID(id);
+    public User getUser(int id) {
+        return userMapper.getUser(id);
     }
 
     @Override
-    public void setUserPhotoById(int id, String path) {
-        userMapper.setUserPhoneById(id, path);
+    public void updateUserPhoto(int id, String path) {
+        userMapper.updateUserPhone(id, path);
     }
 
     @Override
-    public void setUserEmailById(int id, String email) {
-        userMapper.setUserEmailById(id, email);
+    public void updateUserEmail(int id, String email) {
+        userMapper.updateUserEmail(id, email);
     }
 
     @Override
-    public void setUserPasswordById(int id, String password) {
-        userMapper.setUserPasswordById(id, password);
+    public void updateUserPassword(int id, String password) {
+        userMapper.updateUserPassword(id, password);
     }
 }
 

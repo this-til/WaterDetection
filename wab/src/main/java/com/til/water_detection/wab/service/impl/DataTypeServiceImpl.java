@@ -30,7 +30,7 @@ public class DataTypeServiceImpl implements DataTypeService {
     }
 
     @Override
-    public void updateDataTypeAnotherNameById(int id, int userId, String anotherName) {
-        dataTypeMapper.updateDataTypeAnotherNameById(id, userId, anotherName);
+    public int updateDataTypeAnotherNameById(int id, int userId, String anotherName) {
+        return dataTypeMapper.updateDataTypeAnotherNameById(id, userId, anotherName);
     }
 }

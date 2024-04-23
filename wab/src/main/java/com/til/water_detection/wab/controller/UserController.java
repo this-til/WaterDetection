@@ -25,8 +25,8 @@ public class UserController {
 
 
     @PostMapping("/register")
-    public Result<Void> register(@Param("^\\S{5,30}$") String username, @Param("^\\S{5,30}$") String password) {
-        User user = userService.getUserByUsername(username);
+    public Result<Void> register(@Param(FinalString.VERIFY_5_30) String username, @Param(FinalString.VERIFY_5_30) String password) {
+        User user = userService.getUser(username);
         if (user == null) {
             return Result.fail("用户名已被注册");
         }
@@ -35,8 +35,8 @@ public class UserController {
     }
 
     @GetMapping("/login")
-    public Result<String> login(@Param("^\\S{5,30}$") String username, @Param("^\\S{5,30}$") String password) {
-        User user = userService.getUserByUsername(username);
+    public Result<String> login(@Param(FinalString.VERIFY_5_30) String username, @Param(FinalString.VERIFY_5_30) String password) {
+        User user = userService.getUser(username);
         if (user == null) {
             return Result.fail("未知的用户");
         }
@@ -48,9 +48,9 @@ public class UserController {
     }
 
     @GetMapping("/info")
-    public Result<User> userInfo(HttpServletRequest request, @RequestHeader(FinalString.AUTHORIZATION) String token) {
+    public Result<User> userInfo(HttpServletRequest request) {
 
-        User user = userService.getUserById((int) request.getAttribute(FinalString.ID));
+        User user = userService.getUser((int) request.getAttribute(FinalString.ID));
         user.setPassword("");
         user.setSalt("");
 

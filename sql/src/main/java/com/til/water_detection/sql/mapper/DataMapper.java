@@ -1,7 +1,6 @@
 package com.til.water_detection.sql.mapper;
 
 import com.til.water_detection.data.Data;
-import com.til.water_detection.data.DataType;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
@@ -22,14 +21,15 @@ public interface DataMapper {
             from water_detection_data.data
             where id = #{id}
             """)
-    Data getDataById(Long id);
+    Data getData(Long id);
 
     @Select("""
             select *
             from water_detection_data.data
             where user_id = #{userId}
             """)
-    List<Data> getDataListByUserId(int userId);
+    List<Data> getDataList(int userId);
+
 
     @Select("""
             select *

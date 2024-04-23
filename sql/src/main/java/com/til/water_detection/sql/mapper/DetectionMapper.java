@@ -34,28 +34,28 @@ public interface DetectionMapper {
             set another_name = #{anotherName}
             where id = #{id}
             """)
-    int updateDetectionPosAnotherNameById(@Param("id") int id, @Param("anotherName") String anotherName);
+    int updateDetectionAnotherNameById(@Param("id") int id, @Param("anotherName") String anotherName);
 
     @Update("""
             update water_detection_data.detection
             set another_name = #{anotherName}
             where id = #{id} && user_id = #{userId}
             """)
-    int updateDetectionPosAnotherNameById(@Param("id") int id, @Param("userid") int userId, @Param("anotherName") String anotherName);
+    int updateDetectionAnotherNameById(@Param("id") int id, @Param("userid") int userId, @Param("anotherName") String anotherName);
 
     @Update("""
             update water_detection_data.detection
             set up_time = CURRENT_TIMESTAMP
             where id = #{id}
             """)
-    int updateDetectionPosTimeById(int id);
+    int updateDetectionTimeById(int id);
 
     @Update("""
             update water_detection_data.detection
             set up_time = CURRENT_TIMESTAMP
             where id = #{id} && user_id = #{userId}
             """)
-    int updateDetectionPosTimeById(@Param("id")int id,@Param("userId") int userId);
+    int updateDetectionTimeById(@Param("id")int id, @Param("userId") int userId);
 
     @Update("""
             update water_detection_data.detection
@@ -64,7 +64,7 @@ public interface DetectionMapper {
                 up_time   = CURRENT_TIMESTAMP
             where id = #{id}
             """)
-    int updateDetectionPosCoordinateById(@Param("id") int id, @Param("longitude") float longitude, @Param("latitude") float latitude);
+    int updateDetectionCoordinateById(@Param("id") int id, @Param("longitude") float longitude, @Param("latitude") float latitude);
 
     @Update("""
             update water_detection_data.detection
@@ -73,7 +73,7 @@ public interface DetectionMapper {
                 up_time   = CURRENT_TIMESTAMP
             where id = #{id} && user_id = #{userId}
             """)
-    int updateDetectionPosCoordinateById(@Param("id") int id, @Param("userId") int userId,@Param("longitude") float longitude, @Param("latitude") float latitude);
+    int updateDetectionCoordinateById(@Param("id") int id, @Param("userId") int userId, @Param("longitude") float longitude, @Param("latitude") float latitude);
 
 
     @Select("""

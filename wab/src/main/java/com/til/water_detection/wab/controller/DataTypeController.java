@@ -7,12 +7,12 @@ import com.til.water_detection.data.ResultType;
 import com.til.water_detection.wab.service.DataTypeService;
 import com.til.water_detection.wab.util.FinalString;
 import jakarta.servlet.http.HttpServletRequest;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Update;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -49,6 +49,13 @@ public class DataTypeController {
             return Result.fail("未找到对应id的数据类型");
         }
         return new Result<>(ResultType.SUCCESSFUL, null, dataType);
+    }
+
+    @PutMapping("/updateDataTypeAnotherNameById")
+    public Result<Void> updateDataTypeAnotherNameById(HttpServletRequest request, int id, @Param(FinalString.VERIFY_1_30) String anotherName) {
+        int userId = (int) request.getAttribute(FinalString.ID);
+        int i = dataTypeService.updateDataTypeAnotherNameById(id, userId, anotherName);
+        return new Result<>(i > 0 ? ResultType.SUCCESSFUL : ResultType.FAIL, i + "条数据被更改", null);
     }
 
 

@@ -21,6 +21,13 @@ public interface DataTypeMapper {
             """)
     int removeDataTypeById(int id);
 
+    @Delete("""
+            delete
+            from water_detection_data.data_type
+            where id = #{id} && user_id = #{userId}
+            """)
+    int removeDataTypeById( @Param("id")  int id,@Param("userId")  int userId);
+
     @Update("""
             update water_detection_data.data_type
             set another_name = #{anotherName}

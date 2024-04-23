@@ -13,7 +13,7 @@ public interface DetectionService {
     @Nullable
     Detection getDetectionById(int id, int userId);
 
-    void setDetectionAnotherNameById(int id, int userId, String anotherName);
+    int updateDetectionAnotherNameById(int id, int userId, String anotherName);
 
-    void  updateDetectionPosTimeById(int id, int userId);
+    int updateDetectionTimeById(int id, int userId);
 }
