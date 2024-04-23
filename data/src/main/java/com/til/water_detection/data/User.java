@@ -3,6 +3,7 @@ package com.til.water_detection.data;
 import org.jetbrains.annotations.Nullable;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.Objects;
 import java.util.UUID;
 
 public final class User {
@@ -82,5 +83,28 @@ public final class User {
         this.phone = phone;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return id == user.id && Objects.equals(username, user.username) && Objects.equals(password, user.password) && Objects.equals(salt, user.salt) && Objects.equals(email, user.email) && Objects.equals(phone, user.phone);
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, username, password, salt, email, phone);
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", salt='" + salt + '\'' +
+                ", email='" + email + '\'' +
+                ", phone='" + phone + '\'' +
+                '}';
+    }
 }

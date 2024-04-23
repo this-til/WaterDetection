@@ -1,6 +1,7 @@
 package com.til.water_detection.data;
 
 import java.sql.Time;
+import java.util.Objects;
 
 public final class Data {
 
@@ -66,5 +67,30 @@ public final class Data {
 
     public void setValue(float value) {
         this.value = value;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Data data = (Data) o;
+        return id == data.id && userId == data.userId && detectionId == data.detectionId && dataTypeId == data.dataTypeId && Float.compare(value, data.value) == 0 && Objects.equals(time, data.time);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, userId, detectionId, dataTypeId, time, value);
+    }
+
+    @Override
+    public String toString() {
+        return "Data{" +
+                "id=" + id +
+                ", userId=" + userId +
+                ", detectionId=" + detectionId +
+                ", dataTypeId=" + dataTypeId +
+                ", time=" + time +
+                ", value=" + value +
+                '}';
     }
 }

@@ -26,9 +26,9 @@
         </environment>
     </environments>
     <mappers>
-        <mapper resource="mapper/UserMapper.xml"/>
-        <mapper resource="mapper/DetectionPosMapper.xml"/>
-        <mapper resource="mapper/DataMapper.xml"/>
-        <mapper resource="mapper/DataTypeMapper.xml"/>
+        <mapper class="com.til.water_detection.sql.mapper.DataMapper"/>
+        <mapper class="com.til.water_detection.sql.mapper.DataTypeMapper"/>
+        <mapper class="com.til.water_detection.sql.mapper.UserMapper"/>
+        <mapper class="com.til.water_detection.sql.mapper.DetectionMapper"/>
     </mappers>
 </configuration>

@@ -6,8 +6,6 @@ import com.til.water_detection.sql.util.SqlSessionUtil;
 import org.apache.ibatis.session.SqlSession;
 import org.junit.jupiter.api.Test;
 
-import java.security.NoSuchAlgorithmException;
-
 public class UserMapperTest {
 
     @Test
@@ -15,7 +13,7 @@ public class UserMapperTest {
         SqlSession sqlSession = SqlSessionUtil.getSqlSession();
         UserMapper mapper = sqlSession.getMapper(UserMapper.class);
         User user = User.newUser("sasdds", "454");
-        mapper.addUser(user);
+        mapper.addUser(user.getUsername(), user.getPassword(), user.getSalt());
         sqlSession.commit();
         sqlSession.close();
     }
@@ -24,7 +22,7 @@ public class UserMapperTest {
     public void setUserPhotoByIdTest() {
         SqlSession sqlSession = SqlSessionUtil.getSqlSession();
         UserMapper mapper = sqlSession.getMapper(UserMapper.class);
-        mapper.setUserPhotoById(18, "114514");
+        mapper.setUserPhoneById(18, "114514");
         sqlSession.commit();
         sqlSession.close();
     }
