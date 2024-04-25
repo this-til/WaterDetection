@@ -12,10 +12,10 @@ repositories {
 dependencies {
     compileOnly 'org.jetbrains:annotations:24.0.0'
 
-    testImplementation platform('org.junit:junit-bom:5.9.1')
+    testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 
-
+    implementation project(":data")
 
     //implementation "org.apache.logging.log4j:log4j-core:2.19.0"
     implementation "org.apache.logging.log4j:log4j-api:2.19.0"
@@ -26,8 +26,6 @@ dependencies {
     // 如果你使用MyBatis与Spring集成，你可能还需要添加以下依赖
     implementation 'org.mybatis:mybatis-spring:2.0.6' // 请根据你的需要选择适合的版本
 
-    implementation project(":data")
-
 
     // 数据库驱动，例如MySQL
     runtimeOnly 'mysql:mysql-connector-java:8.0.28' // 请根据你的需要选择适合的版本
@@ -36,8 +34,4 @@ dependencies {
 
 test {
     useJUnitPlatform()
-}
-
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
 }

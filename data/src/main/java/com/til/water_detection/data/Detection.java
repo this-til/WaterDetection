@@ -7,16 +7,14 @@ import java.util.Objects;
 
 public final class Detection {
     private int id;
-    private int userId;
     @Nullable
     private String anotherName;
     private float longitude;
     private float latitude;
     private Time upTime;
 
-    public Detection(int id, int userId, @Nullable String anotherName, float longitude, float latitude, Time upTime) {
+    public Detection(int id, @Nullable String anotherName, float longitude, float latitude, Time upTime) {
         this.id = id;
-        this.userId = userId;
         this.anotherName = anotherName;
         this.longitude = longitude;
         this.latitude = latitude;
@@ -30,14 +28,6 @@ public final class Detection {
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(int userId) {
-        this.userId = userId;
     }
 
     @Nullable
@@ -77,7 +67,6 @@ public final class Detection {
     public String toString() {
         return "Detection{" +
                 "id=" + id +
-                ", userId=" + userId +
                 ", anotherName='" + anotherName + '\'' +
                 ", longitude=" + longitude +
                 ", latitude=" + latitude +
@@ -90,11 +79,11 @@ public final class Detection {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Detection detection = (Detection) o;
-        return id == detection.id && userId == detection.userId && Float.compare(longitude, detection.longitude) == 0 && Float.compare(latitude, detection.latitude) == 0 && Objects.equals(anotherName, detection.anotherName) && Objects.equals(upTime, detection.upTime);
+        return id == detection.id && Float.compare(longitude, detection.longitude) == 0 && Float.compare(latitude, detection.latitude) == 0 && Objects.equals(anotherName, detection.anotherName) && Objects.equals(upTime, detection.upTime);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, userId, anotherName, longitude, latitude, upTime);
+        return Objects.hash(id, anotherName, longitude, latitude, upTime);
     }
 }

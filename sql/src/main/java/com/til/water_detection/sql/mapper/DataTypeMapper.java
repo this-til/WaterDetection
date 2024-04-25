@@ -9,10 +9,10 @@ import java.util.List;
 public interface DataTypeMapper {
 
     @Insert("""
-            insert into water_detection_data.data_type (user_id)
-            values (#{userId})
+            insert into water_detection_data.data_type ()
+            values ()
             """)
-    int addDataType(@Param("userId") int userId);
+    int addDataType();
 
     @Delete("""
             delete
@@ -21,26 +21,12 @@ public interface DataTypeMapper {
             """)
     int removeDataTypeById(int id);
 
-    @Delete("""
-            delete
-            from water_detection_data.data_type
-            where id = #{id} && user_id = #{userId}
-            """)
-    int removeDataTypeById( @Param("id")  int id,@Param("userId")  int userId);
-
     @Update("""
             update water_detection_data.data_type
             set another_name = #{anotherName}
             where id = #{id}
             """)
     int updateDataTypeAnotherNameById(@Param("id") int id, @Param("anotherName") String anotherName);
-
-    @Update("""
-            update water_detection_data.data_type
-            set another_name = #{anotherName}
-            where id = #{id} && user_id = #{userId}
-            """)
-    int updateDataTypeAnotherNameById(@Param("id") int id, @Param("userId") int userId, @Param("anotherName") String anotherName);
 
     @Select("""
             select *
@@ -52,15 +38,7 @@ public interface DataTypeMapper {
     @Select("""
             select *
             from water_detection_data.data_type
-            where id = #{id} && user_id = #{userId}
             """)
-    DataType getDataTypeById(int id, int userId);
-
-    @Select("""
-            select *
-            from water_detection_data.data_type
-            where user_id = #{userId}
-            """)
-    List<DataType> getDataTypeListByUserId(int userId);
+    List<DataType> getAllDataType();
 
 }

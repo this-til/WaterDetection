@@ -1,20 +1,19 @@
 package com.til.water_detection.data;
 
 import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.Objects;
 
 public final class Data {
 
     private long id;
-    private int userId;
     private int detectionId;
     private int dataTypeId;
-    private Time time;
+    private Timestamp time;
     private float value;
 
-    public Data(long id, int userId, int detectionId, int dataTypeId, Time time, float value) {
+    public Data(long id, int detectionId, int dataTypeId, Timestamp time, float value) {
         this.id = id;
-        this.userId = userId;
         this.detectionId = detectionId;
         this.dataTypeId = dataTypeId;
         this.time = time;
@@ -29,13 +28,6 @@ public final class Data {
         this.id = id;
     }
 
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(int userId) {
-        this.userId = userId;
-    }
 
     public int getDetectionId() {
         return detectionId;
@@ -53,11 +45,11 @@ public final class Data {
         this.dataTypeId = dataTypeId;
     }
 
-    public Time getTime() {
+    public Timestamp getTime() {
         return time;
     }
 
-    public void setTime(Time time) {
+    public void setTime(Timestamp time) {
         this.time = time;
     }
 
@@ -74,23 +66,11 @@ public final class Data {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Data data = (Data) o;
-        return id == data.id && userId == data.userId && detectionId == data.detectionId && dataTypeId == data.dataTypeId && Float.compare(value, data.value) == 0 && Objects.equals(time, data.time);
+        return id == data.id && detectionId == data.detectionId && dataTypeId == data.dataTypeId && Float.compare(value, data.value) == 0 && Objects.equals(time, data.time);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, userId, detectionId, dataTypeId, time, value);
-    }
-
-    @Override
-    public String toString() {
-        return "Data{" +
-                "id=" + id +
-                ", userId=" + userId +
-                ", detectionId=" + detectionId +
-                ", dataTypeId=" + dataTypeId +
-                ", time=" + time +
-                ", value=" + value +
-                '}';
+        return Objects.hash(id, detectionId, dataTypeId, time, value);
     }
 }

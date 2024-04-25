@@ -3,16 +3,18 @@ package com.til.water_detection.sql.mapper;
 import com.til.water_detection.data.Data;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 @Mapper
 public interface DataMapper {
 
     @Insert("""
-            insert into water_detection_data.data (user_id, detection_id, data_type_id, time, value)
-            values (#{userId}, #{detectionId}, #{dataTypeId}, #{time}, #{value})
+            insert into water_detection_data.data ( detection_id, data_type_id, time, value)
+            values ( #{detectionId}, #{dataTypeId}, #{time}, #{value})
             """)
     int addData(Data data);
 
@@ -21,27 +23,27 @@ public interface DataMapper {
             from water_detection_data.data
             where id = #{id}
             """)
-    Data getData(Long id);
+    Data getDataById(long id);
 
     @Select("""
             select *
             from water_detection_data.data
-            where user_id = #{userId}
             """)
-    List<Data> getDataList(int userId);
-
+    List<Data> getAllData();
 
     @Select("""
             select *
             from water_detection_data.data
-            where detection_id = #{detectionPosId}
+            where
+                if(#{detectionPosId} < 0, TRUE , detection_id = #{detectionPosId})
+                && if(#{dataTypeId} < 0 , TRUE , data_type_id = #{dataTypeId})
+                && if(#{start} < 0, TRUE ,  time > #{start})
+                && if(#{end} < 0, TRUE ,  time < #{end})
             """)
-    List<Data> getDataListByDetectionPosId(int detectionPosId);
-
-    @Select("""
-            select *
-            from water_detection_data.data
-            where data_type_id = #{dataTypeId}
-            """)
-    List<Data> getDataListByDataTypeId(int dataTypeId);
+    List<Data> getData(
+            @Param("detectionPosId") int detectionPosId,
+            @Param("dataTypeId") int dataTypeId,
+            @Param("start") long start,
+            @Param("end") long end
+    );
 }

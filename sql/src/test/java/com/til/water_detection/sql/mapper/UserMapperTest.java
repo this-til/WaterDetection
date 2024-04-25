@@ -1,13 +1,13 @@
 package com.til.water_detection.sql.mapper;
 
 
-import com.til.water_detection.data.User;
 import com.til.water_detection.sql.util.SqlSessionUtil;
 import org.apache.ibatis.session.SqlSession;
 import org.junit.jupiter.api.Test;
 
 public class UserMapperTest {
 
+/*
     @Test
     public void addUserTest() {
         SqlSession sqlSession = SqlSessionUtil.getSqlSession();
@@ -35,6 +35,7 @@ public class UserMapperTest {
         sqlSession.commit();
         sqlSession.close();
     }
+*/
 
 
 }
