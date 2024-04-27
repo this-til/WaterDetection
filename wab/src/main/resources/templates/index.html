@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html
+        xmlns:th="http://www.thymeleaf.org"
+        lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+        <title></title>
+
+    </head>
+
+    <body>
+        <div id="helloVue" class="demo">
+            {{}}
+        </div>
+
+
+
+        <script>
+            import { Line, mixins } from 'vue-chartjs'
+            import { Chart, registerables } from 'chart.js'
+
+            const HelloVueApp = {
+
+                data() {
+                    return {
+                    }
+                },
+                computed: {},
+                methods: {
+                    addCount() {
+                        this.c++;
+                    }
+                },
+                watch: {},
+                comments: {}
+            }
+            Vue.createApp(HelloVueApp).mount('#helloVue')
+        </script>
+
+    </body>
+
+
+</html>

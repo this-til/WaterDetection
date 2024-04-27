@@ -5,3 +5,4 @@ spring:
     username: root
     password: 20041119LYS&lys
 
+server:
