@@ -7,6 +7,9 @@ import java.util.List;
 
 public interface IDataTypeService {
     void addDataType();
+
+    int removeDataTypeById(int id);
+
     List<DataType> getDataType();
     @Nullable
     DataType getDataType(int id);

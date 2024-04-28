@@ -13,7 +13,7 @@ import java.util.List;
 public interface DataMapper {
 
     @Insert("""
-            insert into water_detection_data.data ( detection_id, data_type_id, time, value)
+            insert into water_detection_data.data ( equipmentId_id, data_type_id, time, value)
             values ( #{detectionId}, #{dataTypeId}, #{time}, #{value})
             """)
     int addData(Data data);
@@ -35,13 +35,13 @@ public interface DataMapper {
             select *
             from water_detection_data.data
             where
-                if(#{detectionPosId} < 0, TRUE , detection_id = #{detectionPosId})
+                if(#{detectionPosId} < 0, TRUE , equipmentId_id = #{equipmentId})
                 && if(#{dataTypeId} < 0 , TRUE , data_type_id = #{dataTypeId})
                 && if(#{start} < 0, TRUE ,  time > #{start})
                 && if(#{end} < 0, TRUE ,  time < #{end})
             """)
     List<Data> getData(
-            @Param("detectionPosId") int detectionPosId,
+            @Param("equipmentId") int equipmentId,
             @Param("dataTypeId") int dataTypeId,
             @Param("start") long start,
             @Param("end") long end

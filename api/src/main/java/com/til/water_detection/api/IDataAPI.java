@@ -22,7 +22,7 @@ public interface IDataAPI {
 
     @GET("data/getData")
     Call<Result<List<Data>>> getData(
-            int detectionPosId,
+            int equipmentId,
             int dataTypeId,
             long start,
             long end

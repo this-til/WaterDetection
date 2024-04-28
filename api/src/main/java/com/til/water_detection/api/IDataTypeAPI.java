@@ -4,6 +4,7 @@ import com.til.water_detection.data.DataType;
 import com.til.water_detection.data.Result;
 import com.til.water_detection.data.ResultType;
 import retrofit2.Call;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
@@ -14,6 +15,9 @@ public interface IDataTypeAPI {
 
     @POST("dataType/register")
     Call<Result<Void>> register();
+
+    @DELETE("dataType/removeDataTypeById")
+    Call<Result<Void>> removeDataTypeById(int id);
 
     @GET("dataType/getAllDataType")
     Call<Result<List<DataType>>> getAllDataType();

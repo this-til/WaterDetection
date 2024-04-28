@@ -6,6 +6,7 @@ import com.til.water_detection.data.Result;
 import com.til.water_detection.data.ResultType;
 import com.til.water_detection.wab.service.IDataTypeService;
 import com.til.water_detection.wab.util.FinalString;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -28,6 +29,12 @@ public class DataTypeController {
     public Result<Void> register() {
         dataTypeService.addDataType();
         return Result.successful(null);
+    }
+
+    @DeleteMapping("/removeDataTypeById")
+    public Result<Void> removeDataTypeById(int id) {
+        int i = dataTypeService.removeDataTypeById(id);
+        return new Result<>(i > 0 ? ResultType.SUCCESSFUL : ResultType.FAIL, i + "条数据被删除", null);
     }
 
     @GetMapping("/getAllDataType")

@@ -20,6 +20,11 @@ public class DataTypeServiceImpl implements IDataTypeService {
     }
 
     @Override
+    public int removeDataTypeById(int id){
+        return dataTypeMapper.removeDataTypeById(id);
+    }
+
+    @Override
     public List<DataType> getDataType() {
         return dataTypeMapper.getAllDataType();
     }

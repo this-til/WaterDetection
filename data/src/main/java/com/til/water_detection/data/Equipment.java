@@ -5,7 +5,7 @@ import org.jetbrains.annotations.Nullable;
 import java.sql.Time;
 import java.util.Objects;
 
-public final class Detection {
+public final class Equipment {
     private int id;
     @Nullable
     private String anotherName;
@@ -13,7 +13,7 @@ public final class Detection {
     private float latitude;
     private Time upTime;
 
-    public Detection(int id, @Nullable String anotherName, float longitude, float latitude, Time upTime) {
+    public Equipment(int id, @Nullable String anotherName, float longitude, float latitude, Time upTime) {
         this.id = id;
         this.anotherName = anotherName;
         this.longitude = longitude;
@@ -78,8 +78,8 @@ public final class Detection {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Detection detection = (Detection) o;
-        return id == detection.id && Float.compare(longitude, detection.longitude) == 0 && Float.compare(latitude, detection.latitude) == 0 && Objects.equals(anotherName, detection.anotherName) && Objects.equals(upTime, detection.upTime);
+        Equipment equipment = (Equipment) o;
+        return id == equipment.id && Float.compare(longitude, equipment.longitude) == 0 && Float.compare(latitude, equipment.latitude) == 0 && Objects.equals(anotherName, equipment.anotherName) && Objects.equals(upTime, equipment.upTime);
     }
 
     @Override

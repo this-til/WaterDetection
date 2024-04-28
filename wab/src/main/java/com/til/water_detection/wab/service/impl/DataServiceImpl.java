@@ -31,7 +31,7 @@ public class DataServiceImpl implements IDataService {
     }
 
     @Override
-    public List<Data> getData(int detectionPosId, int dataTypeId, long start, long end) {
-        return dataMapper.getData(detectionPosId, dataTypeId, start, end);
+    public List<Data> getData(int equipmentId, int dataTypeId, long start, long end) {
+        return dataMapper.getData(equipmentId, dataTypeId, start, end);
     }
 }

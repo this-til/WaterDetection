@@ -16,7 +16,7 @@ public interface IDataService {
     List<Data> getAllData();
 
     List<Data> getData(
-            int detectionPosId,
+            int equipmentId,
             int dataTypeId,
             long start,
             long end

@@ -41,11 +41,11 @@ public class DataController {
 
     @GetMapping("/getData")
     public Result<List<Data>> getData(
-            int detectionPosId,
+            int equipmentId,
             int dataTypeId,
             long start,
             long end
     ) {
-        return new Result<>(ResultType.SUCCESSFUL, null, dataService.getData(detectionPosId, dataTypeId, start, end));
+        return new Result<>(ResultType.SUCCESSFUL, null, dataService.getData(equipmentId, dataTypeId, start, end));
     }
 }

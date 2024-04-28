@@ -5,6 +5,5 @@ include 'data'
 include 'sql'
 include 'wab'
 include 'api'
-include 'api:http'
-findProject(':api:http')?.name = 'http'
+include ':view'
 
