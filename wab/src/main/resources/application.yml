@@ -6,3 +6,7 @@ spring:
     password: 20041119LYS&lys
 
 server:
+
+cors:
+  allowed-origins: http://localhost:5173
+

@@ -43,7 +43,7 @@ public interface DataMapper {
     List<Data> getData(
             @Param("equipmentId") int equipmentId,
             @Param("dataTypeId") int dataTypeId,
-            @Param("start") long start,
-            @Param("end") long end
+            @Param("start") Timestamp start,
+            @Param("end") Timestamp end
     );
 }

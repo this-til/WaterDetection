@@ -6,7 +6,6 @@ import com.til.water_detection.data.Result;
 import com.til.water_detection.data.ResultType;
 import com.til.water_detection.wab.service.IDataTypeService;
 import com.til.water_detection.wab.util.FinalString;
-import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -17,6 +16,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/dataType")
 @Validated
+@ResponseBody
 public class DataTypeController {
 
     @Autowired
@@ -39,13 +39,13 @@ public class DataTypeController {
 
     @GetMapping("/getAllDataType")
     public Result<List<DataType>> getAllDataType() {
-        List<DataType> dataTypeListByUserId = dataTypeService.getDataType();
+        List<DataType> dataTypeListByUserId = dataTypeService.getAllDataType();
         return new Result<>(ResultType.SUCCESSFUL, null, dataTypeListByUserId);
     }
 
     @GetMapping("/getDataTypeById")
     public Result<DataType> getDataTypeById(int id) {
-        DataType dataType = dataTypeService.getDataType(id);
+        DataType dataType = dataTypeService.getDataTypeById(id);
         if (dataType == null) {
             return Result.fail("未找到对应id的数据类型");
         }

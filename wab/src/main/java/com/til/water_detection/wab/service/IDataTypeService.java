@@ -10,8 +10,8 @@ public interface IDataTypeService {
 
     int removeDataTypeById(int id);
 
-    List<DataType> getDataType();
+    List<DataType> getAllDataType();
     @Nullable
-    DataType getDataType(int id);
+    DataType getDataTypeById(int id);
     int updateDataTypeAnotherName(int id, String anotherName);
 }

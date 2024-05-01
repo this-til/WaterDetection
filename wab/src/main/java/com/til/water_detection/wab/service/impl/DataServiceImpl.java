@@ -1,7 +1,11 @@
 package com.til.water_detection.wab.service.impl;
 
 import com.til.water_detection.data.Data;
+import com.til.water_detection.data.DataType;
+import com.til.water_detection.data.Equipment;
 import com.til.water_detection.sql.mapper.DataMapper;
+import com.til.water_detection.sql.mapper.DataTypeMapper;
+import com.til.water_detection.sql.mapper.EquipmentMapper;
 import com.til.water_detection.wab.service.IDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,7 +35,7 @@ public class DataServiceImpl implements IDataService {
     }
 
     @Override
-    public List<Data> getData(int equipmentId, int dataTypeId, long start, long end) {
+    public List<Data> getData(int equipmentId, int dataTypeId, Timestamp start, Timestamp end) {
         return dataMapper.getData(equipmentId, dataTypeId, start, end);
     }
 }

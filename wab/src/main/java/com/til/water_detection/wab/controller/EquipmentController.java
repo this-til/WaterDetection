@@ -15,7 +15,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/equipment")
 @Validated
-public class DetectionController {
+@ResponseBody
+public class EquipmentController {
 
     @Autowired
     private IEquipmentService detectionService;

@@ -7,11 +7,10 @@ import java.util.Objects;
 public final class DataType {
 
     private int id;
-    @Nullable
     private String anotherName;
 
 
-    public DataType(int id, @Nullable String anotherName) {
+    public DataType(int id,  String anotherName) {
         this.id = id;
         this.anotherName = anotherName;
     }
@@ -26,12 +25,11 @@ public final class DataType {
     }
 
 
-    @Nullable
     public String getAnotherName() {
         return anotherName;
     }
 
-    public void setAnotherName(@Nullable String anotherName) {
+    public void setAnotherName(String anotherName) {
         this.anotherName = anotherName;
     }
 

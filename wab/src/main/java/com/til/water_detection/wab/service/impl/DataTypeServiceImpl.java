@@ -25,12 +25,12 @@ public class DataTypeServiceImpl implements IDataTypeService {
     }
 
     @Override
-    public List<DataType> getDataType() {
+    public List<DataType> getAllDataType() {
         return dataTypeMapper.getAllDataType();
     }
 
     @Override
-    public DataType getDataType(int id) {
+    public DataType getDataTypeById(int id) {
         return dataTypeMapper.getDataTypeById(id);
     }
 

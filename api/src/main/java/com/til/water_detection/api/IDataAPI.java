@@ -7,6 +7,7 @@ import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 public interface IDataAPI {
@@ -24,7 +25,7 @@ public interface IDataAPI {
     Call<Result<List<Data>>> getData(
             int equipmentId,
             int dataTypeId,
-            long start,
-            long end
+            Timestamp start,
+            Timestamp end
     );
 }

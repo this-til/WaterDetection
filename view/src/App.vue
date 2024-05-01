@@ -1,83 +1,111 @@
 <template>
-  <el-row class="tac">
-    <el-col :span="24">
-      <!--      <h5 class="mb-2">Default colors</h5>-->
-      <el-menu
-          class="el-menu-vertical-demo"
-          @open="handleOpen"
-          @close="handleClose"
-      >
-        <el-sub-menu index="1">
-          <template #title>
-            <el-icon>
-              <Odometer/>
-            </el-icon>
-            <span>监视值</span>
-          </template>
+
+  <div class="common-layout">
+    <el-container>
+      <el-aside width="200px">
+        <el-col :span="24">
+          <el-menu
+              class="el-menu-vertical-demo"
+          >
+            <el-sub-menu index="1">
+              <template #title>
+                <el-icon>
+                  <Odometer/>
+                </el-icon>
+                <span>监视值</span>
+              </template>
+
+              <el-menu-item
+                  v-for="(dataType) in allDataType"
+                  :key=dataType.id
+                  @click=displayDataView(dataType)>
+                <template #title>{{ dataType.anotherName }}</template>
+              </el-menu-item>
 
 
-        </el-sub-menu>
+            </el-sub-menu>
 
-        <el-sub-menu index="2">
-          <template #title>
-            <el-icon>
-              <Cpu/>
-            </el-icon>
-            <span>设备</span>
-          </template>
+            <el-sub-menu index="2">
+              <template #title>
+                <el-icon>
+                  <Cpu/>
+                </el-icon>
+                <span>设备</span>
+              </template>
 
-          <el-sub-menu index="2-1">
-            <template #title>传感器</template>
-            <!--            <el-menu-item>item one</el-menu-item>-->
-          </el-sub-menu>
-          <el-sub-menu index="2-2">
-            <template #title>执行器</template>
-            <!--            <el-menu-item>item one</el-menu-item>-->
-          </el-sub-menu>
-        </el-sub-menu>
+              <el-sub-menu index="2-1">
+                <template #title>传感器</template>
+              </el-sub-menu>
+              <el-sub-menu index="2-2">
+                <template #title>执行器</template>
+              </el-sub-menu>
+              <el-sub-menu index="2-3">
+                <template #title>
+                  <!--                  <el-icon>
+                                      <Connection/>
+                                    </el-icon>-->
+                  <span>规则</span>
+                </template>
+              </el-sub-menu>
+            </el-sub-menu>
 
 
-        <el-sub-menu index="3">
-          <template #title>
-            <el-icon>
-              <Connection/>
-            </el-icon>
-            <span>规则</span>
-          </template>
-        </el-sub-menu>
-        <!--        <el-sub-menu index="1">
-                  <template #title>
-                    <el-icon><location /></el-icon>
-                    <span>Navigator One</span>
-                  </template>
-                  <el-menu-item-group title="Group One">
-                    <el-menu-item index="1-1">item one</el-menu-item>
-                    <el-menu-item index="1-2">item two</el-menu-item>
-                  </el-menu-item-group>
-                  <el-menu-item-group title="Group Two">
-                    <el-menu-item index="1-3">item three</el-menu-item>
-                  </el-menu-item-group>
-                  <el-sub-menu index="1-4">
-                    <template #title>item four</template>
-                    <el-menu-item index="1-4-1">item one</el-menu-item>
-                  </el-sub-menu>
-                </el-sub-menu>-->
+            <el-menu-item
+                index="3"
+                @click=displayOrder>
+              <el-icon>
+                <Finished/>
+              </el-icon>
+              <span>指令</span>
+            </el-menu-item>
 
-        <!--        <el-menu-item index="2">
-                  <el-icon><icon-menu /></el-icon>
-                  <span>Navigator Two</span>
-                </el-menu-item>
-                <el-menu-item index="3" disabled>
-                  <el-icon><document /></el-icon>
-                  <span>Navigator Three</span>
-                </el-menu-item>
-                <el-menu-item index="4">
-                  <el-icon><setting /></el-icon>
-                  <span>Navigator Four</span>
-                </el-menu-item>-->
-      </el-menu>
-    </el-col>
-  </el-row>
+            <el-menu-item
+                index="4"
+                @click=displaySet>
+              <el-icon>
+                <Operation/>
+              </el-icon>
+              <span>设置</span>
+            </el-menu-item>
+          </el-menu>
+        </el-col>
+
+
+      </el-aside>
+      <el-main>
+
+        <DataView
+
+            v-if=isDataView
+
+            class="def-view"
+
+            :equipmentList=allEquipment
+            :dataType=useDataType>
+        </DataView>
+
+        <OrderView
+            v-else-if=isOrder>
+        </OrderView>
+
+        <SetView
+            v-else-if=isSet>
+        </SetView>
+
+
+      </el-main>
+    </el-container>
+  </div>
+
+  <!--  <el-row class="tac">
+
+    </el-row>
+
+    <el-col :span="48" >
+      <DataView class="def-view">
+      </DataView>
+    </el-col>-->
+
 </template>
 
 <script lang="ts" setup>
@@ -86,8 +114,13 @@ import {
   Menu as IconMenu,
   Location,
   Setting,
-  Odometer, Connection, Cpu,
+  Odometer, Connection, Cpu, Finished, Operation,
 } from '@element-plus/icons-vue'
+import {ref} from 'vue';
+import DataView from "@/components/DataView.vue";
+import OrderView from "@/components/OrderView.vue";
+import SetView from "@/components/SetView.vue";
+import {DataType, Equipment, getAllDataType, getAllEquipment} from "@/api";
 
 const handleOpen = (key: string, keyPath: string[]) => {
   console.log(key, keyPath)
@@ -95,6 +128,51 @@ const handleOpen = (key: string, keyPath: string[]) => {
 const handleClose = (key: string, keyPath: string[]) => {
   console.log(key, keyPath)
 }
+
+const isDataView = ref<boolean>(false)
+const useDataType = ref<DataType>(undefined)
+
+const isOrder = ref<boolean>(false)
+const isSet = ref<boolean>(false)
+
+const allDataType = ref<DataType[]>([])
+const allEquipment = ref<Equipment[]>([])
+
+
+const erase = () => {
+  isDataView.value = false
+  useDataType.value = undefined
+
+  isOrder.value = false
+  isSet.value = false
+}
+
+const displayDataView = (dataType: DataType) => {
+  erase()
+  isDataView.value = true
+  useDataType.value = dataType
+}
+
+const displayOrder = () => {
+  erase()
+  isOrder.value = true
+}
+
+const displaySet = () => {
+  erase()
+  isSet.value = true
+}
+
+const up = () => {
+  getAllDataType().then(r => {
+    allDataType.value = r.data.data == null ? [] : r.data.data
+  })
+  getAllEquipment().then(r => {
+    allEquipment.value = r.data.data == null ? [] : r.data.data
+  })
+}
+
+up()
 </script>
 
 <style>
@@ -104,6 +182,17 @@ const handleClose = (key: string, keyPath: string[]) => {
   left: 0;
   bottom: 0;
   overflow-y: auto;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.def-view {
+  position: fixed;
+  top: 0;
+  left: 200px;
+  bottom: 0;
+  overflow-y: auto;
+  overflow-x: auto;
   padding: 20px;
   box-sizing: border-box;
 }

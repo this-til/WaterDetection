@@ -3,17 +3,17 @@ package com.til.water_detection.data;
 import org.jetbrains.annotations.Nullable;
 
 import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.Objects;
 
 public final class Equipment {
     private int id;
-    @Nullable
     private String anotherName;
     private float longitude;
     private float latitude;
-    private Time upTime;
+    private Timestamp upTime;
 
-    public Equipment(int id, @Nullable String anotherName, float longitude, float latitude, Time upTime) {
+    public Equipment(int id, String anotherName, float longitude, float latitude, Timestamp upTime) {
         this.id = id;
         this.anotherName = anotherName;
         this.longitude = longitude;
@@ -30,7 +30,6 @@ public final class Equipment {
         this.id = id;
     }
 
-    @Nullable
     public String getAnotherName() {
         return anotherName;
     }
@@ -55,11 +54,11 @@ public final class Equipment {
         this.latitude = latitude;
     }
 
-    public Time getUpTime() {
+    public Timestamp getUpTime() {
         return upTime;
     }
 
-    public void setUpTime(Time upTime) {
+    public void setUpTime(Timestamp upTime) {
         this.upTime = upTime;
     }
 

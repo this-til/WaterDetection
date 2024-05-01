@@ -18,7 +18,7 @@ public interface IDataService {
     List<Data> getData(
             int equipmentId,
             int dataTypeId,
-            long start,
-            long end
+            Timestamp start,
+            Timestamp end
     );
 }
