@@ -1,0 +1,24 @@
+plugins {
+    id 'java-library'
+}
+
+group = 'com.til.water_detection.fictitious_data'
+version = 'unspecified'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    api project(':api')
+    implementation 'com.google.code.gson:gson:2.8.9'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    implementation 'com.squareup.retrofit2:adapter-rxjava2:2.9.0'
+
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}
