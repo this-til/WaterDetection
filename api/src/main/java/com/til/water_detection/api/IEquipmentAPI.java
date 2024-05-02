@@ -2,6 +2,7 @@ package com.til.water_detection.api;
 
 import com.til.water_detection.data.Equipment;
 import com.til.water_detection.data.Result;
+import com.til.water_detection.data.ResultType;
 import retrofit2.Call;
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
@@ -25,4 +26,7 @@ public interface IEquipmentAPI {
 
     @PUT("equipment/updateEquipmentAnotherNameById")
     Call<Result<Void>> updateEquipmentAnotherNameById(int id, String anotherName);
+
+    @PUT("equipment/updateEquipmentTimeById")
+    Call<Result<Void>> updateEquipmentTimeById(int id);
 }

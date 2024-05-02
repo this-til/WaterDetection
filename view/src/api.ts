@@ -30,11 +30,28 @@ export function getEquipmentById(id: number): Promise<AxiosResponse<Result<Equip
     })
 }
 
+export function getEquipmentByIdArray(id: number[]): Promise<AxiosResponse<Result<Equipment[]>, any>> {
+    return axios({
+        url: '/equipment/getEquipmentByIdArray',
+        method: 'GET',
+        params: {id}
+    })
+}
+
 export function updateEquipmentAnotherNameById(id: number, anotherName: string): Promise<AxiosResponse<Result<undefined>, any>> {
     return axios({
         url: '/equipment/updateEquipmentAnotherNameById',
         method: 'PUT',
         params: {id, anotherName}
+    })
+}
+
+export function updateEquipmentTimeById(id: number): Promise<AxiosResponse<Result<undefined>, any>> {
+
+    return axios({
+        url: '/equipment/updateEquipmentTimeById',
+        method: 'PUT',
+        params: {id}
     })
 }
 
@@ -61,6 +78,15 @@ export function getDataTypeById(id: number): Promise<AxiosResponse<Result<DataTy
     });
 }
 
+
+export function getDataTypeByIdArray(id: number): Promise<AxiosResponse<Result<DataType[]>, any>> {
+    return axios({
+        url: "/dataType/getDataTypeByIdArray",
+        method: "GET",
+        params: {id}
+    });
+}
+
 export function updateDataTypeAnotherName(id: number, anotherName: string): Promise<AxiosResponse<Result<undefined>, any>> {
     return axios({
         url: "/dataType/updateDataTypeAnotherName",
@@ -69,7 +95,7 @@ export function updateDataTypeAnotherName(id: number, anotherName: string): Prom
     })
 }
 
-export function registerData(data: any /*TODO*/): Promise<AxiosResponse<Result<undefined>, any>> {
+export function registerData(data: Data): Promise<AxiosResponse<Result<undefined>, any>> {
     return axios({
         url: '/data/addData',
         method: 'POST',
@@ -104,6 +130,33 @@ export function getData(
         params: {equipmentId, dataTypeId, start, end}
     })
 }
+
+export function getDataMapFromEquipmentIdArray(
+    equipmentIdArray: number[],
+    dataTypeId: number,
+    start: number,
+    end: number
+): Promise<AxiosResponse<Map<number, Data>, any>> {
+    return axios({
+        url: '/data/getDataMapFromEquipmentIdArray',
+        method: 'GET',
+        params: {equipmentIdArray, dataTypeId, start, end}
+    })
+}
+
+export function getDataMapFromDataTypeIdArray(
+    equipmentId: number,
+    dataTypeIdArray: number[],
+    start: number,
+    end: number
+): Promise<AxiosResponse<Map<number, Data>, any>> {
+    return axios({
+        url: '/data/getDataMapFromDataTypeIdArray',
+        method: 'GET',
+        params: {equipmentId, dataTypeIdArray, start, end}
+    })
+}
+
 
 export enum ResultType {
     SUCCESSFUL = "SUCCESSFUL",

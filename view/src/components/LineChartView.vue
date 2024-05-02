@@ -19,24 +19,37 @@ onMounted(() => {
   update()
 });
 
-const {dataType} = toRefs(props);
+const {dataType, equipmentList, timeStep, startTime, endTime} = toRefs(props);
 watch(dataType, (newValue, oldValue) => {
   update();
 });
-const {equipmentList} = toRefs(props);
 watch(equipmentList, (newValue, oldValue) => {
   update();
 });
-const {timeStep} = toRefs(props);
 watch(timeStep, (newValue, oldValue) => {
   update();
 });
-
+watch(startTime, (newValue, oldValue) => {
+  update();
+});
+watch(endTime, (newValue, oldValue) => {
+  update();
+});
 
 const update = () => {
 
-  //time
-  const datatype = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
+  const startTimestamp = props.startTime.getTime();
+  const endTimestamp = props.endTime.getTime();
+
+  const processTime = endTimestamp - startTimestamp;
+  const grid = processTime / (props.timeStep * 1000)
+
+  const datatype = []
+  for (let i = 0; i < grid; i++) {
+    const time = startTimestamp + i * props.timeStep;
+    datatype.push(new Date(time));
+  }
+
 
   const series = []
   for (let equipment of props.equipmentList) {
@@ -58,22 +71,26 @@ const update = () => {
   }, true, false);
 
 
-  /*    lineChart.setOption({
-        title: {
-          text: 'ECharts 入门示例'
-        },
-        tooltip: {},
-        xAxis: {
-          data: ['衬衫', '羊毛衫', '雪纺衫', '裤子', '高跟鞋', '袜子']
-        },
-        yAxis: {},
-        series: [{
-          name: '销量',
-          type: 'bar', // 注意这里应该是 'bar' 而不是 'line'，除非你想画折线图
-          data: [5, 20, 36, 10, 10, 20]
-        }]
-      });*/
-
+  /*  const option = {
+      legend: {},
+      tooltip: {},
+      dataset: {
+        // 提供一份数据。
+        source: [
+          ['product', '2015', '2016', '2017'],
+          ['Matcha Latte', 43.3, 85.8, 93.7],
+          ['Milk Tea', 83.1, 73.4, 55.1],
+          ['Cheese Cocoa', 86.4, 65.2, 82.5],
+          ['Walnut Brownie', 72.4, 53.9, 39.1]
+        ]
+      },
+      // 声明一个 X 轴，类目轴（category）。默认情况下，类目轴对应到 dataset 第一列。
+      xAxis: {type: 'category'},
+      // 声明一个 Y 轴，数值轴。
+      yAxis: {},
+      // 声明多个 bar 系列，默认情况下，每个系列会自动对应到 dataset 的每一列。
+      series: [{type: 'bar'}, {type: 'bar'}, {type: 'bar'}]
+    };*/
 
 }
 
@@ -85,6 +102,8 @@ interface Props {
   dataType: DataType
   equipmentList: Equipment[]
   timeStep: number
+  startTime: Date
+  endTime: Date
 }
 
 

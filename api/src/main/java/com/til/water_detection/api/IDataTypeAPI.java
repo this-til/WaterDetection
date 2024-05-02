@@ -25,6 +25,9 @@ public interface IDataTypeAPI {
     @GET("dataType/getDataTypeById")
     Call<Result<DataType>> getDataTypeById(int id);
 
+    @GET("/getDataTypeByIdArray")
+    Call<Result<List<DataType>>> getDataTypeByIdArray(int[] id);
+
     @PUT("dataType/updateDataTypeAnotherName")
     Call<Result<Void>> updateDataTypeAnotherName(int id, String anotherName);
 

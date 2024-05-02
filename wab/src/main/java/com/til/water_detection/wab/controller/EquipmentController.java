@@ -5,6 +5,7 @@ import com.til.water_detection.data.Result;
 import com.til.water_detection.data.ResultType;
 import com.til.water_detection.wab.service.IEquipmentService;
 import com.til.water_detection.wab.util.FinalString;
+import jakarta.annotation.Resource;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -18,7 +19,7 @@ import java.util.List;
 @ResponseBody
 public class EquipmentController {
 
-    @Autowired
+    @Resource
     private IEquipmentService detectionService;
 
     /***
@@ -48,9 +49,20 @@ public class EquipmentController {
         return new Result<>(equipment != null ? ResultType.SUCCESSFUL : ResultType.FAIL, null, equipment);
     }
 
+    @GetMapping("/getEquipmentByIdArray")
+    public Result<List<Equipment>> getEquipmentByIdArray(int[] id) {
+        return new Result<>(ResultType.SUCCESSFUL, null, detectionService.getEquipmentByIdArray(id));
+    }
+
     @PutMapping("/updateEquipmentAnotherNameById")
     public Result<Void> updateEquipmentAnotherNameById(int id, @Param(FinalString.VERIFY_1_30) String anotherName) {
         int i = detectionService.updateEquipmentAnotherNameById(id, anotherName);
+        return new Result<>(i > 0 ? ResultType.SUCCESSFUL : ResultType.FAIL, i + "条数据被更改", null);
+    }
+
+    @PutMapping("/updateEquipmentTimeById")
+    public Result<Void> updateEquipmentTimeById(int id) {
+        int i = detectionService.updateEquipmentTimeById(id);
         return new Result<>(i > 0 ? ResultType.SUCCESSFUL : ResultType.FAIL, i + "条数据被更改", null);
     }
 }

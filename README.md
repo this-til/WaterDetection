@@ -11,3 +11,33 @@
   服务端可以检测数据、若数据异常可以向预留手机、邮件发送信息；可以根据配置规则下饭执行命令
 - 网页端：
   网页端则提供直观的可视化界面，用户可轻松查看数据趋势，进行设备配置
+
+## 嵌入式命令
+
+- /set {name} {index?} {value}
+
+  表示更改配置
+
+  | {name}   | 解释               | 值类型                 | 索引(index) | 数据大小(bit) |
+    |----------|------------------|---------------------|-----------|-----------|
+  | url      | 表示会话的服务器         | string ascii        | null      | 128       |
+  | username | 表示用户名            | string [8-32] ascii | null      | 32        |
+  | password | 表示用户密码           | string [8-32] ascii | null      | 32        |
+  | equipmentId | 表示当前设备的ID        | uint32_t            | null      | 4         |
+  | dataTypeId | 表示存储服务端设定的数据类型id | uint32_t            | 0-8       | 4*8       |
+  | actuatorId | 表示存储服务端设定的数据类型id | uint32_t            | 0-8       | 4*8       |
+  | dataType | 表示当前缓存传感器的值      | float               | 0-8       | ram 4*8   |
+  | actuator | 表示当前缓存执行器是否开启    | uint8_t             | 0-8       | ram 1*8   |
+
+
+- /get {name} {index?}
+
+  表示返回当前配置的信息
+
+- /start {actuatorId}
+
+  表示开启特定的执行器
+
+- /stop {actuatorId}
+
+  表示停止特定的执行器

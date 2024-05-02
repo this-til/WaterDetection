@@ -1,14 +1,15 @@
 package com.til.water_detection.api;
 
-import com.til.water_detection.data.Data;
-import com.til.water_detection.data.Result;
-import com.til.water_detection.data.ResultType;
+import com.til.water_detection.data.*;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public interface IDataAPI {
 
@@ -25,6 +26,22 @@ public interface IDataAPI {
     Call<Result<List<Data>>> getData(
             int equipmentId,
             int dataTypeId,
+            Timestamp start,
+            Timestamp end
+    );
+
+    @GET("data/getDataMapFromEquipmentIdArray")
+    Call<Result<Map<Integer, List<Data>>>> getDataMapFromEquipmentIdArray(
+            int[] equipmentIdArray,
+            int dataTypeId,
+            Timestamp start,
+            Timestamp end
+    );
+
+    @GET("data/getDataMapFromDataTypeIdArray")
+    Call<Result<Map<Integer, List<Data>>>> getDataMapFromDataTypeIdArray(
+            int equipmentId,
+            int[] dataTypeIdArray,
             Timestamp start,
             Timestamp end
     );

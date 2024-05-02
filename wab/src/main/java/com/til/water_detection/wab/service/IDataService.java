@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Select;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Map;
 
 public interface IDataService {
     int addData(Data data);
@@ -21,4 +22,8 @@ public interface IDataService {
             Timestamp start,
             Timestamp end
     );
+
+    List<Data> getDataMapFromEquipmentIdArray(int[] equipmentIdArray, int dataTypeId, Timestamp start, Timestamp end);
+
+    List<Data> getDataMapFromDataTypeIdArray(int equipmentId, int[] dataTypeIdArray, Timestamp start, Timestamp end);
 }

@@ -1,20 +1,19 @@
 package com.til.water_detection.data;
 
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Objects;
 
 public final class Data {
 
     private long id;
-    private int detectionId;
+    private int equipmentId;
     private int dataTypeId;
     private Timestamp time;
     private float value;
 
-    public Data(long id, int detectionId, int dataTypeId, Timestamp time, float value) {
+    public Data(long id, int equipmentId, int dataTypeId, Timestamp time, float value) {
         this.id = id;
-        this.detectionId = detectionId;
+        this.equipmentId = equipmentId;
         this.dataTypeId = dataTypeId;
         this.time = time;
         this.value = value;
@@ -29,12 +28,12 @@ public final class Data {
     }
 
 
-    public int getDetectionId() {
-        return detectionId;
+    public int getEquipmentId() {
+        return equipmentId;
     }
 
-    public void setDetectionId(int detectionId) {
-        this.detectionId = detectionId;
+    public void setEquipmentId(int equipmentId) {
+        this.equipmentId = equipmentId;
     }
 
     public int getDataTypeId() {
@@ -66,11 +65,11 @@ public final class Data {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Data data = (Data) o;
-        return id == data.id && detectionId == data.detectionId && dataTypeId == data.dataTypeId && Float.compare(value, data.value) == 0 && Objects.equals(time, data.time);
+        return id == data.id && equipmentId == data.equipmentId && dataTypeId == data.dataTypeId && Float.compare(value, data.value) == 0 && Objects.equals(time, data.time);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, detectionId, dataTypeId, time, value);
+        return Objects.hash(id, equipmentId, dataTypeId, time, value);
     }
 }

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class DataServiceImpl implements IDataService {
@@ -37,5 +38,15 @@ public class DataServiceImpl implements IDataService {
     @Override
     public List<Data> getData(int equipmentId, int dataTypeId, Timestamp start, Timestamp end) {
         return dataMapper.getData(equipmentId, dataTypeId, start, end);
+    }
+
+    @Override
+    public    List<Data> getDataMapFromEquipmentIdArray(int[] equipmentIdArray, int dataTypeId, Timestamp start, Timestamp end) {
+        return dataMapper.getDataMapFromEquipmentIdArray(equipmentIdArray, dataTypeId, start, end);
+    }
+
+    @Override
+    public    List<Data> getDataMapFromDataTypeIdArray(int equipmentId, int[] dataTypeIdArray, Timestamp start, Timestamp end) {
+        return dataMapper.getDataMapFromDataTypeIdArray(equipmentId, dataTypeIdArray, start, end);
     }
 }

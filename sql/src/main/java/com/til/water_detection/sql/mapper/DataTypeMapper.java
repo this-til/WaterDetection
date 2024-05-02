@@ -40,5 +40,10 @@ public interface DataTypeMapper {
             from water_detection_data.data_type
             """)
     List<DataType> getAllDataType();
-
+    @Select("""
+            select *
+            from water_detection_data.data_type
+            where id IN  #{id}
+                        """)
+    List<DataType> getDataTypeByIdArray(int[] id);
 }

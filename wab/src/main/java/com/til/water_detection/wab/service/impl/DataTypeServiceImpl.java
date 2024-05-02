@@ -30,6 +30,11 @@ public class DataTypeServiceImpl implements IDataTypeService {
     }
 
     @Override
+    public List<DataType> getDataTypeByIdArray(int[] id) {
+        return dataTypeMapper.getDataTypeByIdArray(id);
+    }
+
+    @Override
     public DataType getDataTypeById(int id) {
         return dataTypeMapper.getDataTypeById(id);
     }
@@ -38,4 +43,5 @@ public class DataTypeServiceImpl implements IDataTypeService {
     public int updateDataTypeAnotherName(int id, String anotherName) {
         return dataTypeMapper.updateDataTypeAnotherNameById(id, anotherName);
     }
+
 }

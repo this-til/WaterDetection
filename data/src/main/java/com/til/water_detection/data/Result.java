@@ -10,7 +10,7 @@ public class Result<T> {
     @Nullable
     private T data;
 
-    public Result(ResultType resultType, String message, T data) {
+    public Result(ResultType resultType, String message, @Nullable T data) {
         this.resultType = resultType;
         this.message = message == null ? "" : message;
         this.data = data;
@@ -45,11 +45,12 @@ public class Result<T> {
         this.message = message;
     }
 
+    @Nullable
     public T getData() {
         return data;
     }
 
-    public void setData(T data) {
+    public void setData(@Nullable T data) {
         this.data = data;
     }
 

@@ -11,7 +11,11 @@ public interface IDataTypeService {
     int removeDataTypeById(int id);
 
     List<DataType> getAllDataType();
+
     @Nullable
     DataType getDataTypeById(int id);
+
     int updateDataTypeAnotherName(int id, String anotherName);
+
+    List<DataType> getDataTypeByIdArray(int[] id);
 }

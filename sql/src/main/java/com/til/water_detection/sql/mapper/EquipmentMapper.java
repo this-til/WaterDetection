@@ -54,10 +54,18 @@ public interface EquipmentMapper {
             """)
     Equipment getEquipmentById(int id);
 
+    @Select("""
+            select *
+            from water_detection_data.data
+            where id IN #{id}
+            """)
+    List<Equipment> getEquipmentByIdArray(int[] id);
+
 
     @Select("""
             select *
             from water_detection_data.equipment
             """)
     List<Equipment> getAllEquipment();
+
 }

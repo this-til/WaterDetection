@@ -1,5 +1,5 @@
 plugins {
-    id 'java'
+    id 'java-library'
 }
 
 group = 'com.til.water_detection'
@@ -10,8 +10,8 @@ repositories {
 }
 
 dependencies {
-    implementation project(":data")
-    implementation 'com.squareup.retrofit2:retrofit:2.11.0'
+    api project(":data")
+    api 'com.squareup.retrofit2:retrofit:2.11.0'
 }
 
 test {

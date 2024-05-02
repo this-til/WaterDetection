@@ -15,6 +15,8 @@ public interface IEquipmentService {
     @Nullable
     Equipment getEquipmentById(int id);
 
+    List<Equipment> getEquipmentByIdArray(int[] id);
+
     int updateEquipmentAnotherNameById(int id, String anotherName);
 
     int updateEquipmentTimeById(int id);

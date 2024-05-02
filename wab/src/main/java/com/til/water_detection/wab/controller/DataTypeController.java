@@ -6,6 +6,7 @@ import com.til.water_detection.data.Result;
 import com.til.water_detection.data.ResultType;
 import com.til.water_detection.wab.service.IDataTypeService;
 import com.til.water_detection.wab.util.FinalString;
+import jakarta.annotation.Resource;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -19,7 +20,7 @@ import java.util.List;
 @ResponseBody
 public class DataTypeController {
 
-    @Autowired
+    @Resource
     private IDataTypeService dataTypeService;
 
     /***
@@ -50,6 +51,11 @@ public class DataTypeController {
             return Result.fail("未找到对应id的数据类型");
         }
         return new Result<>(ResultType.SUCCESSFUL, null, dataType);
+    }
+
+    @GetMapping("/getDataTypeByIdArray")
+    public Result<List<DataType>> getDataTypeByIdArray(int[] id) {
+        return new Result<>(ResultType.SUCCESSFUL, null, dataTypeService.getDataTypeByIdArray(id));
     }
 
     @PutMapping("/updateDataTypeAnotherName")

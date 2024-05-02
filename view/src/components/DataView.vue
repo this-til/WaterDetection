@@ -55,6 +55,7 @@
       <el-divider direction="vertical"/>
 
       呈现方式：
+
       <el-select
           v-model="presentationMode"
           placeholder="Select"
@@ -90,6 +91,8 @@
           :dataType=dataType
           :equipmentList=selectEquipmentList
           :timeStep=timeStep
+          :startTime=time[0]
+          :endTime=time[1]
       >
 
       </LineChartView>
@@ -115,7 +118,7 @@ import ChartView from "@/components/ChartView.vue";
 const props = defineProps<Props>();
 
 const time = ref<[Date, Date]>([
-  new Date(new Date().getTime() - 1000 * 60 * 60 * 24),
+  new Date(new Date().getTime() - 1000 * 60 * 60),
   new Date()
 ])
 
@@ -137,8 +140,8 @@ watch(selectEquipmentIdName, (n, o) => {
   }
 })
 
-const _timeStep = ref('10')
-const timeStep = ref<number>(10)
+const _timeStep = ref('60')
+const timeStep = ref<number>(60)
 
 
 for (let equipment of props.equipmentList) {
@@ -165,7 +168,7 @@ const handleClose = (done: () => void) => {
 
 const presentationMode = ref('lineChart')
 
-const presentationModeList = [
+const presentationModeList = ref([
   {
     value: 'lineChart',
     label: '折线图',
@@ -174,7 +177,7 @@ const presentationModeList = [
     value: 'chart',
     label: '图表',
   },
-]
+])
 
 const handleInput = (event) => {
   const replace = event.target.value.replace(/\D/g, '');

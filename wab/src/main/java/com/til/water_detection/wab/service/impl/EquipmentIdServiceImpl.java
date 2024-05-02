@@ -35,6 +35,11 @@ public class EquipmentIdServiceImpl implements IEquipmentService {
     }
 
     @Override
+    public List<Equipment> getEquipmentByIdArray(int[] id) {
+        return equipmentMapper.getEquipmentByIdArray( id);
+    }
+
+    @Override
     public int updateEquipmentAnotherNameById(int id, String anotherName) {
         return equipmentMapper.updateEquipmentAnotherName(id, anotherName);
     }
