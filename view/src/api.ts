@@ -141,4 +141,3 @@ export interface Equipment {
     latitude: number
     upTime: string
 }
-

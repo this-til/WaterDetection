@@ -4,6 +4,10 @@
   <el-container>
     <el-header class="header-class">
 
+      数据类型：{{ dataType.anotherName }} (id:{{ dataType.id }})
+
+      <el-divider direction="vertical"/>
+
       时间：
 
       <el-date-picker
@@ -16,7 +20,7 @@
           time-format="A hh:mm:ss"
       />
 
-      &nbsp;&nbsp;&nbsp;
+      <el-divider direction="vertical"/>
 
       <el-button
           plain @click="displayScreeningEquipment = true">
@@ -31,7 +35,7 @@
       >
 
         <el-transfer
-            v-model=selectEquipmentList
+            v-model=selectEquipmentIdName
             :data=equipmentFiltration
 
             filterable
@@ -48,13 +52,55 @@
                 </template>-->
       </el-dialog>
 
-      &nbsp;&nbsp;&nbsp;
+      <el-divider direction="vertical"/>
 
+      呈现方式：
+      <el-select
+          v-model="presentationMode"
+          placeholder="Select"
+          style="width: 240px"
+      >
+        <el-option
+            v-for="item in presentationModeList"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+        />
+      </el-select>
+
+      <el-divider direction="vertical"/>
+
+      时间步进（秒）：
+
+      <el-input
+          v-model=_timeStep
+          style="max-width: 100px"
+          @input="handleInput"
+          class="input-with-select">
+      </el-input>
 
 
     </el-header>
-    <el-divider/>
-    <el-main>Main</el-main>
+    <el-main>
+
+      <LineChartView
+          id="lineChart"
+          v-if="presentationMode == 'lineChart'"
+
+          :dataType=dataType
+          :equipmentList=selectEquipmentList
+          :timeStep=timeStep
+      >
+
+      </LineChartView>
+
+      <ChartView
+          id="chart"
+          v-else-if="presentationMode == 'chart'">
+
+      </ChartView>
+
+    </el-main>
   </el-container>
 
 </template>
@@ -63,6 +109,10 @@
 import {ref, warn, watch} from 'vue'
 import {DataType, Equipment} from "@/api";
 import {ElMessageBox} from 'element-plus'
+import LineChartView from "@/components/LineChartView.vue";
+import ChartView from "@/components/ChartView.vue";
+
+const props = defineProps<Props>();
 
 const time = ref<[Date, Date]>([
   new Date(new Date().getTime() - 1000 * 60 * 60 * 24),
@@ -72,23 +122,37 @@ const time = ref<[Date, Date]>([
 const displayScreeningEquipment = ref<boolean>(false)
 
 const equipmentFiltration = ref<EquipmentPack[]>([])
-const selectEquipmentList = ref<[]>([])
+const selectEquipmentIdName = ref<[]>([])
+const selectEquipmentList = ref<Equipment[]>([])
 
-
-const props = defineProps<Props>();
-
-typeConversion(props.equipmentList, equipmentFiltration.value)
-
-function typeConversion(list: Equipment[], outList: EquipmentPack[]) {
-  for (let equipment of list) {
-    outList.push({
-      key: equipment.id,
-      label: equipment.anotherName,
-      disabled: false,
-      equipment: equipment,
-    })
+watch(selectEquipmentIdName, (n, o) => {
+  selectEquipmentList.value = []
+  for (let never of n) {
+    for (let equipment of props.equipmentList) {
+      if (equipment.id == never) {
+        selectEquipmentList.value.push(equipment)
+        break
+      }
+    }
   }
+})
+
+const _timeStep = ref('10')
+const timeStep = ref<number>(10)
+
+
+for (let equipment of props.equipmentList) {
+  const items = {
+    key: equipment.id,
+    label: equipment.anotherName,
+    disabled: false,
+    equipment: equipment,
+  };
+  equipmentFiltration.value.push(items)
+  selectEquipmentList.value.push(equipment)
+  selectEquipmentIdName.value.push(equipment.id)
 }
+
 
 const filterMethod = (query, item) => {
   return item.label.toLowerCase().includes(query.toLowerCase())
@@ -97,6 +161,25 @@ const filterMethod = (query, item) => {
 const handleClose = (done: () => void) => {
   displayScreeningEquipment.value = false;
   //TODO
+}
+
+const presentationMode = ref('lineChart')
+
+const presentationModeList = [
+  {
+    value: 'lineChart',
+    label: '折线图',
+  },
+  {
+    value: 'chart',
+    label: '图表',
+  },
+]
+
+const handleInput = (event) => {
+  const replace = event.target.value.replace(/\D/g, '');
+  _timeStep.value = replace
+  timeStep.value = parseInt(replace)
 }
 
 interface EquipmentPack {
