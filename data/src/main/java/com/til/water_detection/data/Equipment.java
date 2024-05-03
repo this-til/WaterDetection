@@ -1,17 +1,14 @@
 package com.til.water_detection.data;
 
-import org.jetbrains.annotations.Nullable;
-
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Objects;
 
 public final class Equipment {
-    public int id;
-    public String anotherName;
-    public float longitude;
-    public float latitude;
-    public Timestamp upTime;
+    private int id;
+    private String anotherName;
+    private float longitude;
+    private float latitude;
+    private Timestamp upTime;
 
     public Equipment() {
 

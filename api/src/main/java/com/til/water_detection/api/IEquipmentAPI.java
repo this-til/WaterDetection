@@ -15,14 +15,11 @@ public interface IEquipmentAPI {
     @DELETE("equipment/removeEquipmentPosById")
     Call<Result<Void>> removeEquipmentPosById();
 
-    @GET("equipment/getAllEquipment")
+    @POST("equipment/getAllEquipment")
     Call<Result<List<Equipment>>> getAllEquipment();
 
     @GET("equipment/getEquipmentById")
     Call<Result<Equipment>> getEquipmentById(@Query("id") int id);
-
-    @GET("equipment/getEquipmentByIdArray")
-    Call<Result<List<Equipment>>> getEquipmentByIdArray(@Body int[] id);
 
     @PUT("equipment/updateEquipmentAnotherNameById")
     Call<Result<Void>> updateEquipmentAnotherNameById(@Query("id") int id, @Query("anotherName") String anotherName);

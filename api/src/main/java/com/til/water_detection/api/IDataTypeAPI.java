@@ -16,14 +16,11 @@ public interface IDataTypeAPI {
     @DELETE("dataType/removeDataTypeById")
     Call<Result<Void>> removeDataTypeById(@Query("id") int id);
 
-    @GET("dataType/getAllDataType")
+    @POST("dataType/getAllDataType")
     Call<Result<List<DataType>>> getAllDataType();
 
     @GET("dataType/getDataTypeById")
     Call<Result<DataType>> getDataTypeById(@Query("id") int id);
-
-    @GET("dataType/getDataTypeByIdArray")
-    Call<Result<List<DataType>>> getDataTypeByIdArray(@Body int[] id);
 
     @PUT("dataType/updateDataTypeAnotherName")
     Call<Result<Void>> updateDataTypeAnotherName(@Query("id") int id, @Query("id") String anotherName);

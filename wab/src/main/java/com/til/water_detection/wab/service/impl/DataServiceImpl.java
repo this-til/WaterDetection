@@ -1,18 +1,13 @@
 package com.til.water_detection.wab.service.impl;
 
 import com.til.water_detection.data.Data;
-import com.til.water_detection.data.DataType;
-import com.til.water_detection.data.Equipment;
 import com.til.water_detection.sql.mapper.DataMapper;
-import com.til.water_detection.sql.mapper.DataTypeMapper;
-import com.til.water_detection.sql.mapper.EquipmentMapper;
 import com.til.water_detection.wab.service.IDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class DataServiceImpl implements IDataService {
@@ -22,8 +17,8 @@ public class DataServiceImpl implements IDataService {
 
     @Override
     public int addData(Data data) {
-        if (data.time == null) {
-            data.time = new Timestamp(System.currentTimeMillis());
+        if (data.getTime() == null) {
+            data.setTime(new Timestamp(System.currentTimeMillis()));
         }
         return dataMapper.addData(data);
     }

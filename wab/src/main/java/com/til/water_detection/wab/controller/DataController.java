@@ -5,15 +5,11 @@ import com.til.water_detection.wab.service.IDataService;
 import com.til.water_detection.wab.service.IDataTypeService;
 import com.til.water_detection.wab.service.IEquipmentService;
 import jakarta.annotation.Resource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("/data")
@@ -56,7 +52,7 @@ public class DataController {
         return new Result<>(dataById == null ? ResultType.FAIL : ResultType.SUCCESSFUL, null, dataById);
     }
 
-    @GetMapping("/getAllData")
+    @PostMapping("/getAllData")
     public Result<List<Data>> getAllData() {
         return new Result<>(ResultType.SUCCESSFUL, null, dataService.getAllData());
     }
@@ -71,7 +67,8 @@ public class DataController {
         return new Result<>(ResultType.SUCCESSFUL, null, dataService.getData(equipmentId, dataTypeId, start, end));
     }
 
-    @GetMapping("/getDataMapFromEquipmentIdArray")
+    /*@Deprecated
+    @PostMapping("/getDataMapFromEquipmentIdArray")
     public Result<Map<Integer, List<Data>>> getDataMapFromEquipmentIdArray(
             @RequestBody int[] equipmentIdArray,
             @RequestParam int dataTypeId,
@@ -85,15 +82,16 @@ public class DataController {
         List<Data> dataMapFromEquipmentIdArray = dataService.getDataMapFromEquipmentIdArray(equipmentIdArray, dataTypeId, start, end);
         Map<Integer, List<Data>> integerListMap = new HashMap<>(dataMapFromEquipmentIdArray.size());
         for (Data data : dataMapFromEquipmentIdArray) {
-            if (!integerListMap.containsKey(data.equipmentId)) {
-                integerListMap.put(data.equipmentId, new ArrayList<>());
+            if (!integerListMap.containsKey(data.getEquipmentId())) {
+                integerListMap.put(data.getEquipmentId(), new ArrayList<>());
             }
-            integerListMap.get(data.equipmentId).add(data);
+            integerListMap.get(data.getEquipmentId()).add(data);
         }
         return new Result<>(ResultType.SUCCESSFUL, null, integerListMap);
-    }
+    }*/
 
-    @GetMapping("/getDataMapFromDataTypeIdArray")
+   /* @Deprecated
+    @PostMapping("/getDataMapFromDataTypeIdArray")
     public Result<Map<Integer, List<Data>>> getDataMapFromDataTypeIdArray(
             @RequestParam int equipmentId,
             @RequestBody int[] dataTypeIdArray,
@@ -105,13 +103,122 @@ public class DataController {
             return Result.fail("equipmentId is null");
         }
         List<Data> dataMapFromDataTypeIdArray = dataService.getDataMapFromDataTypeIdArray(equipmentId, dataTypeIdArray, start, end);
-        Map<Integer, List<Data>> integerListMap = new HashMap<>(dataMapFromDataTypeIdArray.size());
+        Map<Integer, List<Data>> integerListMap = new HashMap<>();
         for (Data data : dataMapFromDataTypeIdArray) {
-            if (!integerListMap.containsKey(data.dataTypeId)) {
-                integerListMap.put(data.dataTypeId, new ArrayList<>());
+            if (!integerListMap.containsKey(data.getDataTypeId())) {
+                integerListMap.put(data.getDataTypeId(), new ArrayList<>());
             }
-            integerListMap.get(data.dataTypeId).add(data);
+            integerListMap.get(data.getDataTypeId()).add(data);
         }
         return new Result<>(ResultType.SUCCESSFUL, null, integerListMap);
+    }*/
+
+    @PostMapping("/getDataToDataSheet")
+    public Result<DataSheet> getDataToDataSheet(@RequestBody DataFilter dataFilter) {
+        DataType dataType = dataTypeService.getDataTypeById(dataFilter.getDataTypeId());
+        if (dataType == null) {
+            return Result.fail("dataTypeId is null");
+        }
+        long endTime = dataFilter.getEndTime().getTime();
+        long startTime = dataFilter.getStartTime().getTime();
+
+        long processTime = endTime - startTime;
+        long stepByStep = Math.max(dataFilter.getTimeStep(), 10) * 1000L;
+        int grid = (int) (processTime / stepByStep);
+        List<Timestamp> timestampList = new ArrayList<>(grid);
+        List<Long> timestampListLong = new ArrayList<>(grid);
+        for (int i = 0; i < grid; i++) {
+            timestampList.add(new Timestamp(startTime + (i + 1) * stepByStep));
+            timestampListLong.add(startTime + (i + 1) * stepByStep);
+        }
+
+        if(dataFilter.getEquipmentIdArray().length == 0) {
+            return new Result<>(ResultType.FAIL, null,  new DataSheet(
+                    dataType,
+                    dataFilter.getTimeStep(),
+                    dataFilter.getStartTime(),
+                    dataFilter.getEndTime(),
+                    new ArrayList<>(),
+                    timestampList,
+                    new ArrayList<>()
+            ));
+        }
+
+        List<Equipment> equipmentList = equipmentService.getEquipmentByIdArray(dataFilter.getEquipmentIdArray())
+                .stream()
+                .sorted(Comparator.comparingInt(Equipment::getId))
+                .toList();
+
+        List<List<Float>> value = new ArrayList<>(equipmentList.size());
+        for (int i = 0; i < equipmentList.size(); i++) {
+            value.add(new ArrayList<>(timestampList.size()));
+        }
+
+
+        List<Data> dataList = dataService.getDataMapFromEquipmentIdArray(
+                dataFilter.getEquipmentIdArray(),
+                dataType.getId(),
+                dataFilter.getStartTime(),
+                dataFilter.getEndTime());
+
+        Map<Integer, List<Data>> integerListMap = new HashMap<>();
+        for (Equipment equipment : equipmentList) {
+            integerListMap.put(equipment.getId(), new ArrayList<>());
+        }
+        for (Data data : dataList) {
+            integerListMap.get(data.getEquipmentId()).add(data);
+        }
+
+        for (int i = 0; i < value.size(); i++) {
+            List<Float> floats = value.get(i);
+            Equipment equipment = equipmentList.get(i);
+            List<Data> _dataList = integerListMap.get(equipment.getId())
+                    .stream()
+                    .sorted(Comparator.comparingLong(t -> t.getTime().getTime()))
+                    .toList();
+
+            int _ii = 0;
+            for (int ii = 0; ii < timestampListLong.size(); ii++) {
+
+                Float v = null;
+
+                while (true) {
+
+                    if (_ii >= _dataList.size()) {
+                        break;
+                    }
+
+                    Data data = _dataList.get(_ii);
+
+                    if (data.getTime().getTime() > timestampListLong.get(ii)) {
+                        break;
+                    }
+
+                    if (v == null) {
+                        v = data.getValue();
+                    } else {
+                        v = (v + data.getValue()) / 2;
+                    }
+
+                    _ii++;
+                }
+                floats.add(v);
+            }
+
+        }
+
+        return new Result<>(
+                ResultType.SUCCESSFUL,
+                null,
+                new DataSheet(
+                        dataType,
+                        dataFilter.getTimeStep(),
+                        dataFilter.getStartTime(),
+                        dataFilter.getEndTime(),
+                        equipmentList,
+                        timestampList,
+                        value
+                )
+        );
     }
 }

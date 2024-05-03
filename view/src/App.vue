@@ -1,12 +1,10 @@
 <template>
 
-  <div class="common-layout">
-    <el-container>
+  <div class="full-screen">
+    <el-container class="full">
       <el-aside width="200px">
         <el-col :span="24">
-          <el-menu
-              class="el-menu-vertical-demo"
-          >
+          <el-menu class="el-menu-vertical-demo">
             <el-sub-menu index="1">
               <template #title>
                 <el-icon>
@@ -69,17 +67,10 @@
             </el-menu-item>
           </el-menu>
         </el-col>
-
-
       </el-aside>
-      <el-main>
-
+      <el-main class="full">
         <DataView
-
             v-if=isDataView
-
-            class="def-view"
-
             :equipmentList=allEquipment
             :dataType=useDataType>
         </DataView>
@@ -186,14 +177,17 @@ up()
   box-sizing: border-box;
 }
 
-.def-view {
+.full-screen {
   position: fixed;
   top: 0;
-  left: 200px;
+  right: 0;
   bottom: 0;
-  overflow-y: auto;
-  overflow-x: auto;
+  left: 0;
+}
+
+.full {
+  width: 100%;
+  height: 100%;
   padding: 20px;
-  box-sizing: border-box;
 }
 </style>

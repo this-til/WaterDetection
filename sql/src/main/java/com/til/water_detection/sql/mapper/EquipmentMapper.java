@@ -19,7 +19,7 @@ public interface EquipmentMapper {
             from water_detection_data.equipment
             where id = #{id}
             """)
-    int removeEquipmentPosById(int id);
+    int removeEquipmentPosById(@Param("id") int id);
 
     @Update("""
             update water_detection_data.equipment
@@ -34,32 +34,16 @@ public interface EquipmentMapper {
             set up_time = CURRENT_TIMESTAMP
             where id = #{id}
             """)
-    int updateEquipmentTimeById(int id);
-
-
-    @Update("""
-            update water_detection_data.equipment
-            set longitude = #{longitude},
-                latitude  = #{latitude},
-                up_time   = CURRENT_TIMESTAMP
-            where id = #{id}
-            """)
-    int updateEquipmentCoordinateById(@Param("id") int id, @Param("longitude") float longitude, @Param("latitude") float latitude);
-
+    int updateEquipmentTimeById(@Param("id") int id);
 
     @Select("""
             select *
             from water_detection_data.equipment
             where id = #{id}
             """)
-    Equipment getEquipmentById(int id);
+    Equipment getEquipmentById(@Param("id") int id);
 
-    @Select("""
-            select *
-            from water_detection_data.data
-            where id IN #{id}
-            """)
-    List<Equipment> getEquipmentByIdArray(int[] id);
+    List<Equipment> getEquipmentByIdArray(@Param("id") int[] id);
 
 
     @Select("""

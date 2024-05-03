@@ -5,11 +5,11 @@ import java.util.Objects;
 
 public final class Data {
 
-    public long id;
-    public int equipmentId;
-    public int dataTypeId;
-    public Timestamp time;
-    public float value;
+    private long id;
+    private int equipmentId;
+    private int dataTypeId;
+    private Timestamp time;
+    private float value;
 
     public Data() {
     }

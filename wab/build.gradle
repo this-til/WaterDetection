@@ -27,8 +27,7 @@ configurations.configureEach {
 
 dependencies {
 
-    implementation project(":sql")
-    implementation project(":data")
+    api project(":sql")
 
     implementation('org.springframework.boot:spring-boot-starter') /*{
         exclude group: 'org.apache.logging.log4j', module: 'log4j-to-slf4j'

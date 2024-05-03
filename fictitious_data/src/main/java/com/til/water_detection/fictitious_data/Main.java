@@ -11,12 +11,8 @@ import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-import javax.swing.event.ListDataEvent;
-import java.lang.reflect.Type;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class Main {
     public static void main(String[] args) throws Exception {
@@ -40,7 +36,7 @@ public class Main {
         Result<List<Equipment>> allEquipmentBody = allEquipmentExecute.body();
 
         assert allEquipmentBody != null;
-        assert allEquipmentBody.resultType == ResultType.SUCCESSFUL;
+        assert allEquipmentBody.getResultType() == ResultType.SUCCESSFUL;
         assert allEquipmentBody.getData() != null;
         assert !allEquipmentBody.getData().isEmpty();
 
@@ -51,7 +47,7 @@ public class Main {
 
         Result<List<DataType>> allDataTypeBody = allDataTypeExecute.body();
         assert allDataTypeBody != null;
-        assert allDataTypeBody.resultType == ResultType.SUCCESSFUL;
+        assert allDataTypeBody.getResultType() == ResultType.SUCCESSFUL;
         assert allDataTypeBody.getData() != null;
         assert !allDataTypeBody.getData().isEmpty();
 
@@ -65,7 +61,8 @@ public class Main {
         float i = 0;
         for (Equipment equipment : allEquipment) {
             for (DataType dataType : allDataType) {
-                packList.add(new Pack(perlinNoise, equipment, dataType, i++));
+                packList.add(new Pack(perlinNoise, equipment, dataType, i));
+                i  += 0.1f;
             }
         }
 
@@ -75,8 +72,8 @@ public class Main {
             for (Pack pack : packList) {
                 dataList.add(new Data(
                         0,
-                        pack.getEquipment().id,
-                        pack.getDataType().id,
+                        pack.getEquipment().getId(),
+                        pack.getDataType().getId(),
                         null,
                         pack.nextValue()));
             }
@@ -90,12 +87,12 @@ public class Main {
 
             assert execute.isSuccessful();
             assert execute.body() != null;
-            assert execute.body().resultType == ResultType.SUCCESSFUL;
+            assert execute.body().getResultType() == ResultType.SUCCESSFUL;
 
 
             dataList.clear();
 
-            Thread.sleep(1000 * 10);
+            Thread.sleep(1000 * 3);
         }
 
     }

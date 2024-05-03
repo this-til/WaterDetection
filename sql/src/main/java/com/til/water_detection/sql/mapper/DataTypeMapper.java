@@ -19,7 +19,7 @@ public interface DataTypeMapper {
             from water_detection_data.data_type
             where id = #{id}
             """)
-    int removeDataTypeById(int id);
+    int removeDataTypeById(@Param("id") int id);
 
     @Update("""
             update water_detection_data.data_type
@@ -33,17 +33,14 @@ public interface DataTypeMapper {
             from water_detection_data.data_type
             where id = #{id}
             """)
-    DataType getDataTypeById(int id);
+    DataType getDataTypeById(@Param("id") int id);
 
     @Select("""
             select *
             from water_detection_data.data_type
             """)
     List<DataType> getAllDataType();
-    @Select("""
-            select *
-            from water_detection_data.data_type
-            where id IN  #{id}
-                        """)
-    List<DataType> getDataTypeByIdArray(int[] id);
+
+
+    List<DataType> getDataTypeByIdArray(@Param("id") int[] id);
 }

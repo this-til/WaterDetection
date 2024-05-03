@@ -37,7 +37,7 @@ public class EquipmentController {
         return new Result<>(i > 0 ? ResultType.SUCCESSFUL : ResultType.FAIL, i + "条数据被删除", null);
     }
 
-    @GetMapping("/getAllEquipment")
+    @PostMapping("/getAllEquipment")
     public Result<List<Equipment>> getAllEquipment() {
         List<Equipment> equipmentList = detectionService.getAllEquipment();
         return new Result<>(ResultType.SUCCESSFUL, null, equipmentList);
@@ -49,7 +49,7 @@ public class EquipmentController {
         return new Result<>(equipment != null ? ResultType.SUCCESSFUL : ResultType.FAIL, null, equipment);
     }
 
-    @GetMapping("/getEquipmentByIdArray")
+    @PostMapping("/getEquipmentByIdArray")
     public Result<List<Equipment>> getEquipmentByIdArray(@RequestBody int[] id) {
         return new Result<>(ResultType.SUCCESSFUL, null, detectionService.getEquipmentByIdArray(id));
     }

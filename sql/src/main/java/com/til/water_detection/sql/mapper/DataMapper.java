@@ -14,7 +14,7 @@ import java.util.Map;
 public interface DataMapper {
 
     @Insert("""
-            insert into water_detection_data.data ( equipmentId_id, data_type_id, time, value)
+            insert into water_detection_data.data ( equipment_id, data_type_id, time, value)
             values ( #{equipmentId}, #{dataTypeId}, #{time}, #{value})
             """)
     int addData(Data data);
@@ -24,7 +24,7 @@ public interface DataMapper {
             from water_detection_data.data
             where id = #{id}
             """)
-    Data getDataById(long id);
+    Data getDataById(@Param("id") long id);
 
     @Select("""
             select *
@@ -36,7 +36,7 @@ public interface DataMapper {
             select *
             from water_detection_data.data
             where
-                if(#{detectionPosId} < 0, TRUE , equipmentId_id = #{equipmentId})
+                if(#{equipmentId} < 0, TRUE , equipment_id = #{equipmentId})
                 && if(#{dataTypeId} < 0 , TRUE , data_type_id = #{dataTypeId})
                 && if(#{start} < 0, TRUE ,  time > #{start})
                 && if(#{end} < 0, TRUE ,  time < #{end})
@@ -48,25 +48,15 @@ public interface DataMapper {
             @Param("end") Timestamp end
     );
 
-    @Select("""
-            select *
-            from water_detection_data.data
-            where
-                if(#{detectionPosId} < 0, TRUE , equipmentId_id IN #{equipmentIdArray})
-                && if(#{dataTypeId} < 0 , TRUE , data_type_id = #{dataTypeId})
-                && if(#{start} < 0, TRUE ,  time > #{start})
-                && if(#{end} < 0, TRUE ,  time < #{end})
-            """)
-    List<Data> getDataMapFromEquipmentIdArray(int[] equipmentIdArray, int dataTypeId, Timestamp start, Timestamp end);
+    List<Data> getDataMapFromEquipmentIdArray(
+           @Param("equipmentIdArray") int[] equipmentIdArray,
+           @Param("dataTypeId") int dataTypeId,
+           @Param("start") Timestamp start,
+           @Param("end") Timestamp end);
 
-    @Select("""
-            select *
-            from water_detection_data.data
-            where
-                if(#{detectionPosId} < 0, TRUE , equipmentId_id = #{equipmentId})
-                && if(#{dataTypeId} < 0 , TRUE , data_type_id IN #{dataTypeIdArray})
-                && if(#{start} < 0, TRUE ,  time > #{start})
-                && if(#{end} < 0, TRUE ,  time < #{end})
-            """)
-    List<Data> getDataMapFromDataTypeIdArray(int equipmentId, int[] dataTypeIdArray, Timestamp start, Timestamp end);
+    List<Data> getDataMapFromDataTypeIdArray(
+          @Param("equipmentId") int equipmentId,
+          @Param("dataTypeIdArray") int[] dataTypeIdArray,
+          @Param("start") Timestamp start,
+          @Param("end") Timestamp end);
 }

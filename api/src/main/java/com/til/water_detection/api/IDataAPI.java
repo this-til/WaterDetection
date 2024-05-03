@@ -25,10 +25,7 @@ public interface IDataAPI {
     @POST("data/addDataList")
     Call<Result<Void>> addDataList(@Body List<Data> dataList);
 
-    @GET("data/getDataById")
-    Call<Result<Data>> getDataById(@Query("id") long id);
-
-    @GET("data/getAllData")
+    @POST("data/getAllData")
     Call<Result<List<Data>>> getAllData();
 
     @GET("data/getData")
@@ -39,19 +36,6 @@ public interface IDataAPI {
             @Query("end") Timestamp end
     );
 
-    @GET("data/getDataMapFromEquipmentIdArray")
-    Call<Result<Map<Integer, List<Data>>>> getDataMapFromEquipmentIdArray(
-            @Body int[] equipmentIdArray,
-            @Query("dataTypeId") int dataTypeId,
-            @Query("start") Timestamp start,
-            @Query("end") Timestamp end
-    );
-
-    @GET("data/getDataMapFromDataTypeIdArray")
-    Call<Result<Map<Integer, List<Data>>>> getDataMapFromDataTypeIdArray(
-            @Query("equipmentId") int equipmentId,
-            @Body int[] dataTypeIdArray,
-            @Query("start") Timestamp start,
-            @Query("end") Timestamp end
-    );
+    @POST("data/getDataToDataSheet")
+    Call<Result<DataSheet>> getDataToDataSheet(@Body DataFilter dataFilter);
 }

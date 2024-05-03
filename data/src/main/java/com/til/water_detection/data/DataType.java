@@ -1,13 +1,11 @@
 package com.til.water_detection.data;
 
-import org.jetbrains.annotations.Nullable;
-
 import java.util.Objects;
 
 public final class DataType {
 
-    public int id;
-    public String anotherName;
+    private int id;
+    private String anotherName;
 
     public DataType() {
     }

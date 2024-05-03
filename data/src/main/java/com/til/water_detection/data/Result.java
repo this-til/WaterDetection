@@ -5,10 +5,10 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Objects;
 
 public class Result<T> {
-    public ResultType resultType;
-    public String message;
+    private ResultType resultType;
+    private String message;
     @Nullable
-    public T data;
+    private T data;
 
     public Result() {
 

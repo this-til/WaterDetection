@@ -5,6 +5,12 @@ spring:
     username: root
     password: 20041119LYS&lys
 
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+
 cors:
   allowed-origins: http://localhost:5173
 

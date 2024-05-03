@@ -38,7 +38,7 @@ public class DataTypeController {
         return new Result<>(i > 0 ? ResultType.SUCCESSFUL : ResultType.FAIL, i + "条数据被删除", null);
     }
 
-    @GetMapping("/getAllDataType")
+    @PostMapping("/getAllDataType")
     public Result<List<DataType>> getAllDataType() {
         List<DataType> dataTypeListByUserId = dataTypeService.getAllDataType();
         return new Result<>(ResultType.SUCCESSFUL, null, dataTypeListByUserId);
@@ -53,7 +53,7 @@ public class DataTypeController {
         return new Result<>(ResultType.SUCCESSFUL, null, dataType);
     }
 
-    @GetMapping("/getDataTypeByIdArray")
+    @PostMapping("/getDataTypeByIdArray")
     public Result<List<DataType>> getDataTypeByIdArray(@RequestBody int[] id) {
         return new Result<>(ResultType.SUCCESSFUL, null, dataTypeService.getDataTypeByIdArray(id));
     }

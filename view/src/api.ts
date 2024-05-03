@@ -18,7 +18,7 @@ export function removeEquipmentPosById(id: number): Promise<AxiosResponse<Result
 export function getAllEquipment(): Promise<AxiosResponse<Result<Equipment[]>, any>> {
     return axios({
         url: '/equipment/getAllEquipment',
-        method: 'GET'
+        method: 'POST'
     })
 }
 
@@ -27,14 +27,6 @@ export function getEquipmentById(id: number): Promise<AxiosResponse<Result<Equip
         url: '/equipment/getEquipmentById',
         method: 'GET',
         params: {id}
-    })
-}
-
-export function getEquipmentByIdArray(id: number[]): Promise<AxiosResponse<Result<Equipment[]>, any>> {
-    return axios({
-        url: '/equipment/getEquipmentByIdArray',
-        method: 'GET',
-        data: id
     })
 }
 
@@ -59,29 +51,20 @@ export function removeDataTypeById(id: number): Promise<AxiosResponse<Result<und
     return axios({
         url: "/dataType/removeDataTypeById",
         method: "DELETE",
-        data: {id}
+        params: {id}
     });
 }
 
 export function getAllDataType(): Promise<AxiosResponse<Result<DataType[]>, any>> {
     return axios({
         url: "/dataType/getAllDataType",
-        method: "GET"
+        method: 'POST'
     });
 }
 
 export function getDataTypeById(id: number): Promise<AxiosResponse<Result<DataType>, any>> {
     return axios({
         url: "/dataType/getDataTypeById",
-        method: "GET",
-        params: {id}
-    });
-}
-
-
-export function getDataTypeByIdArray(id: number): Promise<AxiosResponse<Result<DataType[]>, any>> {
-    return axios({
-        url: "/dataType/getDataTypeByIdArray",
         method: "GET",
         params: {id}
     });
@@ -119,7 +102,6 @@ export function addDataList(dataList: Data[]): Promise<AxiosResponse<Result<unde
     })
 }
 
-
 export function getDataById(id: number): Promise<AxiosResponse<Result<Data>, any>> {
     return axios({
         url: '/data/getDataById',
@@ -131,7 +113,7 @@ export function getDataById(id: number): Promise<AxiosResponse<Result<Data>, any
 export function getAllData(): Promise<AxiosResponse<Result<Data[]>, any>> {
     return axios({
         url: '/data/getAllData',
-        method: 'GET'
+        method: 'POST'
     })
 }
 
@@ -148,31 +130,11 @@ export function getData(
     })
 }
 
-export function getDataMapFromEquipmentIdArray(
-    equipmentIdArray: number[],
-    dataTypeId: number,
-    start: number,
-    end: number
-): Promise<AxiosResponse<Map<number, Data>, any>> {
+export function getDataToDataSheet(dataFilter: DataFilter): Promise<AxiosResponse<Result<DataSheet>>> {
     return axios({
-        url: '/data/getDataMapFromEquipmentIdArray',
-        method: 'GET',
-        params: {dataTypeId, start, end},
-        data: equipmentIdArray
-    })
-}
-
-export function getDataMapFromDataTypeIdArray(
-    equipmentId: number,
-    dataTypeIdArray: number[],
-    start: number,
-    end: number
-): Promise<AxiosResponse<Map<number, Data>, any>> {
-    return axios({
-        url: '/data/getDataMapFromDataTypeIdArray',
-        method: 'GET',
-        params: {equipmentId, start, end},
-        data: dataTypeIdArray
+        url: '/data/getDataToDataSheet',
+        method: 'POST',
+        data: dataFilter
     })
 }
 
@@ -212,4 +174,33 @@ export interface Equipment {
     longitude: number
     latitude: number
     upTime: string
+}
+
+export interface DataScreening {
+    dataType: DataType
+    equipmentList: Equipment[]
+    timeStep: number
+    startTime: Date
+    endTime: Date
+}
+
+export interface DataSheet {
+    dataType: DataType;
+    timeStep: number;
+    startTime: Date;
+    endTime: Date;
+
+    equipmentList: Equipment[];
+    timestampList: string[];
+
+    //equipment -> timestamp
+    value: number[][];
+}
+
+export interface DataFilter {
+    dataTypeId: number;
+    equipmentIdArray: number[];
+    timeStep: number;
+    startTime: Date;
+    endTime: Date;
 }
