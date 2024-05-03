@@ -32,7 +32,7 @@ public class EquipmentController {
     }
 
     @DeleteMapping("/removeEquipmentPosById")
-    public Result<Void> removeEquipmentPosById(@Param("equipmentId") int equipmentId) {
+    public Result<Void> removeEquipmentPosById(@RequestParam int equipmentId) {
         int i = detectionService.removeEquipmentPosById(equipmentId);
         return new Result<>(i > 0 ? ResultType.SUCCESSFUL : ResultType.FAIL, i + "条数据被删除", null);
     }
@@ -44,24 +44,24 @@ public class EquipmentController {
     }
 
     @GetMapping("/getEquipmentById")
-    public Result<Equipment> getEquipmentById(int id) {
+    public Result<Equipment> getEquipmentById(@RequestParam int id) {
         Equipment equipment = detectionService.getEquipmentById(id);
         return new Result<>(equipment != null ? ResultType.SUCCESSFUL : ResultType.FAIL, null, equipment);
     }
 
     @GetMapping("/getEquipmentByIdArray")
-    public Result<List<Equipment>> getEquipmentByIdArray(int[] id) {
+    public Result<List<Equipment>> getEquipmentByIdArray(@RequestBody int[] id) {
         return new Result<>(ResultType.SUCCESSFUL, null, detectionService.getEquipmentByIdArray(id));
     }
 
     @PutMapping("/updateEquipmentAnotherNameById")
-    public Result<Void> updateEquipmentAnotherNameById(int id, @Param(FinalString.VERIFY_1_30) String anotherName) {
+    public Result<Void> updateEquipmentAnotherNameById(@RequestParam int id, @RequestParam @Param(FinalString.VERIFY_1_30) String anotherName) {
         int i = detectionService.updateEquipmentAnotherNameById(id, anotherName);
         return new Result<>(i > 0 ? ResultType.SUCCESSFUL : ResultType.FAIL, i + "条数据被更改", null);
     }
 
     @PutMapping("/updateEquipmentTimeById")
-    public Result<Void> updateEquipmentTimeById(int id) {
+    public Result<Void> updateEquipmentTimeById(@RequestParam int id) {
         int i = detectionService.updateEquipmentTimeById(id);
         return new Result<>(i > 0 ? ResultType.SUCCESSFUL : ResultType.FAIL, i + "条数据被更改", null);
     }

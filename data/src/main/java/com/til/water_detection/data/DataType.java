@@ -6,15 +6,16 @@ import java.util.Objects;
 
 public final class DataType {
 
-    private int id;
-    private String anotherName;
+    public int id;
+    public String anotherName;
 
+    public DataType() {
+    }
 
-    public DataType(int id,  String anotherName) {
+    public DataType(int id, String anotherName) {
         this.id = id;
         this.anotherName = anotherName;
     }
-
 
     public int getId() {
         return id;
@@ -23,7 +24,6 @@ public final class DataType {
     public void setId(int id) {
         this.id = id;
     }
-
 
     public String getAnotherName() {
         return anotherName;

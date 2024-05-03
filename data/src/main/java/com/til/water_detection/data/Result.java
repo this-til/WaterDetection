@@ -5,28 +5,19 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Objects;
 
 public class Result<T> {
-    private ResultType resultType;
-    private String message;
+    public ResultType resultType;
+    public String message;
     @Nullable
-    private T data;
+    public T data;
+
+    public Result() {
+
+    }
 
     public Result(ResultType resultType, String message, @Nullable T data) {
         this.resultType = resultType;
         this.message = message == null ? "" : message;
         this.data = data;
-    }
-
-
-    public static <T> Result<T> successful(@Nullable String message) {
-        return new Result<>(ResultType.SUCCESSFUL, message == null ? "" : message, null);
-    }
-
-    public static <T> Result<T> fail(@Nullable String message) {
-        return new Result<>(ResultType.FAIL, message == null ? "" : message, null);
-    }
-
-    public static <T> Result<T> error(@Nullable String message) {
-        return new Result<>(ResultType.ERROR, message == null ? "" : message, null);
     }
 
     public ResultType getResultType() {
@@ -43,6 +34,18 @@ public class Result<T> {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public static <T> Result<T> successful(@Nullable String message) {
+        return new Result<>(ResultType.SUCCESSFUL, message == null ? "" : message, null);
+    }
+
+    public static <T> Result<T> fail(@Nullable String message) {
+        return new Result<>(ResultType.FAIL, message == null ? "" : message, null);
+    }
+
+    public static <T> Result<T> error(@Nullable String message) {
+        return new Result<>(ResultType.ERROR, message == null ? "" : message, null);
     }
 
     @Nullable

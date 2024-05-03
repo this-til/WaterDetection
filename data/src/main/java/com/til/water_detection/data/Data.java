@@ -5,11 +5,14 @@ import java.util.Objects;
 
 public final class Data {
 
-    private long id;
-    private int equipmentId;
-    private int dataTypeId;
-    private Timestamp time;
-    private float value;
+    public long id;
+    public int equipmentId;
+    public int dataTypeId;
+    public Timestamp time;
+    public float value;
+
+    public Data() {
+    }
 
     public Data(long id, int equipmentId, int dataTypeId, Timestamp time, float value) {
         this.id = id;
@@ -26,7 +29,6 @@ public final class Data {
     public void setId(long id) {
         this.id = id;
     }
-
 
     public int getEquipmentId() {
         return equipmentId;

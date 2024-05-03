@@ -2,8 +2,7 @@ package com.til.water_detection.api;
 
 import com.til.water_detection.data.*;
 import retrofit2.Call;
-import retrofit2.http.GET;
-import retrofit2.http.POST;
+import retrofit2.http.*;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -14,35 +13,45 @@ import java.util.Map;
 public interface IDataAPI {
 
     @POST("data/addData")
-    Call<Result<Void>> addData(Data data);
+    Call<Result<Void>> addData(@Body Data data);
+
+
+    @POST("data/addDataSimple")
+    Call<Result<Void>> addDataSimple(
+            @Query("equipmentId") int equipmentId,
+            @Query("dataTypeId") int dataTypeId,
+            @Query("value") float value);
+
+    @POST("data/addDataList")
+    Call<Result<Void>> addDataList(@Body List<Data> dataList);
 
     @GET("data/getDataById")
-    Call<Result<Data>> getDataById(long id);
+    Call<Result<Data>> getDataById(@Query("id") long id);
 
     @GET("data/getAllData")
     Call<Result<List<Data>>> getAllData();
 
     @GET("data/getData")
     Call<Result<List<Data>>> getData(
-            int equipmentId,
-            int dataTypeId,
-            Timestamp start,
-            Timestamp end
+            @Query("equipmentId") int equipmentId,
+            @Query("dataTypeId") int dataTypeId,
+            @Query("start") Timestamp start,
+            @Query("end") Timestamp end
     );
 
     @GET("data/getDataMapFromEquipmentIdArray")
     Call<Result<Map<Integer, List<Data>>>> getDataMapFromEquipmentIdArray(
-            int[] equipmentIdArray,
-            int dataTypeId,
-            Timestamp start,
-            Timestamp end
+            @Body int[] equipmentIdArray,
+            @Query("dataTypeId") int dataTypeId,
+            @Query("start") Timestamp start,
+            @Query("end") Timestamp end
     );
 
     @GET("data/getDataMapFromDataTypeIdArray")
     Call<Result<Map<Integer, List<Data>>>> getDataMapFromDataTypeIdArray(
-            int equipmentId,
-            int[] dataTypeIdArray,
-            Timestamp start,
-            Timestamp end
+            @Query("equipmentId") int equipmentId,
+            @Body int[] dataTypeIdArray,
+            @Query("start") Timestamp start,
+            @Query("end") Timestamp end
     );
 }

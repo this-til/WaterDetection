@@ -33,7 +33,7 @@ public class DataTypeController {
     }
 
     @DeleteMapping("/removeDataTypeById")
-    public Result<Void> removeDataTypeById(int id) {
+    public Result<Void> removeDataTypeById(@RequestParam int id) {
         int i = dataTypeService.removeDataTypeById(id);
         return new Result<>(i > 0 ? ResultType.SUCCESSFUL : ResultType.FAIL, i + "条数据被删除", null);
     }
@@ -45,7 +45,7 @@ public class DataTypeController {
     }
 
     @GetMapping("/getDataTypeById")
-    public Result<DataType> getDataTypeById(int id) {
+    public Result<DataType> getDataTypeById(@RequestParam int id) {
         DataType dataType = dataTypeService.getDataTypeById(id);
         if (dataType == null) {
             return Result.fail("未找到对应id的数据类型");
@@ -54,12 +54,12 @@ public class DataTypeController {
     }
 
     @GetMapping("/getDataTypeByIdArray")
-    public Result<List<DataType>> getDataTypeByIdArray(int[] id) {
+    public Result<List<DataType>> getDataTypeByIdArray(@RequestBody int[] id) {
         return new Result<>(ResultType.SUCCESSFUL, null, dataTypeService.getDataTypeByIdArray(id));
     }
 
     @PutMapping("/updateDataTypeAnotherName")
-    public Result<Void> updateDataTypeAnotherName(int id, @Param(FinalString.VERIFY_1_30) String anotherName) {
+    public Result<Void> updateDataTypeAnotherName(@RequestParam int id, @RequestParam @Param(FinalString.VERIFY_1_30) String anotherName) {
         int i = dataTypeService.updateDataTypeAnotherName(id, anotherName);
         return new Result<>(i > 0 ? ResultType.SUCCESSFUL : ResultType.FAIL, i + "条数据被更改", null);
     }

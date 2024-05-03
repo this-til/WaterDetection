@@ -15,7 +15,7 @@ public interface DataMapper {
 
     @Insert("""
             insert into water_detection_data.data ( equipmentId_id, data_type_id, time, value)
-            values ( #{detectionId}, #{dataTypeId}, #{time}, #{value})
+            values ( #{equipmentId}, #{dataTypeId}, #{time}, #{value})
             """)
     int addData(Data data);
 

@@ -15,7 +15,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler
     public Result<?> handler(Exception e) {
-        logger.error(e);
+        logger.error("An exception occurred: ", e);
         return Result.error(e.getClass().getName() + ":" + e.getMessage());
     }
 

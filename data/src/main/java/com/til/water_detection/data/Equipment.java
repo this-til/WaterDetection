@@ -7,11 +7,15 @@ import java.sql.Timestamp;
 import java.util.Objects;
 
 public final class Equipment {
-    private int id;
-    private String anotherName;
-    private float longitude;
-    private float latitude;
-    private Timestamp upTime;
+    public int id;
+    public String anotherName;
+    public float longitude;
+    public float latitude;
+    public Timestamp upTime;
+
+    public Equipment() {
+
+    }
 
     public Equipment(int id, String anotherName, float longitude, float latitude, Timestamp upTime) {
         this.id = id;
@@ -20,7 +24,6 @@ public final class Equipment {
         this.latitude = latitude;
         this.upTime = upTime;
     }
-
 
     public int getId() {
         return id;
@@ -34,7 +37,7 @@ public final class Equipment {
         return anotherName;
     }
 
-    public void setAnotherName(@Nullable String anotherName) {
+    public void setAnotherName(String anotherName) {
         this.anotherName = anotherName;
     }
 

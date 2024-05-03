@@ -34,7 +34,7 @@ export function getEquipmentByIdArray(id: number[]): Promise<AxiosResponse<Resul
     return axios({
         url: '/equipment/getEquipmentByIdArray',
         method: 'GET',
-        params: {id}
+        data: id
     })
 }
 
@@ -99,9 +99,26 @@ export function registerData(data: Data): Promise<AxiosResponse<Result<undefined
     return axios({
         url: '/data/addData',
         method: 'POST',
-        params: {data}
+        data: data
     })
 }
+
+export function addDataSimple(equipmentId: number, dataTypeId: number, value: number): Promise<AxiosResponse<Result<undefined>, any>> {
+    return axios({
+        url: '/data/addDataSimple',
+        method: 'POST',
+        params: {equipmentId, dataTypeId, value}
+    })
+}
+
+export function addDataList(dataList: Data[]): Promise<AxiosResponse<Result<undefined>, any>> {
+    return axios({
+        url: '/data/addDataList',
+        method: 'POST',
+        data: dataList
+    })
+}
+
 
 export function getDataById(id: number): Promise<AxiosResponse<Result<Data>, any>> {
     return axios({
@@ -140,7 +157,8 @@ export function getDataMapFromEquipmentIdArray(
     return axios({
         url: '/data/getDataMapFromEquipmentIdArray',
         method: 'GET',
-        params: {equipmentIdArray, dataTypeId, start, end}
+        params: {dataTypeId, start, end},
+        data: equipmentIdArray
     })
 }
 
@@ -153,7 +171,8 @@ export function getDataMapFromDataTypeIdArray(
     return axios({
         url: '/data/getDataMapFromDataTypeIdArray',
         method: 'GET',
-        params: {equipmentId, dataTypeIdArray, start, end}
+        params: {equipmentId, start, end},
+        data: dataTypeIdArray
     })
 }
 

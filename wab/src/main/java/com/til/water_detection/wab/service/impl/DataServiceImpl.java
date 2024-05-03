@@ -22,6 +22,9 @@ public class DataServiceImpl implements IDataService {
 
     @Override
     public int addData(Data data) {
+        if (data.time == null) {
+            data.time = new Timestamp(System.currentTimeMillis());
+        }
         return dataMapper.addData(data);
     }
 
