@@ -1,9 +1,9 @@
 package com.til.water_detection.wab.service.impl;
 
 import com.til.water_detection.data.Data;
-import com.til.water_detection.sql.mapper.DataMapper;
+import com.til.water_detection.sql.mapper.IDataMapper;
 import com.til.water_detection.wab.service.IDataService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -12,8 +12,8 @@ import java.util.List;
 @Service
 public class DataServiceImpl implements IDataService {
 
-    @Autowired
-    private DataMapper dataMapper;
+    @Resource
+    private IDataMapper dataMapper;
 
     @Override
     public int addData(Data data) {
@@ -39,12 +39,12 @@ public class DataServiceImpl implements IDataService {
     }
 
     @Override
-    public    List<Data> getDataMapFromEquipmentIdArray(int[] equipmentIdArray, int dataTypeId, Timestamp start, Timestamp end) {
+    public List<Data> getDataMapFromEquipmentIdArray(int[] equipmentIdArray, int dataTypeId, Timestamp start, Timestamp end) {
         return dataMapper.getDataMapFromEquipmentIdArray(equipmentIdArray, dataTypeId, start, end);
     }
 
     @Override
-    public    List<Data> getDataMapFromDataTypeIdArray(int equipmentId, int[] dataTypeIdArray, Timestamp start, Timestamp end) {
+    public List<Data> getDataMapFromDataTypeIdArray(int equipmentId, int[] dataTypeIdArray, Timestamp start, Timestamp end) {
         return dataMapper.getDataMapFromDataTypeIdArray(equipmentId, dataTypeIdArray, start, end);
     }
 }

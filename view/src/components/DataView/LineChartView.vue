@@ -50,7 +50,7 @@ const update = () => {
 
   for (let i = 0; i < data.equipmentList.length; i++) {
     series.push({
-      name: data.equipmentList[i].anotherName,
+      name: data.equipmentList[i].name,
       type: 'line',
       data: data.value[i],
     })
@@ -62,14 +62,14 @@ const update = () => {
       type: 'category',
       data: timestampList
     },
-    yAxis: {},
+    yAxis: {
+      type: 'value',
+      name: '值'
+    },
     series: series
   }), true, false);
 }
 
-
-// 如果你需要在其他地方访问 lineChart，可以将它暴露给模板或其他 setup 函数
-// 这里我选择不暴露，因为它只在 onMounted 钩子中使用
 
 interface Props {
   data: DataSheet

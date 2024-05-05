@@ -37,7 +37,7 @@ public class EquipmentController {
         return new Result<>(i > 0 ? ResultType.SUCCESSFUL : ResultType.FAIL, i + "条数据被删除", null);
     }
 
-    @PostMapping("/getAllEquipment")
+    @GetMapping("/getAllEquipment")
     public Result<List<Equipment>> getAllEquipment() {
         List<Equipment> equipmentList = detectionService.getAllEquipment();
         return new Result<>(ResultType.SUCCESSFUL, null, equipmentList);

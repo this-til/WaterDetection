@@ -5,7 +5,7 @@ import java.util.Objects;
 
 public final class Equipment {
     private int id;
-    private String anotherName;
+    private String name;
     private float longitude;
     private float latitude;
     private Timestamp upTime;
@@ -14,9 +14,9 @@ public final class Equipment {
 
     }
 
-    public Equipment(int id, String anotherName, float longitude, float latitude, Timestamp upTime) {
+    public Equipment(int id, String name, float longitude, float latitude, Timestamp upTime) {
         this.id = id;
-        this.anotherName = anotherName;
+        this.name = name;
         this.longitude = longitude;
         this.latitude = latitude;
         this.upTime = upTime;
@@ -30,12 +30,12 @@ public final class Equipment {
         this.id = id;
     }
 
-    public String getAnotherName() {
-        return anotherName;
+    public String getName() {
+        return name;
     }
 
-    public void setAnotherName(String anotherName) {
-        this.anotherName = anotherName;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public float getLongitude() {
@@ -66,7 +66,7 @@ public final class Equipment {
     public String toString() {
         return "Detection{" +
                 "id=" + id +
-                ", anotherName='" + anotherName + '\'' +
+                ", anotherName='" + name + '\'' +
                 ", longitude=" + longitude +
                 ", latitude=" + latitude +
                 ", upTime=" + upTime +
@@ -78,11 +78,11 @@ public final class Equipment {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Equipment equipment = (Equipment) o;
-        return id == equipment.id && Float.compare(longitude, equipment.longitude) == 0 && Float.compare(latitude, equipment.latitude) == 0 && Objects.equals(anotherName, equipment.anotherName) && Objects.equals(upTime, equipment.upTime);
+        return id == equipment.id && Float.compare(longitude, equipment.longitude) == 0 && Float.compare(latitude, equipment.latitude) == 0 && Objects.equals(name, equipment.name) && Objects.equals(upTime, equipment.upTime);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, anotherName, longitude, latitude, upTime);
+        return Objects.hash(id, name, longitude, latitude, upTime);
     }
 }

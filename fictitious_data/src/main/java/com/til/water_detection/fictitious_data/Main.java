@@ -55,13 +55,12 @@ public class Main {
         List<DataType> allDataType = allDataTypeBody.getData();
 
 
-        PerlinNoise perlinNoise = new PerlinNoise();
         List<Pack> packList = new ArrayList<>();
 
         float i = 0;
         for (Equipment equipment : allEquipment) {
             for (DataType dataType : allDataType) {
-                packList.add(new Pack(perlinNoise, equipment, dataType, i));
+                packList.add(new Pack(new PerlinNoise(), equipment, dataType, i));
                 i  += 0.1f;
             }
         }
@@ -114,7 +113,7 @@ public class Main {
         }
 
         public float nextValue() {
-            x += 0.05f;
+            x += 0.001f;
             return (float) perlinNoise.noise(x, y);
         }
 

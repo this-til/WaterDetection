@@ -52,7 +52,7 @@ public class DataController {
         return new Result<>(dataById == null ? ResultType.FAIL : ResultType.SUCCESSFUL, null, dataById);
     }
 
-    @PostMapping("/getAllData")
+    @GetMapping("/getAllData")
     public Result<List<Data>> getAllData() {
         return new Result<>(ResultType.SUCCESSFUL, null, dataService.getAllData());
     }
@@ -121,10 +121,16 @@ public class DataController {
         }
         long endTime = dataFilter.getEndTime().getTime();
         long startTime = dataFilter.getStartTime().getTime();
-
         long processTime = endTime - startTime;
+
         long stepByStep = Math.max(dataFilter.getTimeStep(), 10) * 1000L;
         int grid = (int) (processTime / stepByStep);
+
+        if (grid > 10000) {
+            grid = 10000;
+            stepByStep = processTime / grid;
+        }
+
         List<Timestamp> timestampList = new ArrayList<>(grid);
         List<Long> timestampListLong = new ArrayList<>(grid);
         for (int i = 0; i < grid; i++) {
@@ -132,8 +138,8 @@ public class DataController {
             timestampListLong.add(startTime + (i + 1) * stepByStep);
         }
 
-        if(dataFilter.getEquipmentIdArray().length == 0) {
-            return new Result<>(ResultType.FAIL, null,  new DataSheet(
+        if (dataFilter.getEquipmentIdArray().length == 0) {
+            return new Result<>(ResultType.FAIL, null, new DataSheet(
                     dataType,
                     dataFilter.getTimeStep(),
                     dataFilter.getStartTime(),
@@ -212,7 +218,7 @@ public class DataController {
                 null,
                 new DataSheet(
                         dataType,
-                        dataFilter.getTimeStep(),
+                        (int) stepByStep / 1000,
                         dataFilter.getStartTime(),
                         dataFilter.getEndTime(),
                         equipmentList,

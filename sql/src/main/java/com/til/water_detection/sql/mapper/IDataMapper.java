@@ -8,10 +8,9 @@ import org.apache.ibatis.annotations.Select;
 
 import java.sql.Timestamp;
 import java.util.List;
-import java.util.Map;
 
 @Mapper
-public interface DataMapper {
+public interface IDataMapper {
 
     @Insert("""
             insert into water_detection_data.data ( equipment_id, data_type_id, time, value)
@@ -32,15 +31,7 @@ public interface DataMapper {
             """)
     List<Data> getAllData();
 
-    @Select("""
-            select *
-            from water_detection_data.data
-            where
-                if(#{equipmentId} < 0, TRUE , equipment_id = #{equipmentId})
-                && if(#{dataTypeId} < 0 , TRUE , data_type_id = #{dataTypeId})
-                && if(#{start} < 0, TRUE ,  time > #{start})
-                && if(#{end} < 0, TRUE ,  time < #{end})
-            """)
+
     List<Data> getData(
             @Param("equipmentId") int equipmentId,
             @Param("dataTypeId") int dataTypeId,

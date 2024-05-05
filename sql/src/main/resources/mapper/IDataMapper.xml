@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.til.water_detection.sql.mapper.IDataMapper">
+    <select id="getDataMapFromDataTypeIdArray" resultType="com.til.water_detection.data.Data">
+
+        SELECT *
+        FROM water_detection_data.data
+        WHERE
+        TRUE
+        <!-- 处理 equipment_id 的条件 -->
+        <if test="equipmentId != null and equipmentId >= 0">
+            AND equipment_id = #{equipmentId}
+        </if>
+        <if test="dataTypeIdArray != null and !dataTypeIdArray.isEmpty()">
+            AND data_type_id IN
+            <foreach collection="dataTypeIdArray" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+        <if test="start != null and start >= 0">
+            AND time > #{start}
+        </if>
+        <if test="end != null and end >= 0">
+            AND time &lt; #{end}
+        </if>
+
+    </select>
+    <select id="getDataMapFromEquipmentIdArray" resultType="com.til.water_detection.data.Data">
+
+        SELECT *
+        FROM water_detection_data.data
+        WHERE
+        TRUE
+        <if test="dataTypeId != null and dataTypeId >= 0">
+            AND data_type_id = #{dataTypeId}
+        </if>
+
+        <if test="equipmentIdArray != null and !equipmentIdArray.isEmpty()">
+            AND equipment_id IN
+            <foreach collection="equipmentIdArray" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+
+
+        <if test="start != null and start >= 0">
+            AND time > #{start}
+        </if>
+        <if test="end != null and end >= 0">
+            AND time &lt; #{end}
+        </if>
+    </select>
+
+    <select id="getData" resultType="com.til.water_detection.data.Data">
+        SELECT *
+        FROM water_detection_data.data
+        WHERE
+        TRUE
+        <if test="equipmentId != null and equipmentId >= 0">
+            AND equipment_id = #{equipmentId}
+        </if>
+
+        <if test="dataTypeId != null and dataTypeId >= 0">
+            AND data_type_id = #{dataTypeId}
+        </if>
+
+
+        <if test="start != null and start >= 0">
+            AND time > #{start}
+        </if>
+        <if test="end != null and end >= 0">
+            AND time &lt; #{end}
+        </if>
+    </select>
+</mapper>

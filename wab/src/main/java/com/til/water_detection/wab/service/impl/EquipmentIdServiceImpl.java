@@ -1,7 +1,7 @@
 package com.til.water_detection.wab.service.impl;
 
 import com.til.water_detection.data.Equipment;
-import com.til.water_detection.sql.mapper.EquipmentMapper;
+import com.til.water_detection.sql.mapper.IEquipmentMapper;
 import com.til.water_detection.wab.service.IEquipmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,7 +12,7 @@ import java.util.List;
 public class EquipmentIdServiceImpl implements IEquipmentService {
 
     @Autowired
-    private EquipmentMapper equipmentMapper;
+    private IEquipmentMapper equipmentMapper;
 
     @Override
     public void addEquipment() {

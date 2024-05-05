@@ -18,7 +18,7 @@ export function removeEquipmentPosById(id: number): Promise<AxiosResponse<Result
 export function getAllEquipment(): Promise<AxiosResponse<Result<Equipment[]>, any>> {
     return axios({
         url: '/equipment/getAllEquipment',
-        method: 'POST'
+        method: 'GET'
     })
 }
 
@@ -58,7 +58,7 @@ export function removeDataTypeById(id: number): Promise<AxiosResponse<Result<und
 export function getAllDataType(): Promise<AxiosResponse<Result<DataType[]>, any>> {
     return axios({
         url: "/dataType/getAllDataType",
-        method: 'POST'
+        method: 'GET'
     });
 }
 
@@ -165,12 +165,12 @@ export interface Data {
 
 export interface DataType {
     id: number
-    anotherName: string
+    name: string
 }
 
 export interface Equipment {
     id: number
-    anotherName: string
+    name: string
     longitude: number
     latitude: number
     upTime: string

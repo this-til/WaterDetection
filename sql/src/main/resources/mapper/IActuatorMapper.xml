@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.til.water_detection.sql.mapper.IActuatorMapper">
+    <select id="getActuatorByIdArray" resultType="com.til.water_detection.data.Actuator">
+        select *
+        from water_detection_data.actuator
+        where id IN
+        <foreach collection="id" item="item" index="index" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="getActuatorByNameArray" resultType="com.til.water_detection.data.Actuator">
+        select *
+        from water_detection_data.actuator
+        where name IN
+        <foreach collection="name" item="item" index="index" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </select>
+</mapper>

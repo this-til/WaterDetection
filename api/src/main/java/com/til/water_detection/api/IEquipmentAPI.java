@@ -15,7 +15,7 @@ public interface IEquipmentAPI {
     @DELETE("equipment/removeEquipmentPosById")
     Call<Result<Void>> removeEquipmentPosById();
 
-    @POST("equipment/getAllEquipment")
+    @GET("equipment/getAllEquipment")
     Call<Result<List<Equipment>>> getAllEquipment();
 
     @GET("equipment/getEquipmentById")

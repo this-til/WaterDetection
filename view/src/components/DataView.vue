@@ -3,14 +3,17 @@
 
   <el-header class="header-class">
 
-    数据类型：{{ dataType.anotherName }} (id:{{ dataType.id }})
+    数据类型：{{ dataType.name }} (id:{{ dataType.id }})
 
     <el-divider direction="vertical"/>
 
     时间：
 
     <el-date-picker
-        :model-value=time
+        v-model=time
+        :default-time="defaultTime"
+        :shortcuts=shortcuts
+        :clearable=false
         type="datetimerange"
         start-placeholder="开始时间"
         end-placeholder="结束时间"
@@ -56,7 +59,7 @@
     呈现方式：
 
     <el-select
-        v-model="presentationMode"
+        v-model=presentationMode
         placeholder="Select"
         style="width: 240px"
     >
@@ -84,18 +87,16 @@
   <el-main class="main-class">
 
     <LineChartView
-        id="lineChart"
-
         v-if="presentationMode == 'lineChart' && data != null"
-
         :data=data
     >
 
     </LineChartView>
 
     <ChartView
-        id="chart"
-        v-else-if="presentationMode == 'chart' && data != null">
+        v-else-if="presentationMode == 'chart' && data != null"
+        :data=data
+    >
 
     </ChartView>
 
@@ -104,7 +105,7 @@
 </template>
 
 <script lang="ts" setup>
-import {markRaw, onMounted, ref, toRefs, warn, watch} from 'vue'
+import {markRaw, onMounted, onUnmounted, ref, toRefs, warn, watch} from 'vue'
 import {DataSheet, DataType, Equipment, getDataToDataSheet} from "@/api";
 import {ElMessageBox} from 'element-plus'
 import LineChartView from "@/components/DataView/LineChartView.vue";
@@ -114,12 +115,74 @@ import * as echarts from "echarts";
 
 const props = defineProps<Props>();
 
-const data = ref<DataSheet>(null)
+const data = ref<DataSheet | null>(null)
 
 
-const time = ref<[Date,Date]>([
+const time = ref<[Date, Date]>([
   new Date(new Date().getTime() - 1000 * 60 * 60),
   new Date()
+])
+
+const defaultTime: [Date, Date] = [
+  new Date(new Date().getTime() - 1000 * 60 * 60),
+  new Date()
+] // '12:00:00', '08:00:00'
+
+const shortcuts = ref([
+  {
+    text: '过去一小时',
+    value: () => {
+      const end = new Date()
+      const start = new Date()
+      start.setHours(start.getHours() - 1)
+      return [start, end]
+    },
+  },
+  {
+    text: '过去两小时',
+    value: () => {
+      const end = new Date()
+      const start = new Date()
+      start.setHours(start.getHours() - 2)
+      return [start, end]
+    },
+  },
+  {
+    text: '过去三小时',
+    value: () => {
+      const end = new Date()
+      const start = new Date()
+      start.setHours(start.getHours() - 3)
+      return [start, end]
+    },
+  }, {
+    text: '过去六小时',
+    value: () => {
+      const end = new Date()
+      const start = new Date()
+      start.setHours(start.getHours() - 6)
+      return [start, end]
+    },
+  },
+  {
+    text: '过去半天',
+    value: () => {
+      const end = new Date()
+      const start = new Date()
+      start.setHours(start.getDate() - 12)
+      return [start, end]
+    },
+  },
+  {
+    text: '过去一天',
+    value: () => {
+      const end = new Date()
+      const start = new Date()
+      start.setDate(start.getDate() - 1)
+      return [start, end]
+    },
+  },
+
 ])
 
 const displayScreeningEquipment = ref<boolean>(false)
@@ -136,7 +199,7 @@ const timeStep = ref<number>(10)
 for (let equipment of props.equipmentList) {
   const items = {
     key: equipment.id,
-    label: equipment.anotherName,
+    label: equipment.name,
     disabled: false,
     equipment: equipment,
   };
@@ -185,16 +248,10 @@ watch(selectEquipmentList, (n, o) => {
   up()
 })
 
-watch(timeStep, (n, o) => {
-  up()
-})
-
-
 watch(time, (n, o) => {
-  up()
-}, { immediate: false, deep: false })
-
-watch(timeStep, (n, o) => {
+  if (time.value[1].getTime() > new Date().getTime()) {
+    time.value[1] = new Date();
+  }
   up()
 })
 
@@ -203,8 +260,39 @@ watch(dataType, (n, o) => {
   up()
 })
 
+/*
+watch(_timeStep, (n, o) => {
+  let replace: number = parseInt(_timeStep.value.replace(/\D/g, ''));
+  replace = replace < 8 ? 8 : (replace > 12800 ? 12800 : replace)
+  _timeStep.value = String(replace)
+  timeStep.value = replace
+  up()
+})
+*/
+
+
 onMounted(() => {
   up()
+});
+
+const lastUpdatedTime = ref(new Date(0))
+const updateTime = () => {
+  if (lastUpdatedTime.value.getTime() < new Date().getTime() - 1000 * 16) {
+    time.value[0] = new Date(time.value[0].getTime() + 1000 * 16);
+    time.value[1] = new Date(time.value[1].getTime() + 1000 * 16);
+    lastUpdatedTime.value = new Date();
+    up()
+  }
+};
+
+let intervalId: number = 0;
+
+onMounted(() => {
+  intervalId = setInterval(updateTime, 1000);
+});
+
+onUnmounted(() => {
+  clearInterval(intervalId);
 });
 
 const up = () => {
@@ -216,6 +304,8 @@ const up = () => {
     endTime: time.value[1],
   }).then(r => {
     data.value = r.data.data
+    timeStep.value = data.value.timeStep
+    _timeStep.value = String(data.value.timeStep)
   })
 }
 
@@ -224,6 +314,7 @@ const handleInput = (v) => {
   replace = replace < 8 ? 8 : (replace > 12800 ? 12800 : replace)
   _timeStep.value = replace
   timeStep.value = parseInt(replace)
+  up()
 }
 
 interface EquipmentPack {
@@ -252,4 +343,5 @@ interface Props {
   width: 100%;
   height: 100%;
 }
+
 </style>

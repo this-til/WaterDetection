@@ -25,7 +25,7 @@ public interface IDataAPI {
     @POST("data/addDataList")
     Call<Result<Void>> addDataList(@Body List<Data> dataList);
 
-    @POST("data/getAllData")
+    @GET("data/getAllData")
     Call<Result<List<Data>>> getAllData();
 
     @GET("data/getData")

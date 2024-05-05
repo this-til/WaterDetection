@@ -17,7 +17,7 @@
                   v-for="(dataType) in allDataType"
                   :key=dataType.id
                   @click=displayDataView(dataType)>
-                <template #title>{{ dataType.anotherName }}</template>
+                <template #title>{{ dataType.name }}</template>
               </el-menu-item>
 
 

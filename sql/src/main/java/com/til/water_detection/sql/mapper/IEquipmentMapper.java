@@ -6,13 +6,13 @@ import org.apache.ibatis.annotations.*;
 import java.util.List;
 
 @Mapper
-public interface EquipmentMapper {
+public interface IEquipmentMapper {
 
     @Insert("""
-            insert into water_detection_data.equipment ()
-            values ()
+            insert into water_detection_data.equipment (name)
+            values (#{name})
             """)
-    int addEquipment();
+    int registerEquipment(String name);
 
     @Delete("""
             delete
@@ -23,7 +23,7 @@ public interface EquipmentMapper {
 
     @Update("""
             update water_detection_data.equipment
-            set another_name = #{anotherName}
+            set name = #{anotherName}
             where id = #{id}
             """)
     int updateEquipmentAnotherName(@Param("id") int id, @Param("anotherName") String anotherName);
@@ -43,7 +43,6 @@ public interface EquipmentMapper {
             """)
     Equipment getEquipmentById(@Param("id") int id);
 
-    List<Equipment> getEquipmentByIdArray(@Param("id") int[] id);
 
 
     @Select("""
@@ -51,5 +50,16 @@ public interface EquipmentMapper {
             from water_detection_data.equipment
             """)
     List<Equipment> getAllEquipment();
+
+    @Select("""
+            select *
+            from water_detection_data.equipment
+            where name = #{name}
+            """)
+    Equipment getEquipmentByName(String name);
+
+    List<Equipment> getEquipmentByIdArray(@Param("id") int[] id);
+
+    List<Equipment> getEquipmentByNameArray(@Param("name") String[] name);
 
 }
