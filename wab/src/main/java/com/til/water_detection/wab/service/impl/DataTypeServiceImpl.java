@@ -15,13 +15,28 @@ public class DataTypeServiceImpl implements IDataTypeService {
     private IDataTypeMapper dataTypeMapper;
 
     @Override
-    public void addDataType() {
-        dataTypeMapper.addDataType();
+    public int registerDataType(String name) {
+        return dataTypeMapper.registerDataType(name);
     }
 
     @Override
-    public int removeDataTypeById(int id){
+    public int removeDataTypeById(int id) {
         return dataTypeMapper.removeDataTypeById(id);
+    }
+
+    @Override
+    public int updateDataTypeAnotherName(int id, String anotherName) {
+        return dataTypeMapper.updateDataTypeAnotherNameById(id, anotherName);
+    }
+
+    @Override
+    public DataType getDataTypeById(int id) {
+        return dataTypeMapper.getDataTypeById(id);
+    }
+
+    @Override
+    public DataType getDataTypeByName(String name) {
+        return dataTypeMapper.getDataTypeByName(name);
     }
 
     @Override
@@ -35,13 +50,7 @@ public class DataTypeServiceImpl implements IDataTypeService {
     }
 
     @Override
-    public DataType getDataTypeById(int id) {
-        return dataTypeMapper.getDataTypeById(id);
+    public List<DataType> getDataTypeByNameArray(String[] name) {
+        return dataTypeMapper.getDataTypeByNameArray(name);
     }
-
-    @Override
-    public int updateDataTypeAnotherName(int id, String anotherName) {
-        return dataTypeMapper.updateDataTypeAnotherNameById(id, anotherName);
-    }
-
 }

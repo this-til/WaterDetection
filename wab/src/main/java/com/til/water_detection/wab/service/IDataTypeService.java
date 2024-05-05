@@ -6,16 +6,23 @@ import jakarta.annotation.Nullable;
 import java.util.List;
 
 public interface IDataTypeService {
-    void addDataType();
+    int registerDataType(String name);
 
     int removeDataTypeById(int id);
 
-    List<DataType> getAllDataType();
+    int updateDataTypeAnotherName(int id, String anotherName);
 
     @Nullable
     DataType getDataTypeById(int id);
 
-    int updateDataTypeAnotherName(int id, String anotherName);
+
+    @Nullable
+    DataType getDataTypeByName(String name);
 
     List<DataType> getDataTypeByIdArray(int[] id);
+
+    List<DataType> getAllDataType();
+
+
+    List<DataType> getDataTypeByNameArray(String[] name);
 }

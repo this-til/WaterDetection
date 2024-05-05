@@ -14,32 +14,32 @@ public class ActuatorServiceImpl implements IActuatorService {
 
     @Override
     public int registerActuator(String name) {
-        return 0;
+        return actuatorMapper.registerActuator(name);
     }
 
     @Override
-    public int removeActuatorById(int actuatorId) {
-        return 0;
+    public int removeActuatorById(int id) {
+        return actuatorMapper.removeActuatorById(id);
     }
 
     @Override
     public Actuator getActuatorById(int id) {
-        return null;
+        return actuatorMapper.getActuatorById(id);
     }
 
     @Override
     public Actuator getActuatorByName(String name) {
-        return null;
+        return actuatorMapper.getActuatorByName(name);
     }
 
     @Override
     public List<Actuator> getActuatorByIdArray(int[] id) {
-        return List.of();
+        return actuatorMapper.getActuatorByIdArray(id);
     }
 
     @Override
     public List<Actuator> getActuatorByNameArray(String[] name) {
-        return List.of();
+        return actuatorMapper.getActuatorByNameArray(name);
     }
 
     @Override

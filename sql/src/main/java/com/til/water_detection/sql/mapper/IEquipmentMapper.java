@@ -2,6 +2,7 @@ package com.til.water_detection.sql.mapper;
 
 import com.til.water_detection.data.Equipment;
 import org.apache.ibatis.annotations.*;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -41,9 +42,16 @@ public interface IEquipmentMapper {
             from water_detection_data.equipment
             where id = #{id}
             """)
+    @Nullable
     Equipment getEquipmentById(@Param("id") int id);
 
-
+    @Select("""
+            select *
+            from water_detection_data.equipment
+            where name = #{name}
+            """)
+    @Nullable
+    Equipment getEquipmentByName(String name);
 
     @Select("""
             select *
@@ -51,12 +59,6 @@ public interface IEquipmentMapper {
             """)
     List<Equipment> getAllEquipment();
 
-    @Select("""
-            select *
-            from water_detection_data.equipment
-            where name = #{name}
-            """)
-    Equipment getEquipmentByName(String name);
 
     List<Equipment> getEquipmentByIdArray(@Param("id") int[] id);
 

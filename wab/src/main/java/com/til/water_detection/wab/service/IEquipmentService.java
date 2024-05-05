@@ -6,18 +6,23 @@ import jakarta.annotation.Nullable;
 import java.util.List;
 
 public interface IEquipmentService {
-    void addEquipment();
+    int registerEquipment(String name);
 
     int removeEquipmentPosById(int id);
+
+    int updateEquipmentAnotherNameById(int id, String anotherName);
+
+    int updateEquipmentTimeById(int id);
 
     List<Equipment> getAllEquipment();
 
     @Nullable
     Equipment getEquipmentById(int id);
 
+    @Nullable
+    Equipment getEquipmentByName(String name);
+
     List<Equipment> getEquipmentByIdArray(int[] id);
 
-    int updateEquipmentAnotherNameById(int id, String anotherName);
-
-    int updateEquipmentTimeById(int id);
+    List<Equipment> getEquipmentByNameArray(String[] name);
 }

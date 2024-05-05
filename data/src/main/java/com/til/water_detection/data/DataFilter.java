@@ -2,6 +2,7 @@ package com.til.water_detection.data;
 
 import java.sql.Timestamp;
 
+@Deprecated
 public class DataFilter {
     private int dataTypeId;
     private int[] equipmentIdArray;

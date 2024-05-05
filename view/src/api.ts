@@ -2,7 +2,7 @@ import axios, {AxiosResponse} from 'axios';
 
 export function registerEquipment(): Promise<AxiosResponse<Result<undefined>, any>> {
     return axios({
-        url: '/equipment/register',
+        url: '/equipment/registerEquipment',
         method: 'POST',
     })
 }
@@ -29,6 +29,15 @@ export function getEquipmentById(id: number): Promise<AxiosResponse<Result<Equip
         params: {id}
     })
 }
+
+export function getEquipmentByIdArray(id: number[]): Promise<AxiosResponse<Result<Equipment[]>, any>> {
+    return axios({
+        url: '/equipment/getEquipmentByIdArray',
+        method: 'GET',
+        params: {id: id.join(',')}
+    })
+}
+
 
 export function updateEquipmentAnotherNameById(id: number, anotherName: string): Promise<AxiosResponse<Result<undefined>, any>> {
     return axios({

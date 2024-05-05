@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -30,6 +31,7 @@ public interface IActuatorMapper {
             from water_detection_data.actuator
             where id = #{id}
             """)
+    @Nullable
     Actuator getActuatorById(int id);
 
     @Select("""
@@ -37,6 +39,7 @@ public interface IActuatorMapper {
             from water_detection_data.actuator
             where name = #{name}
             """)
+    @Nullable
     Actuator getActuatorByName(String name);
 
     List<Actuator> getActuatorByIdArray(int[] id);

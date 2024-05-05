@@ -11,7 +11,7 @@ public interface IActuatorService {
 
     int registerActuator(String name);
 
-    int removeActuatorById(int actuatorId);
+    int removeActuatorById(int id);
 
     Actuator getActuatorById(int id);
 

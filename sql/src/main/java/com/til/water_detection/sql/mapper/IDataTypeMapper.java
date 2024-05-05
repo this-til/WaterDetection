@@ -2,6 +2,7 @@ package com.til.water_detection.sql.mapper;
 
 import com.til.water_detection.data.DataType;
 import org.apache.ibatis.annotations.*;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -33,6 +34,7 @@ public interface IDataTypeMapper {
             from water_detection_data.data_type
             where id = #{id}
             """)
+    @Nullable
     DataType getDataTypeById(@Param("id") int id);
 
     @Select("""
@@ -40,6 +42,7 @@ public interface IDataTypeMapper {
             from water_detection_data.data_type
             where name = #{name}
             """)
+    @Nullable
     DataType getDataTypeByName(String name);
 
     @Select("""

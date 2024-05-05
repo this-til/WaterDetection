@@ -23,19 +23,28 @@ public class DataTypeController {
     @Resource
     private IDataTypeService dataTypeService;
 
-    /***
-     * 添加用户自定义的数据 成功时需要重新拉取所有数据类型
-     */
     @PostMapping("/register")
-    public Result<Void> register() {
-        dataTypeService.addDataType();
-        return Result.successful(null);
+    public Result<Void> registerDataType(@RequestParam @Param(FinalString.VERIFY_1_30) String name) {
+        int i = dataTypeService.registerDataType(name);
+        return new Result<>(i > 0 ? ResultType.SUCCESSFUL : ResultType.FAIL, null, null);
     }
 
     @DeleteMapping("/removeDataTypeById")
     public Result<Void> removeDataTypeById(@RequestParam int id) {
         int i = dataTypeService.removeDataTypeById(id);
-        return new Result<>(i > 0 ? ResultType.SUCCESSFUL : ResultType.FAIL, i + "条数据被删除", null);
+        return new Result<>(i > 0 ? ResultType.SUCCESSFUL : ResultType.FAIL, null, null);
+    }
+
+    @GetMapping("/getDataTypeById")
+    public Result<DataType> getDataTypeById(@RequestParam int id) {
+        DataType dataType = dataTypeService.getDataTypeById(id);
+        return new Result<>(dataType == null ? ResultType.FAIL : ResultType.SUCCESSFUL, null, dataType);
+    }
+
+    @GetMapping("/getDataTypeByName")
+    public Result<DataType> getDataTypeByName(@RequestParam String name) {
+        DataType dataType = dataTypeService.getDataTypeByName(name);
+        return new Result<>(dataType == null ? ResultType.FAIL : ResultType.SUCCESSFUL, null, dataType);
     }
 
     @PostMapping("/getAllDataType")
@@ -44,25 +53,13 @@ public class DataTypeController {
         return new Result<>(ResultType.SUCCESSFUL, null, dataTypeListByUserId);
     }
 
-    @GetMapping("/getDataTypeById")
-    public Result<DataType> getDataTypeById(@RequestParam int id) {
-        DataType dataType = dataTypeService.getDataTypeById(id);
-        if (dataType == null) {
-            return Result.fail("未找到对应id的数据类型");
-        }
-        return new Result<>(ResultType.SUCCESSFUL, null, dataType);
-    }
-
-    @PostMapping("/getDataTypeByIdArray")
-    public Result<List<DataType>> getDataTypeByIdArray(@RequestBody int[] id) {
+    @GetMapping("/getDataTypeByIdArray")
+    public Result<List<DataType>> getDataTypeByIdArray(@RequestParam int[] id) {
         return new Result<>(ResultType.SUCCESSFUL, null, dataTypeService.getDataTypeByIdArray(id));
     }
 
-    @PutMapping("/updateDataTypeAnotherName")
-    public Result<Void> updateDataTypeAnotherName(@RequestParam int id, @RequestParam @Param(FinalString.VERIFY_1_30) String anotherName) {
-        int i = dataTypeService.updateDataTypeAnotherName(id, anotherName);
-        return new Result<>(i > 0 ? ResultType.SUCCESSFUL : ResultType.FAIL, i + "条数据被更改", null);
+    @GetMapping("/getDataTypeByNameArray")
+    public Result<List<DataType>> getDataTypeByIdArray(@RequestParam String[] name) {
+        return new Result<>(ResultType.SUCCESSFUL, null, dataTypeService.getDataTypeByNameArray(name));
     }
-
-
 }
