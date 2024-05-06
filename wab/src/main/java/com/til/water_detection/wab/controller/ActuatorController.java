@@ -6,7 +6,6 @@ import com.til.water_detection.data.ResultType;
 import com.til.water_detection.wab.service.IActuatorService;
 import com.til.water_detection.wab.util.FinalString;
 import jakarta.annotation.Resource;
-import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +21,7 @@ public class ActuatorController {
     private IActuatorService actuatorService;
 
     @PostMapping("/registerActuator")
-    public Result<Void> registerActuator(@RequestParam @Param(FinalString.VERIFY_1_30) String name) {
+    public Result<Void> registerActuator(@RequestParam @Param(FinalString.VERIFY_1_32) String name) {
         int i = actuatorService.registerActuator(name);
         return new Result<>(i == 0 ? ResultType.FAIL : ResultType.SUCCESSFUL, null, null);
     }

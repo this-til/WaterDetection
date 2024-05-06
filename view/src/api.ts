@@ -1,152 +1,104 @@
 import axios, {AxiosResponse} from 'axios';
 
-export function registerEquipment(): Promise<AxiosResponse<Result<undefined>, any>> {
-    return axios({
-        url: '/equipment/registerEquipment',
-        method: 'POST',
-    })
-}
+const api = axios.create({
+    headers: {
+        'Content-Type': 'application/json',
+    },
+});
 
-export function removeEquipmentPosById(id: number): Promise<AxiosResponse<Result<undefined>, any>> {
-    return axios({
-        url: '/equipment/removeEquipmentPosById',
-        method: 'DELETE',
-        params: {id}
-    })
-}
+export const CommandApi = {
+    registerCommand: (ruleId: number, actuatorId: number, commandTrigger: number): Promise<AxiosResponse<Result<void>>> => api.post('/command/registerCommand', {
+        params: {
+            ruleId,
+            actuatorId,
+            commandTrigger
+        }
+    }),
+    removeCommandById: (id: number): Promise<AxiosResponse<Result<void>>> => api.delete('/command/removeCommandById', {params: {id}}),
+    getCommandById: (id: number): Promise<AxiosResponse<Result<Command>>> => api.get('/command/getCommandById', {params: {id}}),
+    getCommandByIdArray: (id: number[]): Promise<AxiosResponse<Result<Command[]>>> => api.get('/command/getCommandByIdArray', {params: {id}}),
+    getCommandByActuatorId: (actuatorId: number): Promise<AxiosResponse<Result<Command[]>>> => api.get('/command/getCommandByActuatorId', {params: {actuatorId}}),
+    getCommandByRuleId: (ruleId: number): Promise<AxiosResponse<Result<Command[]>>> => api.get('/command/getCommandByRuleId', {params: {ruleId}}),
+    getAllCommands: (): Promise<AxiosResponse<Result<Command[]>>> => api.get('/command/getAllCommands'),
+};
 
-export function getAllEquipment(): Promise<AxiosResponse<Result<Equipment[]>, any>> {
-    return axios({
-        url: '/equipment/getAllEquipment',
-        method: 'GET'
-    })
-}
+export const DataApi = {
+    addData: (data: Data): Promise<AxiosResponse<Result<void>>> => api.post('/data/addData', data),
+    addDataSimple: (equipmentId: number, dataTypeId: number, time: Date | null, value: number): Promise<AxiosResponse<Result<void>>> => api.post('/data/addDataSimple', {
+        equipmentId,
+        dataTypeId,
+        time,
+        value
+    }),
+    addDataList: (dataList: Data[]): Promise<AxiosResponse<Result<void>>> => api.post('/data/addDataList', dataList),
+    getDataById: (id: number): Promise<AxiosResponse<Result<Data>>> => api.get('/data/getDataById', {params: {id}}),
+    getAllData: (): Promise<AxiosResponse<Result<Data[]>>> => api.get('/data/getAllData'),
+    getData: (equipmentId: number, dataTypeId: number, start: Date, end: Date): Promise<AxiosResponse<Result<Data[]>>> => api.get('/data/getData', {
+        params: {
+            equipmentId,
+            dataTypeId,
+            start,
+            end
+        }
+    }),
+    getDataToDataSheet: (dataTypeId: number, equipmentIdArray: number[], timeStep: number, startTime: Date, endTime: Date): Promise<AxiosResponse<Result<DataSheet>>> => api.get('/data/getDataToDataSheet', {
+        params: {
+            dataTypeId,
+            equipmentIdArray,
+            timeStep,
+            startTime,
+            endTime
+        }
+    }),
+};
 
-export function getEquipmentById(id: number): Promise<AxiosResponse<Result<Equipment>, any>> {
-    return axios({
-        url: '/equipment/getEquipmentById',
-        method: 'GET',
-        params: {id}
-    })
-}
+export const DataTypeApi = {
+    registerDataType: (name: string): Promise<AxiosResponse<Result<void>>> => api.post('/dataType/register', null, {params: {name}}),
+    removeDataTypeById: (id: number): Promise<AxiosResponse<Result<void>>> => api.delete('/dataType/removeDataTypeById', {params: {id}}),
+    getDataTypeById: (id: number): Promise<AxiosResponse<Result<DataType>>> => api.get('/dataType/getDataTypeById', {params: {id}}),
+    getDataTypeByName: (name: string): Promise<AxiosResponse<Result<DataType>>> => api.get('/dataType/getDataTypeByName', {params: {name}}),
+    getAllDataType: (): Promise<AxiosResponse<Result<DataType[]>>> => api.get('/dataType/getAllDataType'),
+    getDataTypeByIdArray: (idArray: number[]): Promise<AxiosResponse<Result<DataType[]>>> => api.get('/dataType/getDataTypeByIdArray', {params: {id: idArray}}),
+    getDataTypeByNameArray: (nameArray: string[]): Promise<AxiosResponse<Result<DataType[]>>> => api.get('/dataType/getDataTypeByNameArray', {params: {name: nameArray}}),
+};
 
-export function getEquipmentByIdArray(id: number[]): Promise<AxiosResponse<Result<Equipment[]>, any>> {
-    return axios({
-        url: '/equipment/getEquipmentByIdArray',
-        method: 'GET',
-        params: {id: id.join(',')}
-    })
-}
+export const EquipmentApi = {
+    registerEquipment: (name: string): Promise<AxiosResponse<Result<void>>> => api.post('/equipment/registerEquipment', null, {params: {name}}),
+    removeEquipmentPosById: (equipmentId: number): Promise<AxiosResponse<Result<void>>> => api.delete('/equipment/removeEquipmentPosById', {params: {equipmentId}}),
+    updateEquipmentAnotherNameById: (id: number, anotherName: string): Promise<AxiosResponse<Result<void>>> => api.put('/equipment/updateEquipmentAnotherNameById', null, {
+        params: {
+            id,
+            anotherName
+        }
+    }),
+    updateEquipmentTimeById: (id: number): Promise<AxiosResponse<Result<void>>> => api.put('/equipment/updateEquipmentTimeById', null, {params: {id}}),
+    getEquipmentById: (id: number): Promise<AxiosResponse<Result<Equipment>>> => api.get('/equipment/getEquipmentById', {params: {id}}),
+    getEquipmentByName: (name: string): Promise<AxiosResponse<Result<Equipment>>> => api.get('/equipment/getEquipmentByName', {params: {name}}),
+    getAllEquipment: (): Promise<AxiosResponse<Result<Equipment[]>>> => api.get('/equipment/getAllEquipment'),
+    getEquipmentByIdArray: (idArray: number[]): Promise<AxiosResponse<Result<Equipment[]>>> => api.get('/equipment/getEquipmentByIdArray', {params: {id: idArray}}),
+    getEquipmentByNameArray: (nameArray: string[]): Promise<AxiosResponse<Result<Equipment[]>>> => api.get('/equipment/getEquipmentByNameArray', {params: {name: nameArray}}),
+};
 
+export const RuleApi = {
+    registerRule: (rule: Rule): Promise<AxiosResponse<Result<void>>> => api.post('/rule/registerRule', rule),
+    deleteByID: (id: number): Promise<AxiosResponse<Result<void>>> => api.delete('/rule/deleteByID', {params: {id}}),
+    updateById: (id: number, rule: Rule): Promise<AxiosResponse<Result<void>>> => api.put('/rule/updateById', rule, {params: {id}}),
+    getRuleById: (id: number): Promise<AxiosResponse<Result<Rule>>> => api.get('/rule/getRuleById', {params: {id}}),
+    getRuleByEquipmentId: (equipmentId: number): Promise<AxiosResponse<Result<Rule[]>>> => api.get('/rule/getRuleByEquipmentId', {params: {equipmentId}}),
+    getRuleByDataTypeId: (dataTypeId: number): Promise<AxiosResponse<Result<Rule[]>>> => api.get('/rule/getRuleByDataTypeId', {params: {dataTypeId}}),
+    getRuleByEquipmentIdArray: (idArray: number[]): Promise<AxiosResponse<Result<Rule[]>>> => api.get('/rule/getRuleByEquipmentIdArray', {params: {id: idArray}}),
+    getAllRule: (): Promise<AxiosResponse<Result<Rule[]>>> => api.get('/rule/getAllRule'),
+};
 
-export function updateEquipmentAnotherNameById(id: number, anotherName: string): Promise<AxiosResponse<Result<undefined>, any>> {
-    return axios({
-        url: '/equipment/updateEquipmentAnotherNameById',
-        method: 'PUT',
-        params: {id, anotherName}
-    })
-}
-
-export function updateEquipmentTimeById(id: number): Promise<AxiosResponse<Result<undefined>, any>> {
-
-    return axios({
-        url: '/equipment/updateEquipmentTimeById',
-        method: 'PUT',
-        params: {id}
-    })
-}
-
-export function removeDataTypeById(id: number): Promise<AxiosResponse<Result<undefined>, any>> {
-    return axios({
-        url: "/dataType/removeDataTypeById",
-        method: "DELETE",
-        params: {id}
-    });
-}
-
-export function getAllDataType(): Promise<AxiosResponse<Result<DataType[]>, any>> {
-    return axios({
-        url: "/dataType/getAllDataType",
-        method: 'GET'
-    });
-}
-
-export function getDataTypeById(id: number): Promise<AxiosResponse<Result<DataType>, any>> {
-    return axios({
-        url: "/dataType/getDataTypeById",
-        method: "GET",
-        params: {id}
-    });
-}
-
-export function updateDataTypeAnotherName(id: number, anotherName: string): Promise<AxiosResponse<Result<undefined>, any>> {
-    return axios({
-        url: "/dataType/updateDataTypeAnotherName",
-        method: "PUT",
-        params: {id, anotherName}
-    })
-}
-
-export function registerData(data: Data): Promise<AxiosResponse<Result<undefined>, any>> {
-    return axios({
-        url: '/data/addData',
-        method: 'POST',
-        data: data
-    })
-}
-
-export function addDataSimple(equipmentId: number, dataTypeId: number, value: number): Promise<AxiosResponse<Result<undefined>, any>> {
-    return axios({
-        url: '/data/addDataSimple',
-        method: 'POST',
-        params: {equipmentId, dataTypeId, value}
-    })
-}
-
-export function addDataList(dataList: Data[]): Promise<AxiosResponse<Result<undefined>, any>> {
-    return axios({
-        url: '/data/addDataList',
-        method: 'POST',
-        data: dataList
-    })
-}
-
-export function getDataById(id: number): Promise<AxiosResponse<Result<Data>, any>> {
-    return axios({
-        url: '/data/getDataById',
-        method: 'GET',
-        params: {id}
-    })
-}
-
-export function getAllData(): Promise<AxiosResponse<Result<Data[]>, any>> {
-    return axios({
-        url: '/data/getAllData',
-        method: 'POST'
-    })
-}
-
-export function getData(
-    equipmentId: number,
-    dataTypeId: number,
-    start: number,
-    end: number
-): Promise<AxiosResponse<Data[], any>> {
-    return axios({
-        url: '/data/getData',
-        method: 'GET',
-        params: {equipmentId, dataTypeId, start, end}
-    })
-}
-
-export function getDataToDataSheet(dataFilter: DataFilter): Promise<AxiosResponse<Result<DataSheet>>> {
-    return axios({
-        url: '/data/getDataToDataSheet',
-        method: 'POST',
-        data: dataFilter
-    })
-}
-
+export const ActuatorApi = {
+    registerActuator: (name: string): Promise<AxiosResponse<Result<void>>> => api.post('/actuator/registerActuator', {name}),
+    removeActuatorById: (id: number): Promise<AxiosResponse<Result<void>>> => api.delete('/actuator/removeActuatorById', {params: {id}}),
+    getActuatorById: (id: number): Promise<AxiosResponse<Result<Actuator>>> => api.get('/actuator/getActuatorById', {params: {id}}),
+    getActuatorByName: (name: string): Promise<AxiosResponse<Result<Actuator>>> => api.get('/actuator/getActuatorByName', {params: {name}}),
+    getAllActuator: (): Promise<AxiosResponse<Result<Actuator[]>>> => api.get('/actuator/getAllActuator'),
+    getActuatorByIdArray: (idArray: number[]): Promise<AxiosResponse<Result<Actuator[]>>> => api.get('/actuator/getActuatorByIdArray', {params: {id: idArray}}),
+    getActuatorByNameArray: (nameArray: string[]): Promise<AxiosResponse<Result<Actuator[]>>> => api.get('/actuator/getActuatorByNameArray', {params: {name: nameArray}}),
+};
 
 export enum ResultType {
     SUCCESSFUL = "SUCCESSFUL",
@@ -173,6 +125,11 @@ export interface Data {
 }
 
 export interface DataType {
+    id: number
+    name: string
+}
+
+export interface Actuator {
     id: number
     name: string
 }
@@ -212,4 +169,26 @@ export interface DataFilter {
     timeStep: number;
     startTime: Date;
     endTime: Date;
+}
+
+
+export interface Command {
+    id: number;
+    ruleId: number;
+    actuatorId: number;
+    commandTrigger: number;
+}
+
+export interface Rule {
+    id: number;
+    datatypeId: number;
+    equipmentId: number;
+
+    exceptionUpper: number;
+    warnUpper: number;
+    warnLower: number;
+    exceptionLower: number;
+
+    warnSendMessage: boolean;
+    exceptionSendMessage: boolean;
 }

@@ -106,7 +106,7 @@
 
 <script lang="ts" setup>
 import {markRaw, onMounted, onUnmounted, ref, toRefs, warn, watch} from 'vue'
-import {DataSheet, DataType, Equipment, getDataToDataSheet} from "@/api";
+import {DataSheet, DataType, Equipment, DataApi} from "@/api";
 import {ElMessageBox} from 'element-plus'
 import LineChartView from "@/components/DataView/LineChartView.vue";
 import ChartView from "@/components/DataView/ChartView.vue";
@@ -296,7 +296,7 @@ onUnmounted(() => {
 });
 
 const up = () => {
-  getDataToDataSheet({
+  DataApi.getDataToDataSheet({
     dataTypeId: props.dataType.id,
     equipmentIdArray: selectEquipmentIdList.value,
     timeStep: timeStep.value,

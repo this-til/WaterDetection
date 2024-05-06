@@ -10,19 +10,25 @@ import java.util.List;
 
 public interface IDataTypeAPI {
 
-    @POST("dataType/register")
-    Call<Result<Void>> register();
+    @POST("/dataType/register")
+    Call<Result<Void>> registerDataType(@Query("name") String name);
 
-    @DELETE("dataType/removeDataTypeById")
+    @DELETE("/dataType/removeDataTypeById")
     Call<Result<Void>> removeDataTypeById(@Query("id") int id);
 
-    @POST("dataType/getAllDataType")
-    Call<Result<List<DataType>>> getAllDataType();
-
-    @GET("dataType/getDataTypeById")
+    @GET("/dataType/getDataTypeById")
     Call<Result<DataType>> getDataTypeById(@Query("id") int id);
 
-    @PUT("dataType/updateDataTypeAnotherName")
-    Call<Result<Void>> updateDataTypeAnotherName(@Query("id") int id, @Query("id") String anotherName);
+    @GET("/dataType/getDataTypeByName")
+    Call<Result<DataType>> getDataTypeByName(@Query("name") String name);
+
+    @GET("/dataType/getAllDataType")
+    Call<Result<List<DataType>>> getAllDataType();
+
+    @GET("/dataType/getDataTypeByIdArray")
+    Call<Result<List<DataType>>> getDataTypeByIdArray(@Query("id") int[] id);
+
+    @GET("/dataType/getDataTypeByNameArray")
+    Call<Result<List<DataType>>> getDataTypeByNameArray(@Query("name") String[] name);
 
 }

@@ -111,7 +111,7 @@ import {ref} from 'vue';
 import DataView from "@/components/DataView.vue";
 import OrderView from "@/components/OrderView.vue";
 import SetView from "@/components/SetView.vue";
-import {DataType, Equipment, getAllDataType, getAllEquipment} from "@/api";
+import {DataType, Equipment, DataApi, EquipmentApi, DataTypeApi} from "@/api";
 
 const handleOpen = (key: string, keyPath: string[]) => {
   console.log(key, keyPath)
@@ -155,10 +155,10 @@ const displaySet = () => {
 }
 
 const up = () => {
-  getAllDataType().then(r => {
+  DataTypeApi.getAllDataType().then(r => {
     allDataType.value = r.data.data == null ? [] : r.data.data
   })
-  getAllEquipment().then(r => {
+  EquipmentApi.getAllEquipment().then(r => {
     allEquipment.value = r.data.data == null ? [] : r.data.data
   })
 }

@@ -18,12 +18,12 @@
 
   表示更改配置，需要和外部存储器交互
 
-  | {name}   | 解释               | 值类型                 | 数据大小(bit) |
-  |----------|------------------|---------------------|-------|
-  | url      | 表示会话的服务器         | string ascii          | 128    |
-  | username | 表示用户名            | string [8-32] ascii   | 32      |
-  | password | 表示用户密码           | string [8-32] ascii   | 32       |
-  | equipmentId | 表示当前设备的ID        | uint32_t              | 4         |
+  | {name}   | 解释        | 值类型                  | 数据大小(bit) |
+      |----------|-----------|----------------------|-----------|
+  | url      | 表示会话的服务器  | string ascii         | 128       |
+  | username | 表示用户名     | string [8-32] ascii  | 32        |
+  | password | 表示用户密码    | string [8-32] ascii  | 32        |
+  | equipment | 表示当前设备的名称 | string [1-32] utf-16 | 64        |
 
 
 - /read {name}
@@ -35,7 +35,7 @@
   表示设置当前缓存的值
 
   | {name} | 解释 |  {name2?} | {value} |
-  |----------|---------------|---------|----------|
+      |----------|---------------|---------|----------|
   | dataType | 表示当前缓存传感器的值 |  数据类型的名称  |float |
   | actuator | 表示当前缓存执行器是否开启 |  执行器的名称   |uint8_t |
 
@@ -44,7 +44,7 @@
   表示读取当前缓存的值
 
   | {name}       | 解释            | {name2?} | 值类型      |
-  |--------------|---------------|---------|----------|
+      |--------------|---------------|---------|----------|
   | dataType     | 表示当前缓存传感器的值   | 数据类型的名称  | float    | 
   | dataTypeList | 表示支持所有传感器的名称  | null     | string[] |
   | actuator     | 表示当前缓存执行器是否开启 | 执行器的名称   | uint8_t  | 
@@ -57,3 +57,20 @@
 - /stop {actuatorName}
 
   表示停止特定的执行器
+
+- /rule {ruleId} {dataTypeName} {exceptionUpper} {warnUpper} {warnLower} {exceptionLower}
+
+  用来同步规则
+
+  |                 | 解释                | 值类型      |  
+    |-----------------|-------------------|----------|
+  | {ruleId}        | 规则ID 由服务端下发用于连接命令 | uint32_t |
+  | {dataTypeName}  | 对应数据类型的名称         | string   |
+  | {exceptionUpper} | 异常上界              | float    |
+  | {warnUpper}     | 警告上界              | float    |
+  | {warnLower}     | 警告下界              | float    |
+  | {exceptionLower} | 异常下界              | float    |
+
+- /command {ruleId} 
+  
+  

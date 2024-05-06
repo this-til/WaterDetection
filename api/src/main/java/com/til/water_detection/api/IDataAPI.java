@@ -1,6 +1,7 @@
 package com.til.water_detection.api;
 
 import com.til.water_detection.data.*;
+import org.jetbrains.annotations.Nullable;
 import retrofit2.Call;
 import retrofit2.http.*;
 
@@ -12,23 +13,27 @@ import java.util.Map;
 
 public interface IDataAPI {
 
-    @POST("data/addData")
+    @POST("/data/addData")
     Call<Result<Void>> addData(@Body Data data);
 
-
-    @POST("data/addDataSimple")
+    @POST("/data/addDataSimple")
     Call<Result<Void>> addDataSimple(
             @Query("equipmentId") int equipmentId,
             @Query("dataTypeId") int dataTypeId,
-            @Query("value") float value);
+            @Query("time") @Nullable Timestamp time,
+            @Query("value") float value
+    );
 
-    @POST("data/addDataList")
+    @POST("/data/addDataList")
     Call<Result<Void>> addDataList(@Body List<Data> dataList);
 
-    @GET("data/getAllData")
+    @GET("/data/getDataById")
+    Call<Result<Data>> getDataById(@Query("id") long id);
+
+    @GET("/data/getAllData")
     Call<Result<List<Data>>> getAllData();
 
-    @GET("data/getData")
+    @GET("/data/getData")
     Call<Result<List<Data>>> getData(
             @Query("equipmentId") int equipmentId,
             @Query("dataTypeId") int dataTypeId,
@@ -36,6 +41,13 @@ public interface IDataAPI {
             @Query("end") Timestamp end
     );
 
-    @POST("data/getDataToDataSheet")
-    Call<Result<DataSheet>> getDataToDataSheet(@Body DataFilter dataFilter);
+    @GET("/data/getDataToDataSheet")
+    Call<Result<DataSheet>> getDataToDataSheet(
+            @Query("dataTypeId") int dataTypeId,
+            @Query("equipmentIdArray") int[] equipmentIdArray,
+            @Query("timeStep") int timeStep,
+            @Query("startTime") Timestamp startTime,
+            @Query("endTime") Timestamp endTime
+    );
+
 }

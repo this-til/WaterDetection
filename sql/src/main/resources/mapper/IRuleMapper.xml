@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.til.water_detection.sql.mapper.IRuleMapper">
+    <select id="getRuleByEquipmentIdArray" resultType="com.til.water_detection.data.Rule">
+        select *
+        from water_detection_data.rule
+        where id IN
+        <foreach collection="id" item="item" index="index" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </select>
+</mapper>

@@ -25,7 +25,7 @@ public class EquipmentController {
      * 添加用户自定义的数据 成功时需要重新拉取所有数据类型
      */
     @PostMapping("/registerEquipment")
-    public Result<Void> registerEquipment(@RequestParam @Param(FinalString.VERIFY_1_30) String name) {
+    public Result<Void> registerEquipment(@RequestParam @Param(FinalString.VERIFY_1_32) String name) {
         int i = detectionService.registerEquipment(name);
         return new Result<>(i > 0 ? ResultType.SUCCESSFUL : ResultType.FAIL, i + "条数据被添加", null);
     }
@@ -37,7 +37,7 @@ public class EquipmentController {
     }
 
     @PutMapping("/updateEquipmentAnotherNameById")
-    public Result<Void> updateEquipmentAnotherNameById(@RequestParam int id, @RequestParam @Param(FinalString.VERIFY_1_30) String anotherName) {
+    public Result<Void> updateEquipmentAnotherNameById(@RequestParam int id, @RequestParam @Param(FinalString.VERIFY_1_32) String anotherName) {
         int i = detectionService.updateEquipmentAnotherNameById(id, anotherName);
         return new Result<>(i > 0 ? ResultType.SUCCESSFUL : ResultType.FAIL, i + "条数据被更改", null);
     }

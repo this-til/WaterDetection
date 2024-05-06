@@ -8,7 +8,6 @@ import com.til.water_detection.wab.service.IDataTypeService;
 import com.til.water_detection.wab.util.FinalString;
 import jakarta.annotation.Resource;
 import org.apache.ibatis.annotations.Param;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +23,7 @@ public class DataTypeController {
     private IDataTypeService dataTypeService;
 
     @PostMapping("/register")
-    public Result<Void> registerDataType(@RequestParam @Param(FinalString.VERIFY_1_30) String name) {
+    public Result<Void> registerDataType(@RequestParam @Param(FinalString.VERIFY_1_32) String name) {
         int i = dataTypeService.registerDataType(name);
         return new Result<>(i > 0 ? ResultType.SUCCESSFUL : ResultType.FAIL, null, null);
     }
@@ -47,7 +46,7 @@ public class DataTypeController {
         return new Result<>(dataType == null ? ResultType.FAIL : ResultType.SUCCESSFUL, null, dataType);
     }
 
-    @PostMapping("/getAllDataType")
+    @GetMapping("/getAllDataType")
     public Result<List<DataType>> getAllDataType() {
         List<DataType> dataTypeListByUserId = dataTypeService.getAllDataType();
         return new Result<>(ResultType.SUCCESSFUL, null, dataTypeListByUserId);
