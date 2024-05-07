@@ -59,7 +59,7 @@ const update = () => {
   for (let i = s; i < value.timestampList.length && i < s + max; i++) {
     const obj: Employee = {}
 
-    obj['date'] = value.timestampList[i]
+    obj['date'] = new Date(value.timestampList[i])
 
     for (let j = 0; j < value.equipmentList.length; j++) {
       obj[String(value.equipmentList[j].id)] = value.value[j][i]

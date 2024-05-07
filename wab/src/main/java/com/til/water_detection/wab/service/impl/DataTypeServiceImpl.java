@@ -3,6 +3,7 @@ package com.til.water_detection.wab.service.impl;
 import com.til.water_detection.data.DataType;
 import com.til.water_detection.sql.mapper.IDataTypeMapper;
 import com.til.water_detection.wab.service.IDataTypeService;
+import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +12,7 @@ import java.util.List;
 @Service
 public class DataTypeServiceImpl implements IDataTypeService {
 
-    @Autowired
+    @Resource
     private IDataTypeMapper dataTypeMapper;
 
     @Override

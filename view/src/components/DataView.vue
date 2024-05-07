@@ -296,13 +296,13 @@ onUnmounted(() => {
 });
 
 const up = () => {
-  DataApi.getDataToDataSheet({
-    dataTypeId: props.dataType.id,
-    equipmentIdArray: selectEquipmentIdList.value,
-    timeStep: timeStep.value,
-    startTime: time.value[0],
-    endTime: time.value[1],
-  }).then(r => {
+  DataApi.getDataToDataSheet(
+     props.dataType.id,
+     selectEquipmentIdList.value,
+     timeStep.value,
+     time.value[0],
+     time.value[1]
+  ).then(r => {
     data.value = r.data.data
     timeStep.value = data.value.timeStep
     _timeStep.value = String(data.value.timeStep)

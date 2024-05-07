@@ -14,3 +14,9 @@ mybatis:
 cors:
   allowed-origins: http://localhost:5173
 
+
+logging:
+  level:
+    org.mybatis: DEBUG
+
+

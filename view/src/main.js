@@ -13,8 +13,6 @@ app.use(ElementPlus)
 
 //const url = (await axios.get("./config.json")).data.url
 
-axios.defaults.baseURL = "/api"
-
 axios.defaults.withCredentials = true
 
 app.mount('#app')

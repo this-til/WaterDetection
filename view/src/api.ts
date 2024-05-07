@@ -1,9 +1,11 @@
 import axios, {AxiosResponse} from 'axios';
 
+const apiString = () => {return "/api"};
 const api = axios.create({
     headers: {
         'Content-Type': 'application/json',
     },
+    baseURL: apiString(),
 });
 
 export const CommandApi = {
@@ -16,7 +18,7 @@ export const CommandApi = {
     }),
     removeCommandById: (id: number): Promise<AxiosResponse<Result<void>>> => api.delete('/command/removeCommandById', {params: {id}}),
     getCommandById: (id: number): Promise<AxiosResponse<Result<Command>>> => api.get('/command/getCommandById', {params: {id}}),
-    getCommandByIdArray: (id: number[]): Promise<AxiosResponse<Result<Command[]>>> => api.get('/command/getCommandByIdArray', {params: {id}}),
+    getCommandByIdArray: (id: number[]): Promise<AxiosResponse<Result<Command[]>>> => api.get('/command/getCommandByIdArray', {params: {id: id.join(',')}}),
     getCommandByActuatorId: (actuatorId: number): Promise<AxiosResponse<Result<Command[]>>> => api.get('/command/getCommandByActuatorId', {params: {actuatorId}}),
     getCommandByRuleId: (ruleId: number): Promise<AxiosResponse<Result<Command[]>>> => api.get('/command/getCommandByRuleId', {params: {ruleId}}),
     getAllCommands: (): Promise<AxiosResponse<Result<Command[]>>> => api.get('/command/getAllCommands'),
@@ -27,7 +29,7 @@ export const DataApi = {
     addDataSimple: (equipmentId: number, dataTypeId: number, time: Date | null, value: number): Promise<AxiosResponse<Result<void>>> => api.post('/data/addDataSimple', {
         equipmentId,
         dataTypeId,
-        time,
+        time: time?.getTime(),
         value
     }),
     addDataList: (dataList: Data[]): Promise<AxiosResponse<Result<void>>> => api.post('/data/addDataList', dataList),
@@ -37,17 +39,17 @@ export const DataApi = {
         params: {
             equipmentId,
             dataTypeId,
-            start,
-            end
+            start: start.getTime(),
+            end: end.getTime(),
         }
     }),
     getDataToDataSheet: (dataTypeId: number, equipmentIdArray: number[], timeStep: number, startTime: Date, endTime: Date): Promise<AxiosResponse<Result<DataSheet>>> => api.get('/data/getDataToDataSheet', {
         params: {
             dataTypeId,
-            equipmentIdArray,
+            equipmentIdArray: equipmentIdArray.join(','),
             timeStep,
-            startTime,
-            endTime
+            startTime: startTime.getTime(),
+            endTime: endTime.getTime(),
         }
     }),
 };
@@ -58,8 +60,8 @@ export const DataTypeApi = {
     getDataTypeById: (id: number): Promise<AxiosResponse<Result<DataType>>> => api.get('/dataType/getDataTypeById', {params: {id}}),
     getDataTypeByName: (name: string): Promise<AxiosResponse<Result<DataType>>> => api.get('/dataType/getDataTypeByName', {params: {name}}),
     getAllDataType: (): Promise<AxiosResponse<Result<DataType[]>>> => api.get('/dataType/getAllDataType'),
-    getDataTypeByIdArray: (idArray: number[]): Promise<AxiosResponse<Result<DataType[]>>> => api.get('/dataType/getDataTypeByIdArray', {params: {id: idArray}}),
-    getDataTypeByNameArray: (nameArray: string[]): Promise<AxiosResponse<Result<DataType[]>>> => api.get('/dataType/getDataTypeByNameArray', {params: {name: nameArray}}),
+    getDataTypeByIdArray: (idArray: number[]): Promise<AxiosResponse<Result<DataType[]>>> => api.get('/dataType/getDataTypeByIdArray', {params: {id: idArray.join(',')}}),
+    getDataTypeByNameArray: (nameArray: string[]): Promise<AxiosResponse<Result<DataType[]>>> => api.get('/dataType/getDataTypeByNameArray', {params: {name: nameArray.join(',')}}),
 };
 
 export const EquipmentApi = {
@@ -75,8 +77,8 @@ export const EquipmentApi = {
     getEquipmentById: (id: number): Promise<AxiosResponse<Result<Equipment>>> => api.get('/equipment/getEquipmentById', {params: {id}}),
     getEquipmentByName: (name: string): Promise<AxiosResponse<Result<Equipment>>> => api.get('/equipment/getEquipmentByName', {params: {name}}),
     getAllEquipment: (): Promise<AxiosResponse<Result<Equipment[]>>> => api.get('/equipment/getAllEquipment'),
-    getEquipmentByIdArray: (idArray: number[]): Promise<AxiosResponse<Result<Equipment[]>>> => api.get('/equipment/getEquipmentByIdArray', {params: {id: idArray}}),
-    getEquipmentByNameArray: (nameArray: string[]): Promise<AxiosResponse<Result<Equipment[]>>> => api.get('/equipment/getEquipmentByNameArray', {params: {name: nameArray}}),
+    getEquipmentByIdArray: (idArray: number[]): Promise<AxiosResponse<Result<Equipment[]>>> => api.get('/equipment/getEquipmentByIdArray', {params: {id: idArray.join(',')}}),
+    getEquipmentByNameArray: (nameArray: string[]): Promise<AxiosResponse<Result<Equipment[]>>> => api.get('/equipment/getEquipmentByNameArray', {params: {name: nameArray.join(',')}}),
 };
 
 export const RuleApi = {
@@ -86,7 +88,7 @@ export const RuleApi = {
     getRuleById: (id: number): Promise<AxiosResponse<Result<Rule>>> => api.get('/rule/getRuleById', {params: {id}}),
     getRuleByEquipmentId: (equipmentId: number): Promise<AxiosResponse<Result<Rule[]>>> => api.get('/rule/getRuleByEquipmentId', {params: {equipmentId}}),
     getRuleByDataTypeId: (dataTypeId: number): Promise<AxiosResponse<Result<Rule[]>>> => api.get('/rule/getRuleByDataTypeId', {params: {dataTypeId}}),
-    getRuleByEquipmentIdArray: (idArray: number[]): Promise<AxiosResponse<Result<Rule[]>>> => api.get('/rule/getRuleByEquipmentIdArray', {params: {id: idArray}}),
+    getRuleByEquipmentIdArray: (idArray: number[]): Promise<AxiosResponse<Result<Rule[]>>> => api.get('/rule/getRuleByEquipmentIdArray', {params: {id: idArray.join(',')}}),
     getAllRule: (): Promise<AxiosResponse<Result<Rule[]>>> => api.get('/rule/getAllRule'),
 };
 
@@ -96,8 +98,8 @@ export const ActuatorApi = {
     getActuatorById: (id: number): Promise<AxiosResponse<Result<Actuator>>> => api.get('/actuator/getActuatorById', {params: {id}}),
     getActuatorByName: (name: string): Promise<AxiosResponse<Result<Actuator>>> => api.get('/actuator/getActuatorByName', {params: {name}}),
     getAllActuator: (): Promise<AxiosResponse<Result<Actuator[]>>> => api.get('/actuator/getAllActuator'),
-    getActuatorByIdArray: (idArray: number[]): Promise<AxiosResponse<Result<Actuator[]>>> => api.get('/actuator/getActuatorByIdArray', {params: {id: idArray}}),
-    getActuatorByNameArray: (nameArray: string[]): Promise<AxiosResponse<Result<Actuator[]>>> => api.get('/actuator/getActuatorByNameArray', {params: {name: nameArray}}),
+    getActuatorByIdArray: (idArray: number[]): Promise<AxiosResponse<Result<Actuator[]>>> => api.get('/actuator/getActuatorByIdArray', {params: {id: idArray.join(',')}}),
+    getActuatorByNameArray: (nameArray: string[]): Promise<AxiosResponse<Result<Actuator[]>>> => api.get('/actuator/getActuatorByNameArray', {params: {name: nameArray.join(',')}}),
 };
 
 export enum ResultType {
@@ -139,38 +141,21 @@ export interface Equipment {
     name: string
     longitude: number
     latitude: number
-    upTime: string
-}
-
-export interface DataScreening {
-    dataType: DataType
-    equipmentList: Equipment[]
-    timeStep: number
-    startTime: Date
-    endTime: Date
+    upTime: number
 }
 
 export interface DataSheet {
     dataType: DataType;
     timeStep: number;
-    startTime: Date;
-    endTime: Date;
+    startTime: number;
+    endTime: number;
 
     equipmentList: Equipment[];
-    timestampList: string[];
+    timestampList: number[];
 
     //equipment -> timestamp
     value: number[][];
 }
-
-export interface DataFilter {
-    dataTypeId: number;
-    equipmentIdArray: number[];
-    timeStep: number;
-    startTime: Date;
-    endTime: Date;
-}
-
 
 export interface Command {
     id: number;

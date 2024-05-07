@@ -4,9 +4,11 @@ import com.til.water_detection.data.Rule;
 import com.til.water_detection.sql.mapper.IRuleMapper;
 import com.til.water_detection.wab.service.IRuleService;
 import jakarta.annotation.Resource;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class RuleServiceImpl implements IRuleService {
 
     @Resource

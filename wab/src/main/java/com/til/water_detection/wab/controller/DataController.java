@@ -85,8 +85,8 @@ public class DataController {
         if (dataType == null) {
             return Result.fail("dataTypeId is null");
         }
-        long endTime_long = startTime.getTime();
-        long startTime_long = endTime.getTime();
+        long startTime_long = startTime.getTime();
+        long endTime_long = endTime.getTime();
         long processTime = endTime_long - startTime_long;
 
         long timeStep_long = Math.max(timeStep, 1) * 1000L;

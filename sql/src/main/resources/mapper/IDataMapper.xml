@@ -8,19 +8,19 @@
         WHERE
         TRUE
         <!-- 处理 equipment_id 的条件 -->
-        <if test="equipmentId != null and equipmentId >= 0">
+        <if test="equipmentId >= 0">
             AND equipment_id = #{equipmentId}
         </if>
-        <if test="dataTypeIdArray != null and !dataTypeIdArray.isEmpty()">
+        <if test="dataTypeIdArray != null">
             AND data_type_id IN
             <foreach collection="dataTypeIdArray" item="item" open="(" close=")" separator=",">
                 #{item}
             </foreach>
         </if>
-        <if test="start != null and start >= 0">
+        <if test="start != null">
             AND time > #{start}
         </if>
-        <if test="end != null and end >= 0">
+        <if test="end != null">
             AND time &lt; #{end}
         </if>
 
@@ -31,11 +31,11 @@
         FROM water_detection_data.data
         WHERE
         TRUE
-        <if test="dataTypeId != null and dataTypeId >= 0">
+        <if test="dataTypeId >= 0">
             AND data_type_id = #{dataTypeId}
         </if>
 
-        <if test="equipmentIdArray != null and !equipmentIdArray.isEmpty()">
+        <if test="equipmentIdArray != null">
             AND equipment_id IN
             <foreach collection="equipmentIdArray" item="item" open="(" close=")" separator=",">
                 #{item}
@@ -43,10 +43,10 @@
         </if>
 
 
-        <if test="start != null and start >= 0">
+        <if test="start != null">
             AND time > #{start}
         </if>
-        <if test="end != null and end >= 0">
+        <if test="end != null">
             AND time &lt; #{end}
         </if>
     </select>
@@ -56,19 +56,19 @@
         FROM water_detection_data.data
         WHERE
         TRUE
-        <if test="equipmentId != null and equipmentId >= 0">
+        <if test="equipmentId >= 0">
             AND equipment_id = #{equipmentId}
         </if>
 
-        <if test="dataTypeId != null and dataTypeId >= 0">
+        <if test="dataTypeId >= 0">
             AND data_type_id = #{dataTypeId}
         </if>
 
 
-        <if test="start != null and start >= 0">
+        <if test="start != null">
             AND time > #{start}
         </if>
-        <if test="end != null and end >= 0">
+        <if test="end != null">
             AND time &lt; #{end}
         </if>
     </select>

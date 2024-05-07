@@ -4,9 +4,11 @@ import com.til.water_detection.data.Actuator;
 import com.til.water_detection.sql.mapper.IActuatorMapper;
 import com.til.water_detection.wab.service.IActuatorService;
 import jakarta.annotation.Resource;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class ActuatorServiceImpl implements IActuatorService {
 
     @Resource
