@@ -3,7 +3,7 @@ package com.til.water_detection.data;
 import java.sql.Timestamp;
 import java.util.Objects;
 
-public final class Equipment {
+public class Equipment {
     private int id;
     private String name;
     private float longitude;

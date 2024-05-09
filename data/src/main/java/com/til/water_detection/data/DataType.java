@@ -2,7 +2,7 @@ package com.til.water_detection.data;
 
 import java.util.Objects;
 
-public final class DataType {
+public class DataType {
 
     private int id;
     private String name;

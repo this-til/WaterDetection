@@ -3,7 +3,7 @@
   <div class="full-screen">
     <el-container class="full">
       <el-aside width="200px">
-        <el-col :span="24">
+        <el-col >
           <el-menu class="el-menu-vertical-demo">
             <el-sub-menu index="1">
               <template #title>
@@ -31,20 +31,28 @@
                 <span>设备</span>
               </template>
 
-              <el-sub-menu index="2-1">
-                <template #title>传感器</template>
+              <el-sub-menu
+                  v-for="e in allEquipment"
+                  :index="'2-' + e.id"
+              >
+                <template #title>{{ e.name }}</template>
+
+                <el-sub-menu
+                    :index="'2-' + e.id + '-1'"
+                >
+                  <template #title>传感器</template>
+                </el-sub-menu>
+
+
+                <el-sub-menu
+                    :index="'2-' + e.id + '-2'"
+                >
+                  <template #title>执行器</template>
+                </el-sub-menu>
+
+
               </el-sub-menu>
-              <el-sub-menu index="2-2">
-                <template #title>执行器</template>
-              </el-sub-menu>
-              <el-sub-menu index="2-3">
-                <template #title>
-                  <!--                  <el-icon>
-                                      <Connection/>
-                                    </el-icon>-->
-                  <span>规则</span>
-                </template>
-              </el-sub-menu>
+
             </el-sub-menu>
 
 
@@ -108,7 +116,7 @@ import {
   Odometer, Connection, Cpu, Finished, Operation,
 } from '@element-plus/icons-vue'
 import {ref} from 'vue';
-import DataView from "@/components/DataView.vue";
+import DataView from "@/components/DataView/DataView.vue";
 import OrderView from "@/components/OrderView.vue";
 import SetView from "@/components/SetView.vue";
 import {DataType, Equipment, DataApi, EquipmentApi, DataTypeApi} from "@/api";

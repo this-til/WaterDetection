@@ -12,8 +12,11 @@ mybatis:
     map-underscore-to-camel-case: true
 
 cors:
-  allowed-origins: http://localhost:5173
+  allowed-origins: "*"
 
+user:
+  username: til
+  password: 114514
 
 logging:
   level:

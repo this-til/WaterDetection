@@ -3,7 +3,7 @@ package com.til.water_detection.data;
 import java.sql.Timestamp;
 import java.util.Objects;
 
-public final class Data {
+public class Data {
 
     private long id;
     private int equipmentId;

@@ -1,6 +1,5 @@
-package com.til.water_detection.data;
+package com.til.water_detection.data.util;
 
-import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -41,6 +40,11 @@ public class Util {
         String saltedPassword = plainPassword + salt;
         byte[] hash = md.digest(saltedPassword.getBytes());
         return Base64.getEncoder().encodeToString(hash);
+    }
+
+    public static <T>T cast(Object obj) {
+        //noinspection unchecked
+        return obj == null ? null : (T)obj;
     }
 
 

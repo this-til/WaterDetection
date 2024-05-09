@@ -24,17 +24,15 @@
 
     <el-divider direction="vertical"/>
 
-    <el-button
-        plain @click="displayScreeningEquipment = true">
-      筛选设备
-    </el-button>
-
-    <el-dialog
-        v-model="displayScreeningEquipment"
-        title="筛选设备"
+    <el-popover
         width="600"
         :before-close="handleClose"
+        trigger="click"
+        placement="bottom"
     >
+      <template #reference>
+        <el-button style="margin-right: 16px">筛选设备</el-button>
+      </template>
 
       <el-transfer
           v-model=selectEquipmentIdList
@@ -44,6 +42,8 @@
           :filter-method=filterMethod
           filter-placeholder="搜索设备"
       />
+
+
       <!--        <template #footer>
                 <div class="dialog-footer">
                   <el-button @click="displayScreeningEquipment = false">Cancel</el-button>
@@ -52,7 +52,7 @@
                   </el-button>
                 </div>
               </template>-->
-    </el-dialog>
+    </el-popover>
 
     <el-divider direction="vertical"/>
 
@@ -185,7 +185,6 @@ const shortcuts = ref([
 
 ])
 
-const displayScreeningEquipment = ref<boolean>(false)
 
 const equipmentFiltration = ref<EquipmentPack[]>([])
 const selectEquipmentIdList = ref<[]>([])
@@ -211,11 +210,6 @@ for (let equipment of props.equipmentList) {
 
 const filterMethod = (query, item) => {
   return item.label.toLowerCase().includes(query.toLowerCase())
-}
-
-const handleClose = (done: () => void) => {
-  displayScreeningEquipment.value = false;
-  //TODO
 }
 
 const presentationMode = ref('lineChart')
@@ -275,20 +269,16 @@ onMounted(() => {
   up()
 });
 
-const lastUpdatedTime = ref(new Date(0))
 const updateTime = () => {
-  if (lastUpdatedTime.value.getTime() < new Date().getTime() - 1000 * 16) {
-    time.value[0] = new Date(time.value[0].getTime() + 1000 * 16);
-    time.value[1] = new Date(time.value[1].getTime() + 1000 * 16);
-    lastUpdatedTime.value = new Date();
-    up()
-  }
+  time.value[0] = new Date(time.value[0].getTime() + 1000 * 16);
+  time.value[1] = new Date(time.value[1].getTime() + 1000 * 16);
+  up()
 };
 
 let intervalId: number = 0;
 
 onMounted(() => {
-  intervalId = setInterval(updateTime, 1000);
+  intervalId = setInterval(updateTime, 16000);
 });
 
 onUnmounted(() => {
@@ -297,11 +287,11 @@ onUnmounted(() => {
 
 const up = () => {
   DataApi.getDataToDataSheet(
-     props.dataType.id,
-     selectEquipmentIdList.value,
-     timeStep.value,
-     time.value[0],
-     time.value[1]
+      props.dataType.id,
+      selectEquipmentIdList.value,
+      timeStep.value,
+      time.value[0],
+      time.value[1]
   ).then(r => {
     data.value = r.data.data
     timeStep.value = data.value.timeStep

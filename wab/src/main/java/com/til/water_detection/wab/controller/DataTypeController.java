@@ -5,7 +5,7 @@ import com.til.water_detection.data.DataType;
 import com.til.water_detection.data.Result;
 import com.til.water_detection.data.ResultType;
 import com.til.water_detection.wab.service.IDataTypeService;
-import com.til.water_detection.wab.util.FinalString;
+import com.til.water_detection.data.util.FinalString;
 import jakarta.annotation.Resource;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.validation.annotation.Validated;

@@ -80,49 +80,25 @@ ___
 
 ![img.png](other/img.png)
 
-## 服务端->4G模块 指令集
+## 嵌入式数据包指令集
 
-- /write {name} {value}
+- / write {name} {value}
 
   表示更改配置，需要和外部存储器交互
 
   | {name}    | 解释        | 值类型                  | 数据大小(bit) |
-          |-----------|-----------|----------------------|-----------|
+      |-----------|-----------|----------------------|-----------|
   | url       | 表示会话的服务器  | string ascii         | 128       |
   | username  | 表示用户名     | string [8-32] ascii  | 32        |
   | password  | 表示用户密码    | string [8-32] ascii  | 32        |
   | equipment | 表示当前设备的名称 | string [1-32] utf-16 | 64        |
 
-
-- /read {name}
-
-  表示返回当前配置的信息，需要和外部存储器交互 执行命令同 /write
-
-- /get {name} {name2?}
-
-  表示读取当前缓存的值
-
-  | {name}       | 解释            | {name2?} | 值类型      |
-                    |--------------|---------------|----------|----------|
-  | dataType     | 表示当前缓存传感器的值   | 数据类型的名称  | float    | 
-  | dataTypeList | 表示支持所有传感器的名称  | null     | string[] |
-  | actuator     | 表示当前缓存执行器是否开启 | 执行器的名称   | uint8_t  | 
-  | actuatorList | 表示支持所有传感器的名称  | null     | string[] |
-
-- /start {actuatorName}
-
-  表示开启特定的执行器
-
-- /stop {actuatorName}
-
-  表示停止特定的执行器
-
-- /rule {ruleId} {dataTypeName} {exceptionUpper} {warnUpper} {warnLower} {exceptionLower}
+- / write rule {ruleId} {dataTypeName} {exceptionUpper} {warnUpper} {warnLower} {exceptionLower}
 
   用来同步规则
 
   |                  | 解释                | 值类型      |  
-          |------------------|-------------------|----------|
+                                  |------------------|-------------------|----------|
   | {ruleId}         | 规则ID 由服务端下发用于连接命令 | uint32_t |
   | {dataTypeName}   | 对应数据类型的名称         | string   |
   | {exceptionUpper} | 异常上界              | float    |
@@ -130,15 +106,43 @@ ___
   | {warnLower}      | 警告下界              | float    |
   | {exceptionLower} | 异常下界              | float    |
 
-- /command {ruleId} {actuatorName} {commandTrigger}
+- / write command {ruleId} {actuatorName} {commandTrigger}
 
   同步命令
 
   |                  | 解释       | 值类型      |  
-          |------------------|----------|----------|
+                                  |------------------|----------|----------|
   | {ruleId}         | 适用规则的ID  | uint32_t |
   | {actuatorName}   | 触发执行器的名称 | string   |
   | {commandTrigger} | 触发器      | uint32_t |
 
-  
-  
+
+- / read {name}
+
+  表示返回当前配置的信息，需要和外部存储器交互 执行命令同 /write
+
+- / get {name} {name2?}
+
+  表示读取当前缓存的值
+
+  | {name}       | 解释            | {name2?} | 值类型      |
+                      |--------------|---------------|----------|----------|
+  | dataType     | 表示当前缓存传感器的值   | 数据类型的名称  | float    | 
+  | dataTypeList | 表示支持所有传感器的名称  | null     | string[] |
+  | actuator     | 表示当前缓存执行器是否开启 | 执行器的名称   | uint8_t  | 
+  | actuatorList | 表示支持所有传感器的名称  | null     | string[] |
+
+- / start {actuatorName} {time}
+
+  表示开启特定的执行器
+
+- / stop {actuatorName} {time}
+
+  表示停止特定的执行器
+
+- /initEnd
+ 
+  表示初始化结束
+
+- 应答模板 > {success/fail} {information}
+- 心跳模板 ~
