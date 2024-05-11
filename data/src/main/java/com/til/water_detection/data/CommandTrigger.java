@@ -9,7 +9,8 @@ public enum CommandTrigger {
     NORMAL(1 << 3),
     HIGH(1 << 4),
     LOW(1 << 5),
-    TRIGGER(1 << 6);
+    TRIGGER(1 << 6),
+    COMMAND_TRIGGER(1 << 7);
 
     private final int at;
 
@@ -33,4 +34,11 @@ public enum CommandTrigger {
         return list;
     }
 
+    public static int of(List<CommandTrigger> list) {
+        int result = 0;
+        for (CommandTrigger trigger : list) {
+            result |= trigger.getAt();
+        }
+        return result;
+    }
 }

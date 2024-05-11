@@ -10,6 +10,8 @@ public interface ICommandService {
 
     int removeCommandById(int id);
 
+    int updateCommand(int ruleId, Command command);
+
     Command getCommandById(int id);
 
     List<Command> getCommandByIdArray(int[] id);

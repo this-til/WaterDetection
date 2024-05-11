@@ -80,6 +80,15 @@ ___
 
 ![img.png](other/img.png)
 
+## 数据包
+  
+### 指令包
+
+
+### 应答包
+
+### 心跳包
+
 ## 嵌入式数据包指令集
 
 - / write {name} {value}
@@ -87,34 +96,44 @@ ___
   表示更改配置，需要和外部存储器交互
 
   | {name}    | 解释        | 值类型                  | 数据大小(bit) |
-      |-----------|-----------|----------------------|-----------|
+           |-----------|-----------|----------------------|-----------|
   | url       | 表示会话的服务器  | string ascii         | 128       |
   | username  | 表示用户名     | string [8-32] ascii  | 32        |
   | password  | 表示用户密码    | string [8-32] ascii  | 32        |
   | equipment | 表示当前设备的名称 | string [1-32] utf-16 | 64        |
 
-- / write rule {ruleId} {dataTypeName} {exceptionUpper} {warnUpper} {warnLower} {exceptionLower}
+- / write rule {dataTypeName} {exceptionUpper} {warnUpper} {warnLower} {exceptionLower}
 
   用来同步规则
 
   |                  | 解释                | 值类型      |  
-                                  |------------------|-------------------|----------|
-  | {ruleId}         | 规则ID 由服务端下发用于连接命令 | uint32_t |
+        |------------------|-------------------|----------|
   | {dataTypeName}   | 对应数据类型的名称         | string   |
   | {exceptionUpper} | 异常上界              | float    |
   | {warnUpper}      | 警告上界              | float    |
   | {warnLower}      | 警告下界              | float    |
   | {exceptionLower} | 异常下界              | float    |
 
-- / write command {ruleId} {actuatorName} {commandTrigger}
+- / write command {commandId} {dataTypeName} {actuatorName} {commandTrigger} {upper} {low}
 
   同步命令
 
-  |                  | 解释       | 值类型      |  
-                                  |------------------|----------|----------|
-  | {ruleId}         | 适用规则的ID  | uint32_t |
-  | {actuatorName}   | 触发执行器的名称 | string   |
-  | {commandTrigger} | 触发器      | uint32_t |
+  |                  | 解释        | 值类型    |  
+  |------------------|-----------|--------|
+  | {commandId}         | 指令的ID     | uint32_t |
+  | {dataTypeName}   | 对应数据类型的名称 | string |
+  | {actuatorName}   | 触发执行器的名称  | string |
+  | {commandTrigger} | 触发器       | enum   |
+
+-
+    - commandTrigger 选项
+      ON_EXCEPTION|
+      ON_WARN|
+      NORMAL|
+      HIGH|
+      LOW|
+      TRIGGER|
+      COMMAND_TRIGGER
 
 
 - / read {name}
@@ -126,7 +145,7 @@ ___
   表示读取当前缓存的值
 
   | {name}       | 解释            | {name2?} | 值类型      |
-                      |--------------|---------------|----------|----------|
+        |--------------|---------------|----------|----------|
   | dataType     | 表示当前缓存传感器的值   | 数据类型的名称  | float    | 
   | dataTypeList | 表示支持所有传感器的名称  | null     | string[] |
   | actuator     | 表示当前缓存执行器是否开启 | 执行器的名称   | uint8_t  | 
@@ -141,8 +160,32 @@ ___
   表示停止特定的执行器
 
 - /initEnd
- 
+
   表示初始化结束
 
-- 应答模板 > {success/fail} {information}
+- /syncEnd
+
+  表示同步完成
+
+- 应答模板 > {SUCCESSFUL/FAIL} {information}
 - 心跳模板 ~
+
+## 服务端命令
+
+- / time
+
+  获得当前的时间
+
+## 服务器命令（仅嵌入式）
+
+- / report {dataTypeName} {value}
+
+- / update rule {dataTypeName} {exceptionUpper} {warnUpper} {warnLower} {exceptionLower}
+
+- / update command {commandId} {dataTypeName} {actuatorName} {commandTrigger} {upper} {low}
+
+## 网页
+
+- / new
+
+  表示有新的设备接入，需要更新

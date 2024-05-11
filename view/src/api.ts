@@ -1,6 +1,8 @@
 import axios, {AxiosResponse} from 'axios';
 
-const apiString = () => {return "/api"};
+const apiString = () => {
+    return "/api"
+};
 const api = axios.create({
     headers: {
         'Content-Type': 'application/json',
@@ -17,6 +19,7 @@ export const CommandApi = {
         }
     }),
     removeCommandById: (id: number): Promise<AxiosResponse<Result<void>>> => api.delete('/command/removeCommandById', {params: {id}}),
+    updateCommandById: (id: number, command: Command): Promise<AxiosResponse<Result<void>>> => axios.put(`/command/updateCommandById`, command, {params : {id}}),
     getCommandById: (id: number): Promise<AxiosResponse<Result<Command>>> => api.get('/command/getCommandById', {params: {id}}),
     getCommandByIdArray: (id: number[]): Promise<AxiosResponse<Result<Command[]>>> => api.get('/command/getCommandByIdArray', {params: {id: id.join(',')}}),
     getCommandByActuatorId: (actuatorId: number): Promise<AxiosResponse<Result<Command[]>>> => api.get('/command/getCommandByActuatorId', {params: {actuatorId}}),
@@ -77,6 +80,7 @@ export const EquipmentApi = {
     getEquipmentById: (id: number): Promise<AxiosResponse<Result<Equipment>>> => api.get('/equipment/getEquipmentById', {params: {id}}),
     getEquipmentByName: (name: string): Promise<AxiosResponse<Result<Equipment>>> => api.get('/equipment/getEquipmentByName', {params: {name}}),
     getAllEquipment: (): Promise<AxiosResponse<Result<Equipment[]>>> => api.get('/equipment/getAllEquipment'),
+    getAllOnlineEquipment:():Promise<AxiosResponse<Result<Equipment[]>>> => api.get('/equipment/getAllOnlineEquipment'),
     getEquipmentByIdArray: (idArray: number[]): Promise<AxiosResponse<Result<Equipment[]>>> => api.get('/equipment/getEquipmentByIdArray', {params: {id: idArray.join(',')}}),
     getEquipmentByNameArray: (nameArray: string[]): Promise<AxiosResponse<Result<Equipment[]>>> => api.get('/equipment/getEquipmentByNameArray', {params: {name: nameArray.join(',')}}),
 };

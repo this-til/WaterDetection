@@ -5,12 +5,16 @@ import com.til.water_detection.data.Result;
 import com.til.water_detection.data.ResultType;
 import com.til.water_detection.wab.service.IEquipmentService;
 import com.til.water_detection.data.util.FinalString;
+import com.til.water_detection.wab.socket_data.EquipmentSocketContext;
+import com.til.water_detection.wab.socket_handler.EquipmentSocketHandler;
 import jakarta.annotation.Resource;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/equipment")
@@ -20,6 +24,9 @@ public class EquipmentController {
 
     @Resource
     private IEquipmentService detectionService;
+
+    @Resource
+    private EquipmentSocketHandler equipmentSocketHandler;
 
     /***
      * 添加用户自定义的数据 成功时需要重新拉取所有数据类型
@@ -64,6 +71,16 @@ public class EquipmentController {
     public Result<List<Equipment>> getAllEquipment() {
         List<Equipment> equipmentList = detectionService.getAllEquipment();
         return new Result<>(ResultType.SUCCESSFUL, null, equipmentList);
+    }
+
+    @GetMapping("/getAllOnlineEquipment")
+    public Result<List<Equipment>> getAllOnlineEquipment() {
+        return new Result<>(ResultType.SUCCESSFUL, null,
+                equipmentSocketHandler.getSocketContext()
+                        .stream()
+                        .map(EquipmentSocketContext::getEquipment)
+                        .toList());
+
     }
 
     @GetMapping("/getEquipmentByIdArray")

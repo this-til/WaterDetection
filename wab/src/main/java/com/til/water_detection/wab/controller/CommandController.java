@@ -32,6 +32,12 @@ public class CommandController {
         return new Result<>(i == 0 ? ResultType.FAIL : ResultType.SUCCESSFUL, null, null);
     }
 
+    @PutMapping("/updateCommandById")
+    public Result<Void> updateCommandById(@RequestParam int id, @RequestBody Command command) {
+        int i = commandService.updateCommand(id, command);
+        return new Result<>(i == 0 ? ResultType.FAIL : ResultType.SUCCESSFUL, null, null);
+    }
+
     @GetMapping("/getCommandById")
     public Result<Command> getCommandById(@RequestParam int id) {
         Command commandById = commandService.getCommandById(id);
@@ -45,7 +51,6 @@ public class CommandController {
     }
 
     @GetMapping("/getCommandByActuatorId")
-
     public Result<List<Command>> getCommandByActuatorId(@RequestParam int actuatorId) {
         List<Command> commandByActuatorId = commandService.getCommandByActuatorId(actuatorId);
         return new Result<>(ResultType.SUCCESSFUL, null, commandByActuatorId);

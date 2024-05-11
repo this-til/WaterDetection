@@ -2,11 +2,9 @@ package com.til.water_detection.api;
 
 import com.til.water_detection.data.Command;
 import com.til.water_detection.data.Result;
+import com.til.water_detection.data.ResultType;
 import retrofit2.Call;
-import retrofit2.http.DELETE;
-import retrofit2.http.GET;
-import retrofit2.http.POST;
-import retrofit2.http.Query;
+import retrofit2.http.*;
 
 import java.util.List;
 
@@ -16,6 +14,9 @@ public interface ICommandAPI {
 
     @DELETE("/command/removeCommandById")
     Call<Result<Void>> removeCommandById(@Query("id") int id);
+
+    @PUT("/command/updateCommandById")
+    Call<Result<Void>> updateCommandById(@Query("id") int id, @Body Command command);
 
     @GET("/command/getCommandById")
     Call<Result<Command>> getCommandById(@Query("id") int id);

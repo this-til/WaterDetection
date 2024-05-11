@@ -3,7 +3,7 @@
 
   <el-header class="header-class">
 
-    数据类型：{{ dataType.name }} (id:{{ dataType.id }})
+    数据类型：{{ dataType.name }}
 
     <el-divider direction="vertical"/>
 
@@ -26,7 +26,6 @@
 
     <el-popover
         width="600"
-        :before-close="handleClose"
         trigger="click"
         placement="bottom"
     >

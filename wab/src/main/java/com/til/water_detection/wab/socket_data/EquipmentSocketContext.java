@@ -17,6 +17,7 @@ public class EquipmentSocketContext extends SocketContext<CommandCallback<Equipm
     private Equipment equipment;
     private Map<Integer, DataType> dataTypeMap;
     private Map<Integer, Actuator> actuatorMap;
+    private boolean isInit;
 
     public EquipmentSocketContext(WebSocketSession webSocketSession) {
         super(webSocketSession);
@@ -32,4 +33,11 @@ public class EquipmentSocketContext extends SocketContext<CommandCallback<Equipm
         return this;
     }
 
+    public boolean isInit() {
+        return isInit;
+    }
+
+    public void initEnd() {
+        isInit = true;
+    }
 }

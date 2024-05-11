@@ -1,8 +1,12 @@
 package com.til.water_detection.wab.socket_handler;
 
+import com.til.water_detection.data.DataType;
+import com.til.water_detection.data.ReturnState;
+import com.til.water_detection.data.util.FinalString;
 import com.til.water_detection.data.util.Util;
 import com.til.water_detection.wab.socket_data.CommandCallback;
 import com.til.water_detection.wab.socket_data.EquipmentSocketContext;
+import com.til.water_detection.wab.socket_data.ReturnPackage;
 import com.til.water_detection.wab.socket_data.SocketContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,7 +18,9 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -145,7 +151,15 @@ public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> ext
         }
         switch (head) {
             case '/':
-                //TODO
+                ReturnPackage returnPackage;
+                try {
+                    returnPackage = command(pack, equipmentSocketContext);
+                } catch (Exception e) {
+                    returnPackage = new ReturnPackage(ReturnState.FAIL, e.getMessage());
+                }
+                synchronized (session) {
+                    session.sendMessage(new TextMessage(returnPackage.toString()));
+                }
                 return;
             case '>':
 
@@ -154,14 +168,14 @@ public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> ext
                 CommandCallback<?> commandCallback = equipmentSocketContext.completeSession();
 
                 switch (s) {
-                    case "success":
+                    case "SUCCESSFUL":
                         try {
                             commandCallback.successCallback(Arrays.copyOfRange(pack, 1, pack.length), Util.cast(equipmentSocketContext));
                         } catch (Exception e) {
                             session.close(CloseStatus.SERVER_ERROR.withReason(e.getMessage()));
                         }
                         break;
-                    case "fail":
+                    case "FAIL":
                         try {
                             commandCallback.failCallback(Arrays.copyOfRange(pack, 1, pack.length), Util.cast(equipmentSocketContext));
                         } catch (Exception e) {
@@ -174,5 +188,17 @@ public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> ext
 
 
         }
+    }
+
+    protected ReturnPackage command(String[] pack, S s) {
+        switch (pack[0]) {
+            case FinalString.TIME:
+                return new ReturnPackage(ReturnState.SUCCESSFUL, String.valueOf(System.currentTimeMillis()));
+        }
+        return new ReturnPackage(ReturnState.FAIL, "UNKNOWN INSTRUCTION");
+    }
+
+    public Collection<S> getSocketContext() {
+        return map.values();
     }
 }

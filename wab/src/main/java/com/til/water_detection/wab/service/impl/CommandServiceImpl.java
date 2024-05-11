@@ -25,6 +25,11 @@ public class CommandServiceImpl implements ICommandService {
     }
 
     @Override
+    public int updateCommand(int ruleId, Command command) {
+        return commandMapper.updateCommand(ruleId, command);
+    }
+
+    @Override
     public Command getCommandById(int id) {
         return commandMapper.getCommandById(id);
     }

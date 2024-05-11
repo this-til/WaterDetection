@@ -34,6 +34,12 @@ public interface IRuleMapper {
             """)
     int registerRule(Rule rule);
 
+    @Insert("""
+            insert into water_detection_data.rule(equipment_id, data_type_id)
+            values (#{equipmentId}, #{dataTypeId})
+            """)
+    int registerRuleSimple(@Param("equipmentId") int equipmentId, @Param("dataTypeId")int dataTypeId);
+
     @Delete("""
             delete from water_detection_data.rule
             where id = #{id}
@@ -59,6 +65,13 @@ public interface IRuleMapper {
             where id=#{id}
             """)
     Rule getRuleById(int id);
+
+    @Select("""
+            select *
+            from water_detection_data.rule
+            where equipment_id=#{equipmentId} and data_type_id=#{dataTypeId}
+            """)
+    Rule getRuleByLimitId(int equipmentId, int dataTypeId);
 
     @Select("""
             select *

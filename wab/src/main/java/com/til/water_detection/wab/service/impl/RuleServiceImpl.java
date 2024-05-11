@@ -20,6 +20,11 @@ public class RuleServiceImpl implements IRuleService {
     }
 
     @Override
+    public int registerRuleSimple(int equipmentId, int dataTypeId) {
+        return ruleMapper.registerRuleSimple(equipmentId, dataTypeId);
+    }
+
+    @Override
     public int deleteByID(int id) {
         return ruleMapper.deleteByID(id);
     }
@@ -32,6 +37,11 @@ public class RuleServiceImpl implements IRuleService {
     @Override
     public Rule getRuleById(int id) {
         return ruleMapper.getRuleById(id);
+    }
+
+    @Override
+    public Rule getRuleByLimitId(int equipmentId, int dataTypeId) {
+        return ruleMapper.getRuleByLimitId(equipmentId, dataTypeId);
     }
 
     @Override

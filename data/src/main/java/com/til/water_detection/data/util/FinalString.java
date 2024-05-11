@@ -16,6 +16,7 @@ public class FinalString {
     public static final String START = "start";
     public static final String STOP = "stop";
     public static final String INIT_END = "initEnd";
+    public static final String SYNC_END = "syncEnd";
 
     public static final String URL = "url";
     public static final String USERNAME = "username";
@@ -25,4 +26,7 @@ public class FinalString {
     public static final String DATA_TYPE_LIST = "dataTypeList";
     public static final String ACTUATOR_LIST = "actuatorList";
 
+    public static final String TIME = "time";
+    public static final String UPDATE = "update";
+    public static final String REPORT = "report";
 }

@@ -21,6 +21,17 @@ public interface ICommandMapper {
             """)
     int removeCommandById(@Param("id") int id);
 
+    @Update("""
+            update water_detection_data.command
+            set rule_id = #{command.ruleId},
+                actuator_id = #{command.actuatorId},
+                command_trigger = #{command.commandTrigger},
+                upper = #{command.upper},
+                low = #{command.low}
+            where id = #{command.ruleId}
+            """)
+    int updateCommand(@Param("id") int ruleId,@Param("command") Command command);
+
     @Select("""
             select * 
             from water_detection_data.command

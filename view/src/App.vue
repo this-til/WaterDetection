@@ -3,7 +3,7 @@
   <div class="full-screen">
     <el-container class="full">
       <el-aside width="200px">
-        <el-col >
+        <el-col>
           <el-menu class="el-menu-vertical-demo">
             <el-sub-menu index="1">
               <template #title>
@@ -16,6 +16,7 @@
               <el-menu-item
                   v-for="(dataType) in allDataType"
                   :key=dataType.id
+                  :index="'1-' + dataType.id"
                   @click=displayDataView(dataType)>
                 <template #title>{{ dataType.name }}</template>
               </el-menu-item>
@@ -31,27 +32,18 @@
                 <span>设备</span>
               </template>
 
-              <el-sub-menu
+              <el-menu-item
                   v-for="e in allEquipment"
                   :index="'2-' + e.id"
+                  @click=displayEquipmentView(e)
               >
-                <template #title>{{ e.name }}</template>
-
-                <el-sub-menu
-                    :index="'2-' + e.id + '-1'"
-                >
-                  <template #title>传感器</template>
-                </el-sub-menu>
+                <template #title>{{ e.name }} ({{
+                    allOnlineEquipment.indexOf(e) !== -1 ? ("在线") : ("离线")
+                                 }})
+                </template>
 
 
-                <el-sub-menu
-                    :index="'2-' + e.id + '-2'"
-                >
-                  <template #title>执行器</template>
-                </el-sub-menu>
-
-
-              </el-sub-menu>
+              </el-menu-item>
 
             </el-sub-menu>
 
@@ -82,6 +74,14 @@
             :equipmentList=allEquipment
             :dataType=useDataType>
         </DataView>
+
+        <EquipmentView
+            v-else-if=isEquipmentView
+            :equipment=useEquipment
+            :online=" allOnlineEquipment.indexOf(useEquipment) !== -1 "
+        >
+
+        </EquipmentView>
 
         <OrderView
             v-else-if=isOrder>
@@ -119,6 +119,7 @@ import {ref} from 'vue';
 import DataView from "@/components/DataView/DataView.vue";
 import OrderView from "@/components/OrderView.vue";
 import SetView from "@/components/SetView.vue";
+import EquipmentView from "@/components/EquipmentView/EquipmentView.vue"
 import {DataType, Equipment, DataApi, EquipmentApi, DataTypeApi} from "@/api";
 
 const handleOpen = (key: string, keyPath: string[]) => {
@@ -131,12 +132,15 @@ const handleClose = (key: string, keyPath: string[]) => {
 const isDataView = ref<boolean>(false)
 const useDataType = ref<DataType>(undefined)
 
+const isEquipmentView = ref<boolean>(false)
+const useEquipment = ref<Equipment>(undefined)
+
 const isOrder = ref<boolean>(false)
 const isSet = ref<boolean>(false)
 
 const allDataType = ref<DataType[]>([])
 const allEquipment = ref<Equipment[]>([])
-
+const allOnlineEquipment = ref<Equipment[]>([])
 
 const erase = () => {
   isDataView.value = false
@@ -150,6 +154,12 @@ const displayDataView = (dataType: DataType) => {
   erase()
   isDataView.value = true
   useDataType.value = dataType
+}
+
+const displayEquipmentView = (equipment: Equipment) => {
+  erase()
+  isEquipmentView.value = true
+  useEquipment.value = equipment
 }
 
 const displayOrder = () => {
@@ -168,6 +178,9 @@ const up = () => {
   })
   EquipmentApi.getAllEquipment().then(r => {
     allEquipment.value = r.data.data == null ? [] : r.data.data
+  })
+  EquipmentApi.getAllOnlineEquipment().then(r => {
+    allOnlineEquipment.value = r.data.data == null ? [] : r.data.data
   })
 }
 
