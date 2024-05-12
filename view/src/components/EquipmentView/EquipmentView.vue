@@ -13,13 +13,13 @@
 
     <el-row>
       数据：
-
     </el-row>
 
     <el-space
         wrap
     >
       <p
+          v-if="equipmentRunTime != null"
           v-for="item in 20"
           :key="item"
           class="scrollbar-demo-item-normal"
@@ -35,7 +35,10 @@
     <el-space
         wrap
     >
-      <p v-for="item in 20" :key="item" class="scrollbar-demo-item-normal">
+      <p
+          v-if="equipmentRunTime != null"
+          v-for="item in 20" :key="item"
+          class="scrollbar-demo-item-normal">
       </p>
     </el-space>
 
@@ -50,12 +53,24 @@
 
 <script lang="ts" setup>
 import {ref} from 'vue'
-import {DataSheet, Equipment} from "@/api";
+import {DataSheet, Equipment, EquipmentApi, EquipmentRunTime} from "@/api";
 import ChartView from "@/components/DataView/ChartView.vue";
 import LineChartView from "@/components/DataView/LineChartView.vue";
 import {Color} from "echarts";
 
 const props = defineProps<Props>();
+
+const equipmentRunTime = ref<EquipmentRunTime | null>(null)
+ 
+const up = () => {
+
+  EquipmentApi.getOnlineEquipment(props.equipment.id).then(r => {
+    equipmentRunTime.value = r.data.data
+  })
+
+}
+
+up();
 
 interface Props {
   equipment: Equipment

@@ -1,29 +1,56 @@
 package com.til.water_detection.wab.socket_data;
 
+import com.til.water_detection.data.util.FinalByte;
+import io.netty.buffer.CompositeByteBuf;
+import io.netty.buffer.EmptyByteBuf;
 import lombok.Getter;
-import org.jetbrains.annotations.Nullable;
+import org.apache.ibatis.javassist.bytecode.ByteArray;
+import org.springframework.core.codec.ByteBufferEncoder;
+import io.netty.buffer.ByteBuf;
 
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-
+@Getter
 public abstract class CommandCallback<S extends SocketContext<?>> {
 
-    public final String command;
+    public final byte[] command;
+    public final int cId;
 
-    public CommandCallback(String... strings) {
-        assert strings.length > 0;
-        String command = String.join(" ", strings);
-        assert !command.isEmpty();
-        if (command.charAt(0) != '/') {
-            command = "/" + command;
-        }
-        this.command = command;
+    public boolean send;
+    public long sendTime;
+
+    private static int id;
+
+    public CommandCallback(byte[] command) {
+
+        cId = id++;
+
+        this.command = new byte[command.length + 9];
+        System.arraycopy(command, 6, this.command, 0, command.length);
+        this.command[0] = FinalByte.SERVER; // 来源
+        this.command[1] = FinalByte.ORDER; // 头
+
+        ByteArray.write32bit(cId, this.command, 2);
+
+        this.command[this.command.length - 1] = (byte) 0xff;
+        this.command[this.command.length - 2] = (byte) 0xff;
+        this.command[this.command.length - 3] = (byte) 0xff;
+
+
     }
 
-    public void successCallback(String[] strings, S socketContext) {
+
+    public void send() {
+        send = true;
+        sendTime = System.currentTimeMillis();
     }
 
-    public void failCallback(String[] strings, S socketContext) {
+
+    public void successCallback(ByteBuf byteBuf, S socketContext) {
+    }
+
+    public void failCallback(ByteBuf byteBuf, S socketContext) {
+    }
+
+    public void exceptionCallback(ByteBuf byteBuf, S socketContext) {
     }
 
     public void outTime(S socketContext) {

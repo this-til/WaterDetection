@@ -19,7 +19,7 @@ export const CommandApi = {
         }
     }),
     removeCommandById: (id: number): Promise<AxiosResponse<Result<void>>> => api.delete('/command/removeCommandById', {params: {id}}),
-    updateCommandById: (id: number, command: Command): Promise<AxiosResponse<Result<void>>> => axios.put(`/command/updateCommandById`, command, {params : {id}}),
+    updateCommandById: (id: number, command: Command): Promise<AxiosResponse<Result<void>>> => axios.put(`/command/updateCommandById`, command, {params: {id}}),
     getCommandById: (id: number): Promise<AxiosResponse<Result<Command>>> => api.get('/command/getCommandById', {params: {id}}),
     getCommandByIdArray: (id: number[]): Promise<AxiosResponse<Result<Command[]>>> => api.get('/command/getCommandByIdArray', {params: {id: id.join(',')}}),
     getCommandByActuatorId: (actuatorId: number): Promise<AxiosResponse<Result<Command[]>>> => api.get('/command/getCommandByActuatorId', {params: {actuatorId}}),
@@ -80,7 +80,8 @@ export const EquipmentApi = {
     getEquipmentById: (id: number): Promise<AxiosResponse<Result<Equipment>>> => api.get('/equipment/getEquipmentById', {params: {id}}),
     getEquipmentByName: (name: string): Promise<AxiosResponse<Result<Equipment>>> => api.get('/equipment/getEquipmentByName', {params: {name}}),
     getAllEquipment: (): Promise<AxiosResponse<Result<Equipment[]>>> => api.get('/equipment/getAllEquipment'),
-    getAllOnlineEquipment:():Promise<AxiosResponse<Result<Equipment[]>>> => api.get('/equipment/getAllOnlineEquipment'),
+    getAllOnlineEquipment: (): Promise<AxiosResponse<Result<Equipment[]>>> => api.get('/equipment/getAllOnlineEquipment'),
+    getOnlineEquipment: (id: number): Promise<AxiosResponse<Result<Equipment[]>>> => api.get('/equipment/getOnlineEquipment', {params: {id}}),
     getEquipmentByIdArray: (idArray: number[]): Promise<AxiosResponse<Result<Equipment[]>>> => api.get('/equipment/getEquipmentByIdArray', {params: {id: idArray.join(',')}}),
     getEquipmentByNameArray: (nameArray: string[]): Promise<AxiosResponse<Result<Equipment[]>>> => api.get('/equipment/getEquipmentByNameArray', {params: {name: nameArray.join(',')}}),
 };
@@ -149,35 +150,58 @@ export interface Equipment {
 }
 
 export interface DataSheet {
-    dataType: DataType;
-    timeStep: number;
-    startTime: number;
-    endTime: number;
+    dataType: DataType
+    timeStep: number
+    startTime: number
+    endTime: number
 
-    equipmentList: Equipment[];
-    timestampList: number[];
+    equipmentList: Equipment[]
+    timestampList: number[]
 
     //equipment -> timestamp
-    value: number[][];
+    value: number[][]
 }
 
 export interface Command {
-    id: number;
-    ruleId: number;
-    actuatorId: number;
-    commandTrigger: number;
+    id: number
+    ruleId: number
+    actuatorId: number
+    commandTrigger: number
 }
 
 export interface Rule {
-    id: number;
-    datatypeId: number;
-    equipmentId: number;
+    id: number
+    datatypeId: number
+    equipmentId: number
 
-    exceptionUpper: number;
-    warnUpper: number;
-    warnLower: number;
-    exceptionLower: number;
+    exceptionUpper: number
+    warnUpper: number
+    warnLower: number
+    exceptionLower: number
 
-    warnSendMessage: boolean;
-    exceptionSendMessage: boolean;
+    warnSendMessage: boolean
+    exceptionSendMessage: boolean
+}
+
+export interface ActuatorRuntime {
+
+    activated: boolean
+    embeddedId: number
+    actuator: Actuator
+}
+
+export interface DataTypeRunTime {
+
+    value: number
+    embeddedId: number
+    dataType: DataType
+    rule : Rule
+}
+
+export interface EquipmentRunTime {
+
+    equipment: Equipment
+    actuatorRuntimeList: ActuatorRuntime[];
+    dataTypeRuntimeList: DataTypeRunTime[];
+
 }

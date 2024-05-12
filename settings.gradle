@@ -4,5 +4,6 @@ include 'sql'
 include 'wab'
 include 'api'
 include ':view'
+include ':4G'
 include 'fictitious_data'
 

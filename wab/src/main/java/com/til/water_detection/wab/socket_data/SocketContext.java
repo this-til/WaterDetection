@@ -4,17 +4,15 @@ import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.web.socket.WebSocketSession;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 
-public class SocketContext<C extends CommandCallback< ?>> {
-    @Getter
+@Getter
+public class SocketContext<C extends CommandCallback<?>> {
     protected final WebSocketSession webSocketSession;
-    private final Queue<C> commandCallbacks = new LinkedList<>();
-    private C activityCommandCallbacks;
-    @Getter
-    private long activityCommandStartTime;
-    @Getter
+    private final LinkedList<C> commandCallbacks = new LinkedList<>();
     private long finalUpdate = System.currentTimeMillis();
 
     public SocketContext(WebSocketSession webSocketSession) {
@@ -23,22 +21,6 @@ public class SocketContext<C extends CommandCallback< ?>> {
 
     public void update() {
         finalUpdate = System.currentTimeMillis();
-    }
-
-    @Nullable
-    public C nextCommand() {
-        activityCommandCallbacks = commandCallbacks.poll();
-        activityCommandStartTime = System.currentTimeMillis();
-        return activityCommandCallbacks;
-    }
-
-    public C completeSession() {
-        C _activityCommandCallbacks = activityCommandCallbacks;
-        return _activityCommandCallbacks;
-    }
-
-    public boolean haveActivityCommandCallbacks() {
-        return activityCommandCallbacks != null;
     }
 
     public void addCommandCallback(C commandCallback) {

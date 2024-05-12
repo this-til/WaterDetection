@@ -1,17 +1,26 @@
 package com.til.water_detection.wab.socket_handler;
 
 import com.til.water_detection.data.*;
+import com.til.water_detection.data.run_time.ActuatorRuntime;
+import com.til.water_detection.data.run_time.DataTypeRunTime;
+import com.til.water_detection.data.util.FinalByte;
 import com.til.water_detection.data.util.FinalString;
 import com.til.water_detection.wab.service.*;
 import com.til.water_detection.wab.socket_data.CommandCallback;
 import com.til.water_detection.wab.socket_data.EquipmentSocketContext;
 import com.til.water_detection.wab.socket_data.ReturnPackage;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import jakarta.annotation.Resource;
+import org.apache.ibatis.javassist.bytecode.ByteArray;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -34,7 +43,181 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
     protected EquipmentSocketContext mackSocketContext(WebSocketSession session) {
         EquipmentSocketContext equipmentSocketContext = new EquipmentSocketContext(session);
 
-        equipmentSocketContext.addCommandCallback(new CommandCallback<>(FinalString.READ, FinalString.EQUIPMENT) {
+
+        equipmentSocketContext.addCommandCallback(new CommandCallback<>(
+                Unpooled.buffer()
+                        .writeByte(FinalByte.READ)
+                        .writeByte(FinalByte.EQUIPMENT)
+                        .array()
+        ) {
+            @Override
+            public void successCallback(ByteBuf byteBuf, EquipmentSocketContext socketContext) {
+                byte[] equipmentName = new byte[byteBuf.readableBytes()];
+                String equipmentNameString = new String(equipmentName, 0, equipmentName.length - 1, StandardCharsets.UTF_8);
+
+                Equipment equipment = equipmentService.getEquipmentByName(equipmentNameString);
+                if (equipment == null) {
+                    equipmentService.registerEquipment(equipmentNameString);
+                    equipment = equipmentService.getEquipmentByName(equipmentNameString);
+                }
+                assert equipment != null;
+                socketContext.setEquipment(equipment);
+            }
+        });
+
+
+        equipmentSocketContext.addCommandCallback(new CommandCallback<>(
+                Unpooled.buffer()
+                        .writeByte(FinalByte.GET)
+                        .writeByte(FinalByte.DATA_TYPE_LIST)
+                        .array()
+        ) {
+            @Override
+            public void successCallback(ByteBuf byteBuf, EquipmentSocketContext socketContext) {
+                super.successCallback(byteBuf, socketContext);
+
+                int l = byteBuf.readInt();
+
+                byte[] dataTypeName = new byte[1024];
+                List<String> dataTypeNameList = new ArrayList<>(l);
+
+                int nameLen = 0;
+                for (int i = 0; i < l; i++) {
+                    byte b = byteBuf.readByte();
+                    switch (b) {
+                        case '\0':
+                            dataTypeNameList.add(new String(dataTypeName, 0, nameLen, StandardCharsets.UTF_8));
+                            nameLen = 0;
+                            break;
+                        default:
+                            dataTypeName[nameLen++] = b;
+                            break;
+                    }
+                }
+
+                List<DataTypeRunTime> dataTypeRunTimeList = new ArrayList<>();
+
+                for (int i = 0; i < dataTypeNameList.size(); i++) {
+                    String name = dataTypeNameList.get(i);
+                    DataType dataType = dataTypeService.getDataTypeByName(name);
+                    if (dataType == null) {
+                        dataTypeService.registerDataType(name);
+                        dataType = dataTypeService.getDataTypeByName(name);
+                        assert dataType != null;
+                    }
+                    int equipmentId = socketContext.getEquipmentRunTime().getEquipment().getId();
+                    int dataTypeId = dataType.getId();
+                    Rule rule = ruleService.getRuleByLimitId(equipmentId, dataTypeId);
+                    if (rule == null) {
+                        ruleService.registerRuleSimple(equipmentId, dataTypeId);
+                        rule = ruleService.getRuleByLimitId(equipmentId, dataTypeId);
+                        assert rule != null;
+                    }
+                    dataTypeRunTimeList.add(new DataTypeRunTime(0, i, dataType, rule));
+                }
+
+                socketContext.setDataTypeRuntimeList(dataTypeRunTimeList);
+
+            }
+        });
+
+        equipmentSocketContext.addCommandCallback(new CommandCallback<EquipmentSocketContext>(
+                Unpooled.buffer()
+                        .writeByte(FinalByte.GET)
+                        .writeByte(FinalByte.ACTUATOR_LIST)
+                        .array()
+        ) {
+            @Override
+            public void successCallback(ByteBuf byteBuf, EquipmentSocketContext socketContext) {
+
+                super.successCallback(byteBuf, socketContext);
+
+                int l = byteBuf.readInt();
+
+                byte[] dataTypeName = new byte[1024];
+                List<String> actuatorNameList = new ArrayList<>(l);
+
+                int nameLen = 0;
+                for (int i = 0; i < l; i++) {
+                    byte b = byteBuf.readByte();
+                    switch (b) {
+                        case '\0':
+                            actuatorNameList.add(new String(dataTypeName, 0, nameLen, StandardCharsets.UTF_8));
+                            nameLen = 0;
+                            break;
+                        default:
+                            dataTypeName[nameLen++] = b;
+                            break;
+                    }
+                }
+
+                List<ActuatorRuntime> actuatorRuntimeList = new ArrayList<>();
+
+                for (int i = 0; i < actuatorNameList.size(); i++) {
+                    String name = actuatorNameList.get(i);
+
+                    Actuator actuator = actuatorService.getActuatorByName(name);
+
+                    if (actuator == null) {
+                        actuatorService.registerActuator(name);
+                        actuator = actuatorService.getActuatorByName(name);
+                        assert actuator != null;
+                    }
+
+                    actuatorRuntimeList.add(new ActuatorRuntime(false, i, actuator));
+                }
+            }
+        });
+
+        equipmentSocketContext.addCommandCallback(new CommandCallback<EquipmentSocketContext>(
+                Unpooled.buffer()
+                        .writeByte(FinalByte.INIT_END)
+                        .array()
+        ) {
+            @Override
+            public void successCallback(ByteBuf byteBuf, EquipmentSocketContext socketContext) {
+                super.successCallback(byteBuf, socketContext);
+
+                boolean complete = socketContext.getEquipmentRunTime().getEquipment() == null;
+                complete = complete && socketContext.getEquipmentRunTime().getActuatorRuntimeList() == null;
+                complete = complete && socketContext.getEquipmentRunTime().getDataTypeRuntimeList() == null;
+                if (!complete) {
+
+                    try {
+                        socketContext.getWebSocketSession().close(CloseStatus.NOT_ACCEPTABLE.withReason("初始化失败"));
+                    } catch (IOException e) {
+                        logger.info("初始化完成时验证失败：", e);
+                    }
+
+                    return;
+                }
+
+                socketContext.initEnd();
+
+                for (DataTypeRunTime dataTypeRunTime : socketContext.getEquipmentRunTime().getDataTypeRuntimeList()) {
+
+                    Rule rule = dataTypeRunTime.getRule();
+
+                    equipmentSocketContext.addCommandCallback(new CommandCallback<EquipmentSocketContext>(
+                            Unpooled.buffer()
+                                    .writeByte(FinalByte.WRITE)
+                                    .writeByte(FinalByte.RULE)
+                                    .writeInt(dataTypeRunTime.getEmbeddedId())
+                                    .writeInt((int) (rule.getExceptionUpper() * 10000))
+                                    .writeInt((int) (rule.getWarnUpper() * 10000))
+                                    .writeInt((int) (rule.getWarnLower() * 10000))
+                                    .writeInt((int) (rule.getExceptionLower() * 10000))
+                                    .array()
+                    ) {
+                    });
+
+                }
+
+            }
+        });
+
+
+       /* equipmentSocketContext.addCommandCallback(new CommandCallback<>(FinalString.READ, FinalString.EQUIPMENT) {
             @Override
             public void successCallback(String[] strings, EquipmentSocketContext socketContext) {
                 String equipmentName = strings[0];
@@ -201,17 +384,61 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
                 }
             }
         });
-
+*/
 
         return equipmentSocketContext;
     }
 
     @Override
+    protected ReturnPackage command(ByteBuf byteBuf, EquipmentSocketContext equipmentSocketContext) {
+
+        byte b = byteBuf.readByte();
+
+        switch (b) {
+            case FinalByte.WRITE_RULE -> {
+                int index = byteBuf.readInt();
+                DataTypeRunTime dataTypeRunTime = equipmentSocketContext.getEquipmentRunTime().getDataTypeRuntimeList().get(index);
+                Rule rule = dataTypeRunTime.getRule();
+                Rule nRule = new Rule(
+                        0,
+                        0,
+                        0,
+                        (float) ((double) byteBuf.readInt() / 10000d),
+                        (float) ((double) byteBuf.readInt() / 10000d),
+                        (float) ((double) byteBuf.readInt() / 10000d),
+                        (float) ((double) byteBuf.readInt() / 10000d),
+                        rule.isWarnSendMessage(),
+                        rule.isExceptionSendMessage());
+                ruleService.updateById(rule.getId(), nRule);
+                dataTypeRunTime.setRule(ruleService.getRuleById(rule.getId()));
+                return new ReturnPackage(ReturnState.SUCCESSFUL, new byte[0]);
+            }
+            case FinalByte.TIME -> {
+                return new ReturnPackage(ReturnState.SUCCESSFUL, Unpooled.buffer().writeLong(System.currentTimeMillis()).array());
+            }
+            case FinalByte.REPORTING -> {
+                int index = byteBuf.readInt();
+
+                DataType dataType = equipmentSocketContext.getEquipmentRunTime().getDataTypeRuntimeList().get(index).getDataType();
+
+                dataService.addData(new Data(0L, equipmentSocketContext.getEquipmentRunTime().getEquipment().getId(), dataType.getId(), null, (float) ((double) (byteBuf.readInt()) / 10000d)));
+
+                return new ReturnPackage(ReturnState.SUCCESSFUL, new byte[0]);
+            }
+            default -> {
+                return new ReturnPackage(ReturnState.EXCEPTION, new byte[0]);
+            }
+        }
+    }
+
+/*    @Override
     protected ReturnPackage command(String[] pack, EquipmentSocketContext equipmentSocketContext) {
         if (!equipmentSocketContext.isInit()) {
             return super.command(pack, equipmentSocketContext);
         }
-        switch (pack[0]) {
+
+
+     *//*   switch (pack[0]) {
             case FinalString.REPORT -> {
                 if (pack.length < 3) {
                     return new ReturnPackage(ReturnState.FAIL, "指令位数不符合标准");
@@ -337,7 +564,7 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
                 }
             }
 
-        }
+        }*//*
         return super.command(pack, equipmentSocketContext);
-    }
+    }*/
 }

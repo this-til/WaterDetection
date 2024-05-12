@@ -2,21 +2,29 @@ package com.til.water_detection.wab.socket_handler;
 
 import com.til.water_detection.data.DataType;
 import com.til.water_detection.data.ReturnState;
+import com.til.water_detection.data.util.FinalByte;
 import com.til.water_detection.data.util.FinalString;
 import com.til.water_detection.data.util.Util;
 import com.til.water_detection.wab.socket_data.CommandCallback;
 import com.til.water_detection.wab.socket_data.EquipmentSocketContext;
 import com.til.water_detection.wab.socket_data.ReturnPackage;
 import com.til.water_detection.wab.socket_data.SocketContext;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
+import io.netty.buffer.PooledByteBufAllocator;
+import io.netty.buffer.Unpooled;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.handler.BinaryWebSocketHandler;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
@@ -26,31 +34,15 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> extends TextWebSocketHandler {
+public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> extends BinaryWebSocketHandler {
     protected final Logger logger = LogManager.getLogger(EquipmentSocketHandler.class);
     protected final Map<WebSocketSession, S> map = new ConcurrentHashMap<>();
     protected final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
     public CommandSocketHandlerBasics() {
-        scheduler.scheduleAtFixedRate(this::sendHeartbeat, 0, 30, TimeUnit.SECONDS);
         scheduler.scheduleAtFixedRate(this::heartbeatDetection, 0, 30, TimeUnit.SECONDS);
         scheduler.scheduleAtFixedRate(this::timeoutDetection, 0, 30, TimeUnit.SECONDS);
-        scheduler.scheduleAtFixedRate(this::queuedSending, 0, 1, TimeUnit.SECONDS);
-    }
-
-    protected void sendHeartbeat() {
-        for (Map.Entry<WebSocketSession, S> entry : map.entrySet()) {
-            if (!entry.getKey().isOpen()) {
-                continue;
-            }
-            try {
-                synchronized (entry.getKey()) {
-                    entry.getKey().sendMessage(new TextMessage("~"));
-                }
-            } catch (IOException e) {
-                logger.error("心跳发送失败：", e);
-            }
-        }
+        scheduler.scheduleAtFixedRate(this::send, 0, 1, TimeUnit.SECONDS);
     }
 
     protected void heartbeatDetection() {
@@ -71,36 +63,35 @@ public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> ext
         long timeMillis = System.currentTimeMillis() - 60 * 1000;
 
         for (Map.Entry<WebSocketSession, S> entry : map.entrySet()) {
-
-            S value = entry.getValue();
-
-            if (value.haveActivityCommandCallbacks() && value.getActivityCommandStartTime() < timeMillis) {
-                value.completeSession().outTime(Util.cast(value));
-                try {
-                    entry.getKey().close(CloseStatus.SESSION_NOT_RELIABLE);
-                } catch (IOException e) {
-                    logger.error("任务超时关闭时发生异常：", e);
+            for (CommandCallback<?> commandCallback : entry.getValue().getCommandCallbacks()) {
+                if (!commandCallback.isSend()) {
+                    continue;
+                }
+                if (commandCallback.getSendTime() < timeMillis) {
+                    try {
+                        entry.getKey().close(CloseStatus.SESSION_NOT_RELIABLE);
+                    } catch (IOException e) {
+                        logger.error("任务超时关闭时发生异常：", e);
+                    }
                 }
             }
-
         }
     }
 
-    protected void queuedSending() {
+    protected void send() {
         for (Map.Entry<WebSocketSession, S> entry : map.entrySet()) {
-            if (entry.getValue().haveActivityCommandCallbacks()) {
-                continue;
-            }
-            CommandCallback<?> commandCallback = entry.getValue().nextCommand();
-            if (commandCallback == null) {
-                continue;
-            }
-            WebSocketSession key = entry.getKey();
-            synchronized (key) {
-                try {
-                    key.sendMessage(new TextMessage(commandCallback.command));
-                } catch (IOException e) {
-                    logger.error("发送指令时异常：", e);
+
+            for (CommandCallback<?> commandCallback : entry.getValue().getCommandCallbacks()) {
+                if (commandCallback.isSend()) {
+                    return;
+                }
+                WebSocketSession key = entry.getKey();
+                synchronized (key) {
+                    try {
+                        key.sendMessage(new BinaryMessage(commandCallback.getCommand()));
+                    } catch (IOException e) {
+                        logger.error("发送指令时异常：", e);
+                    }
                 }
             }
         }
@@ -120,7 +111,74 @@ public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> ext
         logger.info("连接断开 id={} url={} closeStatus={}", session.getId(), session.getUri(), status);
     }
 
+
     @Override
+    protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) throws Exception {
+        super.handleBinaryMessage(session, message);
+        logger.info("新的消息 id={} url={} message={}", session.getId(), session.getUri(), message.getPayload());
+
+
+        S socketContext = map.get(session);
+        socketContext.update();
+
+        ByteBuffer byteBuffer = message.getPayload();
+        ByteBuf byteBuf = Unpooled.copiedBuffer(byteBuffer);
+
+        byte source = byteBuf.readByte(); // 不使用
+        byte head = byteBuf.readByte();
+        int id = byteBuf.readInt();
+
+        switch (head) {
+            case FinalByte.ORDER -> {
+                ReturnPackage command = command(byteBuf, socketContext);
+                ByteBuf buf = Unpooled.buffer();
+                buf.writeByte(FinalByte.SERVER);
+                buf.writeByte(FinalByte.ANSWER_BACK);
+                buf.writeInt(id);
+                buf.writeByte(command.getReturnState().getState());
+                buf.writeBytes(command.getInformation());
+                buf.writeByte(0xff).writeByte(0xff).writeByte(0xff);
+            }
+            case FinalByte.ANSWER_BACK -> {
+
+                byte answerState = byteBuf.readByte();
+
+                CommandCallback<?> commandCallback = null;
+
+                for (CommandCallback<?> _commandCallback : socketContext.getCommandCallbacks()) {
+                    if (!_commandCallback.isSend()) {
+                        continue;
+                    }
+                    if (_commandCallback.cId == id) {
+                        commandCallback = _commandCallback;
+                        break;
+                    }
+                }
+
+                if (commandCallback == null) {
+                    session.close(CloseStatus.NOT_ACCEPTABLE.withReason("未知的应答:" + id));
+                    return;
+                }
+
+                switch (answerState) {
+                    case FinalByte.SUCCESSFUL -> commandCallback.successCallback(byteBuf, Util.cast(socketContext));
+                    case FinalByte.FAIL -> {
+                        commandCallback.failCallback(byteBuf, Util.cast(socketContext));
+                        session.close(CloseStatus.NOT_ACCEPTABLE);
+                    }
+                    case FinalByte.EXCEPTION -> {
+                        commandCallback.exceptionCallback(byteBuf, Util.cast(socketContext));
+                        session.close(CloseStatus.NOT_ACCEPTABLE);
+                    }
+                    default -> session.close(CloseStatus.NOT_ACCEPTABLE.withReason("未定状态:" + answerState));
+                }
+            }
+            default -> session.close(CloseStatus.NOT_ACCEPTABLE.withReason("未定义头:" + head));
+        }
+
+    }
+
+    /*@Override
     protected void handleTextMessage(@NotNull WebSocketSession session, @NotNull TextMessage message) throws Exception {
         logger.info("新的消息 id={} url={} message={}", session.getId(), session.getUri(), message.getPayload());
 
@@ -188,15 +246,9 @@ public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> ext
 
 
         }
-    }
+    }*/
 
-    protected ReturnPackage command(String[] pack, S s) {
-        switch (pack[0]) {
-            case FinalString.TIME:
-                return new ReturnPackage(ReturnState.SUCCESSFUL, String.valueOf(System.currentTimeMillis()));
-        }
-        return new ReturnPackage(ReturnState.FAIL, "UNKNOWN INSTRUCTION");
-    }
+    protected abstract ReturnPackage command(ByteBuf byteBuf, S s);
 
     public Collection<S> getSocketContext() {
         return map.values();

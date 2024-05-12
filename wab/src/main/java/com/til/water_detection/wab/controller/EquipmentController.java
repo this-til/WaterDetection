@@ -3,6 +3,7 @@ package com.til.water_detection.wab.controller;
 import com.til.water_detection.data.Equipment;
 import com.til.water_detection.data.Result;
 import com.til.water_detection.data.ResultType;
+import com.til.water_detection.data.run_time.EquipmentRunTime;
 import com.til.water_detection.wab.service.IEquipmentService;
 import com.til.water_detection.data.util.FinalString;
 import com.til.water_detection.wab.socket_data.EquipmentSocketContext;
@@ -13,6 +14,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -78,9 +80,19 @@ public class EquipmentController {
         return new Result<>(ResultType.SUCCESSFUL, null,
                 equipmentSocketHandler.getSocketContext()
                         .stream()
-                        .map(EquipmentSocketContext::getEquipment)
+                        .map(EquipmentSocketContext::getEquipmentRunTime)
+                        .map(EquipmentRunTime::getEquipment)
                         .toList());
+    }
 
+    @GetMapping("/getOnlineEquipment")
+    public Result<EquipmentRunTime> getOnlineEquipment(@RequestParam int id) {
+        return equipmentSocketHandler.getSocketContext()
+                .stream()
+                .filter(e -> e.getEquipmentRunTime().getEquipment().getId() == id)
+                .findFirst()
+                .map(equipmentSocketContext -> new Result<>(ResultType.SUCCESSFUL, null, equipmentSocketContext.getEquipmentRunTime()))
+                .orElseGet(() -> new Result<>(ResultType.FAIL, null, null));
     }
 
     @GetMapping("/getEquipmentByIdArray")

@@ -80,112 +80,86 @@ ___
 
 ![img.png](other/img.png)
 
-## 数据包
-  
-### 指令包
+## 锚定码
+
+### configuration
+
+|           | tag  | 解释        | value          | 
+|-----------|------|-----------|----------------|
+| url       | 0x01 | 表示会话的服务器  | string [0-128] |
+| username  | 0x02 | 表示用户名     | string [8-32]  |
+| password  | 0x03 | 表示用户密码    | string [8-32]  |
+| equipment | 0x04 | 表示当前设备的名称 | string [1-32]  |
+
+### getTag
+
+|              | tag  | int:index?          | 解释        | value    | 
+|--------------|------|---------------------|-----------|----------|
+| dataType     | 0x01 | dataTypeList 对应关系   | 检测数据      | float    |
+| actuator     | 0x02 | equipmentList  对应关系 | 执行器       | byte     |
+| dataTypeList | 0x03 | null                | 支持的检测数据内部 | string[] |
+| actuatorList | 0x04 | null                | 表示当前设备的名称 | string[] |
+
+### answerState
+
+|            | tag  | 解释 |
+|------------|------|----|
+| SUCCESSFUL | 0x01 | 成功 |
+| FAIL       | 0x02 | 失败 |
+| EXCEPTION  | 0x03 | 异常 |
+
+### 来源
+
+服务端 0x01
+客户端 0x02
+
+### commandTrigger
+
+    ON_EXCEPTION      1 << 1          
+    ON_WARN           1 << 2    
+    NORMAL            1 << 3   
+    HIGH              1 << 4 
+    LOW               1 << 5
+    TRIGGER           1 << 6    
+    COMMAND_TRIGGER   1 << 7            
+
+## 指令包
+
+|      | 来源   | 头    | id         | 数据码     | 尾        |
+|------|------|------|------------|---------|----------|
+| byte | 0x00 | 0x01 | 0x00000000 | 0x00~00 | 0xFFFFFF |
+
+## 应答包
+
+|      | 来源   | 头    | id        | {answerState} | 数据码     | 尾        |
+|------|------|------|-----------|---------------|---------|----------|
+| byte | 0x00 | 0x02 | 0x0000000 | 0x00          | 0x00~00 | 0xFFFFFF |
+
+---
+
+- write 01{configurationName.tag}{configurationName.value}
+
+- write rule 0105{int:dataType.index}{float:exceptionUpper}{float:warnUpper}{float:warnLower}{float:exceptionLower}
+
+- read 02{configurationName.tag} -> {configurationName.value}
+
+- get 03{tag}{index?} -> {getTag.value}
+
+- initEnd 04
+
+- syncEnd 05
+
+---
+
+服务端:
+
+- write rule 01{int:dataType.index}{float:exceptionUpper}{float:warnUpper}{float:warnLower}{float:exceptionLower}
+
+- reporting 02 {int:dataType.index}{value}
+
+- time 03 -> {long}
 
 
-### 应答包
-
-### 心跳包
-
-## 嵌入式数据包指令集
-
-- / write {name} {value}
-
-  表示更改配置，需要和外部存储器交互
-
-  | {name}    | 解释        | 值类型                  | 数据大小(bit) |
-           |-----------|-----------|----------------------|-----------|
-  | url       | 表示会话的服务器  | string ascii         | 128       |
-  | username  | 表示用户名     | string [8-32] ascii  | 32        |
-  | password  | 表示用户密码    | string [8-32] ascii  | 32        |
-  | equipment | 表示当前设备的名称 | string [1-32] utf-16 | 64        |
-
-- / write rule {dataTypeName} {exceptionUpper} {warnUpper} {warnLower} {exceptionLower}
-
-  用来同步规则
-
-  |                  | 解释                | 值类型      |  
-        |------------------|-------------------|----------|
-  | {dataTypeName}   | 对应数据类型的名称         | string   |
-  | {exceptionUpper} | 异常上界              | float    |
-  | {warnUpper}      | 警告上界              | float    |
-  | {warnLower}      | 警告下界              | float    |
-  | {exceptionLower} | 异常下界              | float    |
-
-- / write command {commandId} {dataTypeName} {actuatorName} {commandTrigger} {upper} {low}
-
-  同步命令
-
-  |                  | 解释        | 值类型    |  
-  |------------------|-----------|--------|
-  | {commandId}         | 指令的ID     | uint32_t |
-  | {dataTypeName}   | 对应数据类型的名称 | string |
-  | {actuatorName}   | 触发执行器的名称  | string |
-  | {commandTrigger} | 触发器       | enum   |
-
--
-    - commandTrigger 选项
-      ON_EXCEPTION|
-      ON_WARN|
-      NORMAL|
-      HIGH|
-      LOW|
-      TRIGGER|
-      COMMAND_TRIGGER
 
 
-- / read {name}
 
-  表示返回当前配置的信息，需要和外部存储器交互 执行命令同 /write
-
-- / get {name} {name2?}
-
-  表示读取当前缓存的值
-
-  | {name}       | 解释            | {name2?} | 值类型      |
-        |--------------|---------------|----------|----------|
-  | dataType     | 表示当前缓存传感器的值   | 数据类型的名称  | float    | 
-  | dataTypeList | 表示支持所有传感器的名称  | null     | string[] |
-  | actuator     | 表示当前缓存执行器是否开启 | 执行器的名称   | uint8_t  | 
-  | actuatorList | 表示支持所有传感器的名称  | null     | string[] |
-
-- / start {actuatorName} {time}
-
-  表示开启特定的执行器
-
-- / stop {actuatorName} {time}
-
-  表示停止特定的执行器
-
-- /initEnd
-
-  表示初始化结束
-
-- /syncEnd
-
-  表示同步完成
-
-- 应答模板 > {SUCCESSFUL/FAIL} {information}
-- 心跳模板 ~
-
-## 服务端命令
-
-- / time
-
-  获得当前的时间
-
-## 服务器命令（仅嵌入式）
-
-- / report {dataTypeName} {value}
-
-- / update rule {dataTypeName} {exceptionUpper} {warnUpper} {warnLower} {exceptionLower}
-
-- / update command {commandId} {dataTypeName} {actuatorName} {commandTrigger} {upper} {low}
-
-## 网页
-
-- / new
-
-  表示有新的设备接入，需要更新
