@@ -2,7 +2,7 @@ package com.til.water_detection.wab.controller;
 
 import com.til.water_detection.data.Equipment;
 import com.til.water_detection.data.Result;
-import com.til.water_detection.data.ResultType;
+import com.til.water_detection.data.state.ResultType;
 import com.til.water_detection.data.run_time.EquipmentRunTime;
 import com.til.water_detection.wab.service.IEquipmentService;
 import com.til.water_detection.data.util.FinalString;
@@ -14,9 +14,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/equipment")

@@ -9,7 +9,10 @@
 
 
   </el-header>
-  <el-main class="main-class">
+  <el-main
+      class="main-class"
+      v-if="equipmentRunTime != null"
+  >
 
     <el-row>
       数据：
@@ -19,11 +22,13 @@
         wrap
     >
       <p
-          v-if="equipmentRunTime != null"
-          v-for="item in 20"
-          :key="item"
-          class="scrollbar-demo-item-normal"
+          v-for="item in equipmentRunTime.dataTypeRuntimeList"
+          :key="item.dataType.id"
+          :class=dataStyle(item)
       >
+
+        {{ item.dataType.name }} : {{ item.value }}
+
 
       </p>
 
@@ -36,7 +41,7 @@
         wrap
     >
       <p
-          v-if="equipmentRunTime != null"
+
           v-for="item in 20" :key="item"
           class="scrollbar-demo-item-normal">
       </p>
@@ -53,15 +58,15 @@
 
 <script lang="ts" setup>
 import {ref} from 'vue'
-import {DataSheet, Equipment, EquipmentApi, EquipmentRunTime} from "@/api";
+import {DataSheet, DataTypeRunTime, Equipment, EquipmentApi, EquipmentRunTime} from "@/api";
 import ChartView from "@/components/DataView/ChartView.vue";
 import LineChartView from "@/components/DataView/LineChartView.vue";
 import {Color} from "echarts";
 
 const props = defineProps<Props>();
 
-const equipmentRunTime = ref<EquipmentRunTime | null>(null)
- 
+const equipmentRunTime = ref<EquipmentRunTime>(null)
+
 const up = () => {
 
   EquipmentApi.getOnlineEquipment(props.equipment.id).then(r => {
@@ -71,6 +76,21 @@ const up = () => {
 }
 
 up();
+
+const dataStyle = (dataRunTime: DataTypeRunTime): string => {
+  switch (dataRunTime.dataState) {
+    case 2:
+      return "scrollbar-demo-item-normal"
+    case 1:
+    case 3:
+      return "scrollbar-demo-item-warn"
+    case 0:
+    case 4:
+      return "scrollbar-demo-item-exception"
+    default:
+      return "scrollbar-demo-item-normal"
+  }
+}
 
 interface Props {
   equipment: Equipment
@@ -108,7 +128,7 @@ interface Props {
   background: #a0cfff;
 }
 
-.scrollbar-demo-item-warn .scrollbar-demo-item {
+.scrollbar-demo-item-warn {
 
   display: flex;
   align-items: center;
@@ -124,7 +144,7 @@ interface Props {
   background: #f3d19e;
 }
 
-.scrollbar-demo-item-exception .scrollbar-demo-item {
+.scrollbar-demo-item-exception {
 
   display: flex;
   align-items: center;

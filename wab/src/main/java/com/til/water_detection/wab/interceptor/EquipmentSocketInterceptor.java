@@ -11,6 +11,7 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 
 import java.util.Map;
+import java.util.Objects;
 
 @Controller
 public class EquipmentSocketInterceptor implements HandshakeInterceptor {
@@ -26,6 +27,11 @@ public class EquipmentSocketInterceptor implements HandshakeInterceptor {
 
         String username = servletServerHttpRequest.getServletRequest().getParameter("username");
         String password = servletServerHttpRequest.getServletRequest().getParameter("password");
+        String isDeBug = servletServerHttpRequest.getServletRequest().getParameter("isDeBug");
+
+        attributes.put("username", username);
+        attributes.put("password", password);
+        attributes.put("isDeBug", Objects.equals(isDeBug, "true"));
 
         return loginConfig.tryLogin(username, password);
     }

@@ -2,7 +2,7 @@ package com.til.water_detection.wab.controller;
 
 import com.til.water_detection.data.Actuator;
 import com.til.water_detection.data.Result;
-import com.til.water_detection.data.ResultType;
+import com.til.water_detection.data.state.ResultType;
 import com.til.water_detection.wab.service.IActuatorService;
 import com.til.water_detection.data.util.FinalString;
 import jakarta.annotation.Resource;

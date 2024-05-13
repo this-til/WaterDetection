@@ -1,8 +1,11 @@
-package com.til.water_detection.data;
+package com.til.water_detection.data.state;
+
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
 public enum CommandTrigger {
     ON_EXCEPTION(1),
     ON_WARN(1 << 2),
@@ -18,12 +21,8 @@ public enum CommandTrigger {
         this.at = at;
     }
 
-    public int getAt() {
-        return at;
-    }
-
     public static List<CommandTrigger> of(int tag) {
-        List<CommandTrigger> list = new ArrayList<CommandTrigger>();
+        List<CommandTrigger> list = new ArrayList<>();
 
         for (CommandTrigger trigger : CommandTrigger.values()) {
             if ((tag & trigger.getAt()) > 0) {

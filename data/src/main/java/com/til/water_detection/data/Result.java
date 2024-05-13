@@ -1,11 +1,10 @@
 package com.til.water_detection.data;
 
+import com.til.water_detection.data.state.ResultType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Objects;
 
 @Data
 @AllArgsConstructor

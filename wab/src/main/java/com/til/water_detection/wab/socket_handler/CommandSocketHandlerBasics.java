@@ -1,17 +1,11 @@
 package com.til.water_detection.wab.socket_handler;
 
-import com.til.water_detection.data.DataType;
-import com.til.water_detection.data.ReturnState;
 import com.til.water_detection.data.util.FinalByte;
-import com.til.water_detection.data.util.FinalString;
 import com.til.water_detection.data.util.Util;
 import com.til.water_detection.wab.socket_data.CommandCallback;
-import com.til.water_detection.wab.socket_data.EquipmentSocketContext;
 import com.til.water_detection.wab.socket_data.ReturnPackage;
 import com.til.water_detection.wab.socket_data.SocketContext;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
-import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.buffer.Unpooled;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -20,21 +14,18 @@ import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.handler.BinaryWebSocketHandler;
-import org.springframework.web.socket.handler.TextWebSocketHandler;
+import org.springframework.web.socket.handler.AbstractWebSocketHandler;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> extends BinaryWebSocketHandler {
+public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> extends AbstractWebSocketHandler {
     protected final Logger logger = LogManager.getLogger(EquipmentSocketHandler.class);
     protected final Map<WebSocketSession, S> map = new ConcurrentHashMap<>();
     protected final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
@@ -102,21 +93,24 @@ public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> ext
     @Override
     public void afterConnectionEstablished(@NotNull WebSocketSession session) throws Exception {
         map.put(session, mackSocketContext(session));
-        logger.info("新的连接 id={} url={}", session.getId(), session.getUri());
+        logger.info("新的连接 id={} remoteAddress={}", session.getId(), session.getRemoteAddress());
     }
 
     @Override
     public void afterConnectionClosed(@NotNull WebSocketSession session, @NotNull CloseStatus status) throws Exception {
         map.remove(session);
-        logger.info("连接断开 id={} url={} closeStatus={}", session.getId(), session.getUri(), status);
+        logger.info("连接断开 id={} remoteAddress={} closeStatus={}", session.getId(), session.getRemoteAddress(), status);
     }
 
 
     @Override
-    protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) throws Exception {
+    protected void handleBinaryMessage(@NotNull WebSocketSession session, @NotNull BinaryMessage message) throws Exception {
         super.handleBinaryMessage(session, message);
-        logger.info("新的消息 id={} url={} message={}", session.getId(), session.getUri(), message.getPayload());
+        logger.info("新的消息 id={} remoteAddress={} message={}", session.getId(), session.getRemoteAddress(), message.getPayload());
 
+        if ((boolean) session.getAttributes().get("isDeBug")) {
+            session.close(CloseStatus.NOT_ACCEPTABLE.withReason("debug模式不能使用二进制数据"));
+        }
 
         S socketContext = map.get(session);
         socketContext.update();
@@ -135,8 +129,8 @@ public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> ext
                 buf.writeByte(FinalByte.SERVER);
                 buf.writeByte(FinalByte.ANSWER_BACK);
                 buf.writeInt(id);
-                buf.writeByte(command.getReturnState().getState());
-                buf.writeBytes(command.getInformation());
+                buf.writeByte(command.returnState().getState());
+                buf.writeBytes(command.information());
                 buf.writeByte(0xff).writeByte(0xff).writeByte(0xff);
             }
             case FinalByte.ANSWER_BACK -> {
@@ -176,6 +170,14 @@ public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> ext
             default -> session.close(CloseStatus.NOT_ACCEPTABLE.withReason("未定义头:" + head));
         }
 
+    }
+
+    @Override
+    protected void handleTextMessage(@NotNull WebSocketSession session, @NotNull TextMessage message) throws Exception {
+        super.handleTextMessage(session, message);
+        logger.info("新的消息 id={} remoteAddress={} message={}", session.getId(), session.getRemoteAddress(), message.getPayload());
+        map.get(session).update();
+        session.sendMessage(new TextMessage(message.getPayload()));
     }
 
     /*@Override

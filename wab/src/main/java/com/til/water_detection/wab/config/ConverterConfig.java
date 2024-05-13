@@ -1,7 +1,10 @@
 package com.til.water_detection.wab.config;
 
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.til.water_detection.data.state.DataState;
+import com.til.water_detection.wab.component.IntToDataStateConverter;
 import com.til.water_detection.wab.component.StringToTimestampConverter;
+import com.til.water_detection.wab.json_serializer.DataStateToIntSerializer;
 import com.til.water_detection.wab.json_serializer.DateToLongSerializer;
 import jakarta.annotation.Resource;
 import org.springframework.context.annotation.Bean;
@@ -18,15 +21,20 @@ public class ConverterConfig implements WebMvcConfigurer {
     @Resource
     private StringToTimestampConverter stringToTimestampConverter;
 
+    @Resource
+    private IntToDataStateConverter intToDataStateConverter;
+
     @Override
     public void addFormatters(FormatterRegistry registry) {
         registry.addConverter(stringToTimestampConverter);
+        registry.addConverter(intToDataStateConverter);
     }
 
     @Bean
     public SimpleModule customModule() {
         SimpleModule module = new SimpleModule();
         module.addSerializer(Date.class, new DateToLongSerializer());
+        module.addSerializer(DataState.class, new DataStateToIntSerializer());
         return module;
     }
 

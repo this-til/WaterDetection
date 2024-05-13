@@ -2,7 +2,6 @@ package com.til.water_detection.api;
 
 import com.til.water_detection.data.Command;
 import com.til.water_detection.data.Result;
-import com.til.water_detection.data.ResultType;
 import retrofit2.Call;
 import retrofit2.http.*;
 

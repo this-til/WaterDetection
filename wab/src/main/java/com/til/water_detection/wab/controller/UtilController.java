@@ -1,9 +1,8 @@
 package com.til.water_detection.wab.controller;
 
 import com.til.water_detection.data.Result;
-import com.til.water_detection.data.ResultType;
+import com.til.water_detection.data.state.ResultType;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

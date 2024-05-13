@@ -33,7 +33,7 @@ public interface ICommandMapper {
     int updateCommand(@Param("id") int ruleId,@Param("command") Command command);
 
     @Select("""
-            select * 
+            select *
             from water_detection_data.command
             where id = #{id}
             """)

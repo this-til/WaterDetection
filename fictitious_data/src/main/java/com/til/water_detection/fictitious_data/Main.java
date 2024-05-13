@@ -6,6 +6,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.InstanceCreator;
 import com.til.water_detection.api.IAPI;
 import com.til.water_detection.data.*;
+import com.til.water_detection.data.state.ResultType;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;

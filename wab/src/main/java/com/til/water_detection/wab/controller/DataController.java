@@ -1,6 +1,7 @@
 package com.til.water_detection.wab.controller;
 
 import com.til.water_detection.data.*;
+import com.til.water_detection.data.state.ResultType;
 import com.til.water_detection.wab.service.IDataService;
 import com.til.water_detection.wab.service.IDataTypeService;
 import com.til.water_detection.wab.service.IEquipmentService;

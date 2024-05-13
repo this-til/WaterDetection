@@ -1,11 +1,10 @@
 package com.til.water_detection.wab.controller;
 
 import com.til.water_detection.data.Result;
-import com.til.water_detection.data.ResultType;
+import com.til.water_detection.data.state.ResultType;
 import com.til.water_detection.data.Rule;
 import com.til.water_detection.wab.service.IRuleService;
 import jakarta.annotation.Resource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 

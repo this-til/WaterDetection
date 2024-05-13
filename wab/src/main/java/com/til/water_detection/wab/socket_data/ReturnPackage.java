@@ -1,22 +1,10 @@
 package com.til.water_detection.wab.socket_data;
 
-import com.til.water_detection.data.ReturnState;
+import com.til.water_detection.data.state.ResultType;
 import lombok.Getter;
 
-import java.util.Arrays;
-
 @Getter
-public class ReturnPackage {
-
-
-    private final ReturnState returnState;
-    private final byte[] information;
-
-
-    public ReturnPackage(ReturnState returnState, byte[] information) {
-        this.returnState = returnState;
-        this.information = information;
-    }
+public record ReturnPackage(ResultType returnState, byte[] information) {
 
 
 }

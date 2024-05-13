@@ -3,12 +3,15 @@ package com.til.water_detection.wab.socket_handler;
 import com.til.water_detection.data.*;
 import com.til.water_detection.data.run_time.ActuatorRuntime;
 import com.til.water_detection.data.run_time.DataTypeRunTime;
+import com.til.water_detection.data.state.DataState;
+import com.til.water_detection.data.state.ResultType;
 import com.til.water_detection.data.util.FinalByte;
 import com.til.water_detection.data.util.FinalString;
 import com.til.water_detection.wab.service.*;
 import com.til.water_detection.wab.socket_data.CommandCallback;
 import com.til.water_detection.wab.socket_data.EquipmentSocketContext;
 import com.til.water_detection.wab.socket_data.ReturnPackage;
+import com.til.water_detection.wab.util.ByteBufUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import jakarta.annotation.Resource;
@@ -43,6 +46,10 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
     protected EquipmentSocketContext mackSocketContext(WebSocketSession session) {
         EquipmentSocketContext equipmentSocketContext = new EquipmentSocketContext(session);
 
+        boolean isDeBug = (boolean) session.getAttributes().get("isDeBug");
+        if (isDeBug) {
+            return equipmentSocketContext;
+        }
 
         equipmentSocketContext.addCommandCallback(new CommandCallback<>(
                 Unpooled.buffer()
@@ -52,9 +59,7 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
         ) {
             @Override
             public void successCallback(ByteBuf byteBuf, EquipmentSocketContext socketContext) {
-                byte[] equipmentName = new byte[byteBuf.readableBytes()];
-                String equipmentNameString = new String(equipmentName, 0, equipmentName.length - 1, StandardCharsets.UTF_8);
-
+                String equipmentNameString = ByteBufUtil.readString(byteBuf, null);
                 Equipment equipment = equipmentService.getEquipmentByName(equipmentNameString);
                 if (equipment == null) {
                     equipmentService.registerEquipment(equipmentNameString);
@@ -113,7 +118,7 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
                         rule = ruleService.getRuleByLimitId(equipmentId, dataTypeId);
                         assert rule != null;
                     }
-                    dataTypeRunTimeList.add(new DataTypeRunTime(0, i, dataType, rule));
+                    dataTypeRunTimeList.add(new DataTypeRunTime(0, DataState.NORMAL, i, dataType, rule));
                 }
 
                 socketContext.setDataTypeRuntimeList(dataTypeRunTimeList);
@@ -121,7 +126,7 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
             }
         });
 
-        equipmentSocketContext.addCommandCallback(new CommandCallback<EquipmentSocketContext>(
+        equipmentSocketContext.addCommandCallback(new CommandCallback<>(
                 Unpooled.buffer()
                         .writeByte(FinalByte.GET)
                         .writeByte(FinalByte.ACTUATOR_LIST)
@@ -133,22 +138,9 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
                 super.successCallback(byteBuf, socketContext);
 
                 int l = byteBuf.readInt();
-
-                byte[] dataTypeName = new byte[1024];
                 List<String> actuatorNameList = new ArrayList<>(l);
-
-                int nameLen = 0;
                 for (int i = 0; i < l; i++) {
-                    byte b = byteBuf.readByte();
-                    switch (b) {
-                        case '\0':
-                            actuatorNameList.add(new String(dataTypeName, 0, nameLen, StandardCharsets.UTF_8));
-                            nameLen = 0;
-                            break;
-                        default:
-                            dataTypeName[nameLen++] = b;
-                            break;
-                    }
+                    actuatorNameList.add(ByteBufUtil.readString(byteBuf, null));
                 }
 
                 List<ActuatorRuntime> actuatorRuntimeList = new ArrayList<>();
@@ -166,10 +158,12 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
 
                     actuatorRuntimeList.add(new ActuatorRuntime(false, i, actuator));
                 }
+
+                socketContext.setActuatorRuntimeList(actuatorRuntimeList);
             }
         });
 
-        equipmentSocketContext.addCommandCallback(new CommandCallback<EquipmentSocketContext>(
+        equipmentSocketContext.addCommandCallback(new CommandCallback<>(
                 Unpooled.buffer()
                         .writeByte(FinalByte.INIT_END)
                         .array()
@@ -198,7 +192,7 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
 
                     Rule rule = dataTypeRunTime.getRule();
 
-                    equipmentSocketContext.addCommandCallback(new CommandCallback<EquipmentSocketContext>(
+                    equipmentSocketContext.addCommandCallback(new CommandCallback<>(
                             Unpooled.buffer()
                                     .writeByte(FinalByte.WRITE)
                                     .writeByte(FinalByte.RULE)
@@ -411,10 +405,10 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
                         rule.isExceptionSendMessage());
                 ruleService.updateById(rule.getId(), nRule);
                 dataTypeRunTime.setRule(ruleService.getRuleById(rule.getId()));
-                return new ReturnPackage(ReturnState.SUCCESSFUL, new byte[0]);
+                return new ReturnPackage(ResultType.SUCCESSFUL, new byte[0]);
             }
             case FinalByte.TIME -> {
-                return new ReturnPackage(ReturnState.SUCCESSFUL, Unpooled.buffer().writeLong(System.currentTimeMillis()).array());
+                return new ReturnPackage(ResultType.SUCCESSFUL, Unpooled.buffer().writeLong(System.currentTimeMillis()).array());
             }
             case FinalByte.REPORTING -> {
                 int index = byteBuf.readInt();
@@ -423,10 +417,10 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
 
                 dataService.addData(new Data(0L, equipmentSocketContext.getEquipmentRunTime().getEquipment().getId(), dataType.getId(), null, (float) ((double) (byteBuf.readInt()) / 10000d)));
 
-                return new ReturnPackage(ReturnState.SUCCESSFUL, new byte[0]);
+                return new ReturnPackage(ResultType.SUCCESSFUL, new byte[0]);
             }
             default -> {
-                return new ReturnPackage(ReturnState.EXCEPTION, new byte[0]);
+                return new ReturnPackage(ResultType.ERROR, new byte[0]);
             }
         }
     }

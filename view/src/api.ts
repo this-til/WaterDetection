@@ -191,11 +191,11 @@ export interface ActuatorRuntime {
 }
 
 export interface DataTypeRunTime {
-
     value: number
+    dataState: number
     embeddedId: number
     dataType: DataType
-    rule : Rule
+    rule: Rule
 }
 
 export interface EquipmentRunTime {
