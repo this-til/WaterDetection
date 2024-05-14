@@ -40,11 +40,6 @@ public class UtilController {
             // 如果你在负载均衡器或代理后面，上述的X-Forwarded-For等头可能更可靠
         }
 
-        // 这里只是一个简单的检查，用于演示。你可能需要更复杂的逻辑来处理IPv4-mapped IPv6地址等
-        if (ipAddress != null && ipAddress.contains(":")) {
-            // 这是一个IPv6地址
-            // 你可以在这里添加额外的处理逻辑，例如规范化地址格式等
-        }
 
         return new Result<>(ResultType.SUCCESSFUL, null, ipAddress);
     }

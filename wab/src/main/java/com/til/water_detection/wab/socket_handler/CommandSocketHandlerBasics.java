@@ -129,8 +129,8 @@ public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> ext
                 buf.writeByte(FinalByte.SERVER);
                 buf.writeByte(FinalByte.ANSWER_BACK);
                 buf.writeInt(id);
-                buf.writeByte(command.returnState().getState());
-                buf.writeBytes(command.information());
+                buf.writeByte(command.getReturnState().getState());
+                buf.writeBytes(command.getInformation());
                 buf.writeByte(0xff).writeByte(0xff).writeByte(0xff);
             }
             case FinalByte.ANSWER_BACK -> {
@@ -172,13 +172,13 @@ public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> ext
 
     }
 
-    @Override
+/*    @Override
     protected void handleTextMessage(@NotNull WebSocketSession session, @NotNull TextMessage message) throws Exception {
         super.handleTextMessage(session, message);
         logger.info("新的消息 id={} remoteAddress={} message={}", session.getId(), session.getRemoteAddress(), message.getPayload());
         map.get(session).update();
         session.sendMessage(new TextMessage(message.getPayload()));
-    }
+    }*/
 
     /*@Override
     protected void handleTextMessage(@NotNull WebSocketSession session, @NotNull TextMessage message) throws Exception {

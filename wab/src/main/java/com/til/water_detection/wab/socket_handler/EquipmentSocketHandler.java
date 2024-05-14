@@ -6,7 +6,6 @@ import com.til.water_detection.data.run_time.DataTypeRunTime;
 import com.til.water_detection.data.state.DataState;
 import com.til.water_detection.data.state.ResultType;
 import com.til.water_detection.data.util.FinalByte;
-import com.til.water_detection.data.util.FinalString;
 import com.til.water_detection.wab.service.*;
 import com.til.water_detection.wab.socket_data.CommandCallback;
 import com.til.water_detection.wab.socket_data.EquipmentSocketContext;
@@ -15,17 +14,14 @@ import com.til.water_detection.wab.util.ByteBufUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import jakarta.annotation.Resource;
-import org.apache.ibatis.javassist.bytecode.ByteArray;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @Controller
 public class EquipmentSocketHandler extends CommandSocketHandlerBasics<EquipmentSocketContext> {
@@ -58,13 +54,22 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
                         .array()
         ) {
             @Override
-            public void successCallback(ByteBuf byteBuf, EquipmentSocketContext socketContext) {
+            public void successCallback(ByteBuf byteBuf, EquipmentSocketContext socketContext) throws IOException {
                 String equipmentNameString = ByteBufUtil.readString(byteBuf, null);
+
                 Equipment equipment = equipmentService.getEquipmentByName(equipmentNameString);
                 if (equipment == null) {
                     equipmentService.registerEquipment(equipmentNameString);
                     equipment = equipmentService.getEquipmentByName(equipmentNameString);
                 }
+
+                for (EquipmentSocketContext context : getSocketContext()) {
+                    if (context.getEquipmentRunTime().getEquipment().getId() == equipment.getId()) {
+                        session.close();
+                    }
+                }
+
+
                 assert equipment != null;
                 socketContext.setEquipment(equipment);
             }
@@ -78,7 +83,7 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
                         .array()
         ) {
             @Override
-            public void successCallback(ByteBuf byteBuf, EquipmentSocketContext socketContext) {
+            public void successCallback(ByteBuf byteBuf, EquipmentSocketContext socketContext) throws IOException {
                 super.successCallback(byteBuf, socketContext);
 
                 int l = byteBuf.readInt();
@@ -133,7 +138,7 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
                         .array()
         ) {
             @Override
-            public void successCallback(ByteBuf byteBuf, EquipmentSocketContext socketContext) {
+            public void successCallback(ByteBuf byteBuf, EquipmentSocketContext socketContext) throws IOException {
 
                 super.successCallback(byteBuf, socketContext);
 
@@ -169,7 +174,7 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
                         .array()
         ) {
             @Override
-            public void successCallback(ByteBuf byteBuf, EquipmentSocketContext socketContext) {
+            public void successCallback(ByteBuf byteBuf, EquipmentSocketContext socketContext) throws IOException {
                 super.successCallback(byteBuf, socketContext);
 
                 boolean complete = socketContext.getEquipmentRunTime().getEquipment() == null;
@@ -389,40 +394,106 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
         byte b = byteBuf.readByte();
 
         switch (b) {
-            case FinalByte.WRITE_RULE -> {
-                int index = byteBuf.readInt();
-                DataTypeRunTime dataTypeRunTime = equipmentSocketContext.getEquipmentRunTime().getDataTypeRuntimeList().get(index);
-                Rule rule = dataTypeRunTime.getRule();
-                Rule nRule = new Rule(
-                        0,
-                        0,
-                        0,
-                        (float) ((double) byteBuf.readInt() / 10000d),
-                        (float) ((double) byteBuf.readInt() / 10000d),
-                        (float) ((double) byteBuf.readInt() / 10000d),
-                        (float) ((double) byteBuf.readInt() / 10000d),
-                        rule.isWarnSendMessage(),
-                        rule.isExceptionSendMessage());
-                ruleService.updateById(rule.getId(), nRule);
-                dataTypeRunTime.setRule(ruleService.getRuleById(rule.getId()));
-                return new ReturnPackage(ResultType.SUCCESSFUL, new byte[0]);
+            case FinalByte.S_WRITE -> {
+                byte tag = byteBuf.readByte();
+                switch (tag) {
+                    case FinalByte.S_RULE -> {
+                        int index = byteBuf.readInt();
+                        DataTypeRunTime dataTypeRunTime = equipmentSocketContext.getEquipmentRunTime().getDataTypeRuntimeList().get(index);
+                        Rule rule = dataTypeRunTime.getRule();
+                        Rule nRule = new Rule(
+                                0,
+                                0,
+                                0,
+                                (float) ((double) byteBuf.readInt() / 10000d),
+                                (float) ((double) byteBuf.readInt() / 10000d),
+                                (float) ((double) byteBuf.readInt() / 10000d),
+                                (float) ((double) byteBuf.readInt() / 10000d),
+                                rule.isWarnSendMessage(),
+                                rule.isExceptionSendMessage());
+                        ruleService.updateById(rule.getId(), nRule);
+                        dataTypeRunTime.setRule(ruleService.getRuleById(rule.getId()));
+                        return new ReturnPackage(ResultType.SUCCESSFUL, new byte[0]);
+                    }
+                    case FinalByte.S_EQUIPMENT_NAME -> {
+                        String s = ByteBufUtil.readString(byteBuf, null);
+
+                        if (s.isEmpty() || s.length() > 30) {
+                            return new ReturnPackage(ResultType.ERROR, new byte[0]);
+                        }
+
+                        if (s.equals(equipmentSocketContext.getEquipmentRunTime().getEquipment().getName())) {
+                            return new ReturnPackage(ResultType.SUCCESSFUL, new byte[0]);
+                        }
+
+                        Equipment equipment = equipmentService.getEquipmentByName(s);
+
+                        if (equipment != null) {
+                            return new ReturnPackage(ResultType.FAIL, new byte[0]);
+                        }
+
+                        equipmentService.updateEquipmentAnotherNameById(equipmentSocketContext.getEquipmentRunTime().getEquipment().getId(), s);
+
+                        equipmentSocketContext.getEquipmentRunTime().getEquipment().setName(s);
+
+                        return new ReturnPackage(ResultType.SUCCESSFUL, new byte[0]);
+
+                    }
+                    default -> {
+                        return new ReturnPackage(ResultType.ERROR, new byte[0]);
+                    }
+                }
             }
-            case FinalByte.TIME -> {
+            case FinalByte.S_REPORTING -> {
+                byte tag = byteBuf.readByte();
+                switch (tag) {
+                    case FinalByte.S_DATA -> {
+                        int index = byteBuf.readInt();
+
+                        DataTypeRunTime dataTypeRunTime = equipmentSocketContext.getEquipmentRunTime().getDataTypeRuntimeList().get(index);
+                        DataType dataType = dataTypeRunTime.getDataType();
+
+                        equipmentService.updateEquipmentTimeById(equipmentSocketContext.getEquipmentRunTime().getEquipment().getId());
+                        float value = (float) ((double) (byteBuf.readInt()) / 10000d);
+                        dataService.addData(new Data(0L, equipmentSocketContext.getEquipmentRunTime().getEquipment().getId(), dataType.getId(), null, value));
+
+                        dataTypeRunTime.setDataState(dataTypeRunTime.getRule().ofDataState(value));
+
+                        return new ReturnPackage(ResultType.SUCCESSFUL, new byte[0]);
+                    }
+                    case FinalByte.S_GPS -> {
+
+                        float longitude = (float) ((double) byteBuf.readInt() / 10000d);
+                        float latitude = (float) ((double) byteBuf.readInt() / 10000d);
+
+                        Equipment equipment = equipmentSocketContext.getEquipmentRunTime().getEquipment();
+
+                        equipmentService.updateEquipmentTimeById(equipment.getId());
+                        equipmentService.updateEquipmentPosById(equipment.getId(), longitude, latitude);
+                        equipment.setUpTime(new Timestamp(System.currentTimeMillis()));
+
+                        if (equipment.isElectronicFence() && equipment.getLongitude() == 0 && equipment.getLatitude() == 0) {
+                            equipmentService.updateEquipmentFencePosById(equipment.getId(), true, longitude, latitude);
+                        }
+
+                        equipmentSocketContext.getEquipmentRunTime().setEquipment(equipmentService.getEquipmentById(equipment.getId()));
+
+                        return new ReturnPackage(ResultType.SUCCESSFUL, new byte[0]);
+
+                    }
+                    default -> {
+                        return new ReturnPackage(ResultType.ERROR, new byte[0]);
+                    }
+                }
+            }
+            case FinalByte.S_TIME -> {
                 return new ReturnPackage(ResultType.SUCCESSFUL, Unpooled.buffer().writeLong(System.currentTimeMillis()).array());
-            }
-            case FinalByte.REPORTING -> {
-                int index = byteBuf.readInt();
-
-                DataType dataType = equipmentSocketContext.getEquipmentRunTime().getDataTypeRuntimeList().get(index).getDataType();
-
-                dataService.addData(new Data(0L, equipmentSocketContext.getEquipmentRunTime().getEquipment().getId(), dataType.getId(), null, (float) ((double) (byteBuf.readInt()) / 10000d)));
-
-                return new ReturnPackage(ResultType.SUCCESSFUL, new byte[0]);
             }
             default -> {
                 return new ReturnPackage(ResultType.ERROR, new byte[0]);
             }
         }
+
     }
 
 /*    @Override

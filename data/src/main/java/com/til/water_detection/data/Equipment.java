@@ -17,4 +17,7 @@ public class Equipment {
     private float latitude;
     private Timestamp upTime;
 
+    private boolean electronicFence;
+    private float fenceLongitude;
+    private float fenceLatitude;
 }

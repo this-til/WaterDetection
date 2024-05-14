@@ -1,4 +1,5 @@
 import axios, {AxiosResponse} from 'axios';
+import {ElMessage} from "element-plus";
 
 const apiString = () => {
     return "/api"
@@ -9,6 +10,40 @@ const api = axios.create({
     },
     baseURL: apiString(),
 });
+
+api.interceptors.response.use(function (response) {
+    // 对响应数据做点什么
+    // 例如，你可以在这里处理错误代码
+
+    switch (response.data.resultType) {
+        case 'FAIL':
+
+            ElMessage({
+                message: '执行失败:' + response.data.message,
+                type: 'warning',
+            })
+            break
+        case 'ERROR':
+            ElMessage({
+                message: '执行错误:' + response.data.message,
+                type: 'error',
+            })
+            break
+    }
+
+
+    if (response.data.errorCode) {
+        return Promise.reject(response.data.errorMessage);
+    }
+    return response;
+}, function (error) {
+    ElMessage({
+        message: '响应错误:' + error.message,
+        type: 'error',
+    })
+    return Promise.reject(error);
+});
+
 
 export const CommandApi = {
     registerCommand: (ruleId: number, actuatorId: number, commandTrigger: number): Promise<AxiosResponse<Result<void>>> => api.post('/command/registerCommand', {
@@ -77,6 +112,21 @@ export const EquipmentApi = {
         }
     }),
     updateEquipmentTimeById: (id: number): Promise<AxiosResponse<Result<void>>> => api.put('/equipment/updateEquipmentTimeById', null, {params: {id}}),
+    updateEquipmentPosById: (id: number, longitude: number, latitude: number): Promise<AxiosResponse<Result<void>>> => api.put('equipment/updateEquipmentPosById', null, {
+        params: {
+            id,
+            latitude,
+            longitude
+        }
+    }),
+    updateEquipmentFencePosById: (id: number, electronicFence: boolean, longitude: number, latitude: number): Promise<AxiosResponse<Result<void>>> => api.put('equipment/updateEquipmentFencePosById', null, {
+        params: {
+            id,
+            latitude,
+            longitude,
+            electronicFence
+        }
+    }),
     getEquipmentById: (id: number): Promise<AxiosResponse<Result<Equipment>>> => api.get('/equipment/getEquipmentById', {params: {id}}),
     getEquipmentByName: (name: string): Promise<AxiosResponse<Result<Equipment>>> => api.get('/equipment/getEquipmentByName', {params: {name}}),
     getAllEquipment: (): Promise<AxiosResponse<Result<Equipment[]>>> => api.get('/equipment/getAllEquipment'),
@@ -144,9 +194,13 @@ export interface Actuator {
 export interface Equipment {
     id: number
     name: string
+    upTime: number
     longitude: number
     latitude: number
-    upTime: number
+
+    electronicFence: boolean
+    fenceLongitude: number
+    fenceLatitude: number
 }
 
 export interface DataSheet {

@@ -8,8 +8,10 @@ import org.apache.ibatis.javassist.bytecode.ByteArray;
 import org.springframework.core.codec.ByteBufferEncoder;
 import io.netty.buffer.ByteBuf;
 
+import java.io.IOException;
+
 @Getter
-public abstract class CommandCallback<S extends SocketContext<?>> {
+public class CommandCallback<S extends SocketContext<?>> {
 
     public final byte[] command;
     public final int cId;
@@ -37,20 +39,18 @@ public abstract class CommandCallback<S extends SocketContext<?>> {
 
     }
 
-
     public void send() {
         send = true;
         sendTime = System.currentTimeMillis();
     }
 
-
-    public void successCallback(ByteBuf byteBuf, S socketContext) {
+    public void successCallback(ByteBuf byteBuf, S socketContext) throws IOException {
     }
 
-    public void failCallback(ByteBuf byteBuf, S socketContext) {
+    public void failCallback(ByteBuf byteBuf, S socketContext)  throws IOException{
     }
 
-    public void exceptionCallback(ByteBuf byteBuf, S socketContext) {
+    public void exceptionCallback(ByteBuf byteBuf, S socketContext) throws IOException {
     }
 
     public void outTime(S socketContext) {

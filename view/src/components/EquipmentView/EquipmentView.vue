@@ -5,8 +5,77 @@
 
     <el-divider direction="vertical"/>
 
-    最后更新时间：
+    <el-popover
+        width="300"
+        trigger="click"
+        placement="bottom"
+        @before-enter="clickRename"
+    >
+      <template #reference>
+        <el-button style="margin-right: 16px">重命名</el-button>
+      </template>
 
+      <el-input v-model="newEquipmentName"/>
+      <el-button @click=upEquipmentName>确定</el-button>
+
+    </el-popover>
+
+    <el-divider direction="vertical"/>
+
+    最后更新时间：{{ new Date(equipment.upTime) }}
+
+    <el-divider direction="vertical"/>
+
+    坐标：({{ equipment.longitude }},{{ equipment.latitude }})
+
+    <el-divider direction="vertical"/>
+
+    <el-popover
+        width="300"
+        trigger="click"
+        placement="bottom"
+        @before-enter="clickFence"
+    >
+      <template #reference>
+        <el-button style="margin-right: 16px">电子栅栏</el-button>
+      </template>
+
+
+      <el-checkbox v-model="newFence" label="启用" border/>
+
+      <br>
+
+      longitude:
+      <el-input v-model="newFenceLongitude" :disabled="!equipment.electronicFence" placeholder="longitude"
+                type="number"/>
+
+      latitude:
+      <el-input v-model="newFenceLatitude" :disabled="!equipment.electronicFence" placeholder="latitude"
+                type="number"/>
+
+      <el-button @click=upElectronicFence>确定</el-button>
+
+      <!--      <el-transfer
+                v-model=selectEquipmentIdList
+                :data=equipmentFiltration
+
+                filterable
+                :filter-method=filterMethod
+                filter-placeholder="搜索设备"
+            />-->
+
+
+      <!--        <template #footer>
+                <div class="dialog-footer">
+                  <el-button @click="displayScreeningEquipment = false">Cancel</el-button>
+                  <el-button type="primary" @click="displayScreeningEquipment = false">
+                    Confirm
+                  </el-button>
+                </div>
+              </template>-->
+    </el-popover>
+
+    <el-divider direction="vertical"/>
 
   </el-header>
   <el-main
@@ -57,15 +126,41 @@
 </template>
 
 <script lang="ts" setup>
-import {ref} from 'vue'
-import {DataSheet, DataTypeRunTime, Equipment, EquipmentApi, EquipmentRunTime} from "@/api";
-import ChartView from "@/components/DataView/ChartView.vue";
-import LineChartView from "@/components/DataView/LineChartView.vue";
-import {Color} from "echarts";
+import {onMounted, onUnmounted, ref, toRefs, watch} from 'vue'
+import {DataTypeRunTime, Equipment, EquipmentApi, EquipmentRunTime, getResultTypeFromString, ResultType} from "@/api";
+import {ElMessage} from "element-plus";
+import {h} from 'vue'
+import {post} from "axios";
 
 const props = defineProps<Props>();
 
 const equipmentRunTime = ref<EquipmentRunTime>(null)
+
+const newEquipmentName = ref<string>()
+
+const newFence = ref<boolean>(false)
+const newFenceLongitude = ref<number>(0)
+const newFenceLatitude = ref<number>(0)
+
+
+const emit = defineEmits(['needUp']);
+
+const upEquipmentName = () => {
+  EquipmentApi.updateEquipmentAnotherNameById(props.equipment.id, newEquipmentName.value)
+      .then(r => {
+        if (r.data.resultType == 'SUCCESSFUL') {
+          up()
+          props.equipment.name = newEquipmentName.value
+          emit('needUp');
+          return
+        }
+      })
+}
+
+const upElectronicFence = () => {
+  EquipmentApi.updateEquipmentFencePosById(props.equipment.id, newFence.value, newFenceLongitude.value, newFenceLatitude.value)
+  emit('needUp');
+}
 
 const up = () => {
 
@@ -75,7 +170,40 @@ const up = () => {
 
 }
 
-up();
+const clickFence = () => {
+  newFence.value = props.equipment.electronicFence
+  newFenceLongitude.value = props.equipment.fenceLongitude
+  newFenceLatitude.value = props.equipment.fenceLatitude
+}
+
+const clickRename = () => {
+  newEquipmentName.value = props.equipment.name
+}
+
+
+onMounted(() => {
+  up();
+})
+
+let intervalId: number = 0;
+
+onMounted(() => {
+  intervalId = setInterval(updateTime, 16000);
+});
+
+onUnmounted(() => {
+  clearInterval(intervalId);
+});
+
+const updateTime = () => {
+  up();
+}
+
+const {equipment} = toRefs(props)
+watch(equipment, (n, o) => {
+  up()
+})
+
 
 const dataStyle = (dataRunTime: DataTypeRunTime): string => {
   switch (dataRunTime.dataState) {

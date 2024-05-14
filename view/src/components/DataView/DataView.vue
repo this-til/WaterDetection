@@ -75,9 +75,10 @@
     时间步进（秒）：
 
     <el-input
-        v-model=_timeStep
+        v-model=timeStep
         style="max-width: 100px"
         @blur=handleInput
+        type="number"
         class="input-with-select">
     </el-input>
 
@@ -186,11 +187,10 @@ const shortcuts = ref([
 
 
 const equipmentFiltration = ref<EquipmentPack[]>([])
-const selectEquipmentIdList = ref<[]>([])
+const selectEquipmentIdList = ref<number[]>([])
 const selectEquipmentList = ref<Equipment[]>([])
 
 
-const _timeStep = ref('10')
 const timeStep = ref<number>(10)
 
 
@@ -294,14 +294,12 @@ const up = () => {
   ).then(r => {
     data.value = r.data.data
     timeStep.value = data.value.timeStep
-    _timeStep.value = String(data.value.timeStep)
   })
 }
 
 const handleInput = (v) => {
-  let replace = v.target.value.replace(/\D/g, '');
+  let replace = v.target.value;
   replace = replace < 8 ? 8 : (replace > 12800 ? 12800 : replace)
-  _timeStep.value = replace
   timeStep.value = parseInt(replace)
   up()
 }

@@ -79,6 +79,7 @@
             v-else-if=isEquipmentView
             :equipment=useEquipment
             :online=" allOnlineEquipment.indexOf(useEquipment) !== -1 "
+            @needUp="needUp"
         >
 
         </EquipmentView>
@@ -115,7 +116,7 @@ import {
   Setting,
   Odometer, Connection, Cpu, Finished, Operation,
 } from '@element-plus/icons-vue'
-import {ref} from 'vue';
+import {onMounted, onUnmounted, ref} from 'vue';
 import DataView from "@/components/DataView/DataView.vue";
 import OrderView from "@/components/OrderView.vue";
 import SetView from "@/components/SetView.vue";
@@ -145,6 +146,9 @@ const allOnlineEquipment = ref<Equipment[]>([])
 const erase = () => {
   isDataView.value = false
   useDataType.value = undefined
+
+  isEquipmentView.value = false
+  useEquipment.value = undefined
 
   isOrder.value = false
   isSet.value = false
@@ -184,7 +188,28 @@ const up = () => {
   })
 }
 
-up()
+const needUp = () => {
+  up()
+}
+
+onMounted(() => {
+  up()
+});
+
+let intervalId: number = 0;
+
+onMounted(() => {
+  intervalId = setInterval(updateTime, 16000);
+});
+
+onUnmounted(() => {
+  clearInterval(intervalId);
+});
+
+const updateTime = () => {
+  up()
+}
+
 </script>
 
 <style>

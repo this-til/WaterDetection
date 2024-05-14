@@ -5,7 +5,6 @@ import com.til.water_detection.sql.mapper.IEquipmentMapper;
 import com.til.water_detection.wab.service.IEquipmentService;
 import jakarta.annotation.Nullable;
 import jakarta.annotation.Resource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -34,6 +33,16 @@ public class EquipmentIdServiceImpl implements IEquipmentService {
     @Override
     public int updateEquipmentTimeById(int id) {
         return equipmentMapper.updateEquipmentTimeById(id);
+    }
+
+    @Override
+    public int updateEquipmentPosById(int id, float longitude, float latitude) {
+        return equipmentMapper.updateEquipmentPosById(id, longitude, latitude);
+    }
+
+    @Override
+    public int updateEquipmentFencePosById(int id, boolean electronicFence, float longitude, float latitude) {
+        return equipmentMapper.updateEquipmentFencePosById(id, electronicFence , longitude, latitude);
     }
 
     @Override

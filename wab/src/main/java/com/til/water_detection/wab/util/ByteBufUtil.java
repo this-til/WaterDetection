@@ -18,4 +18,9 @@ public class ByteBufUtil {
         return new String(bytes, 0, len, charset == null ? StandardCharsets.UTF_8 : charset);
     }
 
+    public static  void  writeString(ByteBuf byteBuf, String str) {
+        byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
+        byteBuf.writeBytes(bytes);
+        byteBuf.writeByte('\0');
+    }
 }

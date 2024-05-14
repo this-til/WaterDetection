@@ -50,7 +50,7 @@ public class DataController {
         for (Data data : dataList) {
             i += dataService.addData(data);
         }
-        return new Result<>(i == 0 ? ResultType.FAIL : ResultType.SUCCESSFUL, "已经成功插入" + i + "条数据", null);
+        return new Result<>(i == 0 ? ResultType.FAIL : ResultType.SUCCESSFUL, null, null);
     }
 
     @GetMapping("/getDataById")
@@ -151,7 +151,7 @@ public class DataController {
                     .toList();
 
             int _ii = 0;
-            for (int ii = 0; ii < timestampListLong.size(); ii++) {
+            for (Long aLong : timestampListLong) {
 
                 Float v = null;
 
@@ -163,7 +163,7 @@ public class DataController {
 
                     Data data = _dataList.get(_ii);
 
-                    if (data.getTime().getTime() > timestampListLong.get(ii)) {
+                    if (data.getTime().getTime() > aLong) {
                         break;
                     }
 

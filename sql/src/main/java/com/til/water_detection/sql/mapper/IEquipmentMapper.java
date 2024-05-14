@@ -37,6 +37,20 @@ public interface IEquipmentMapper {
             """)
     int updateEquipmentTimeById(@Param("id") int id);
 
+    @Update("""
+            update water_detection_data.equipment
+            set latitude = #{latitude},longitude = #{longitude}
+            where id = #{id}
+            """)
+    int updateEquipmentPosById(@Param("id") int id, @Param("longitude") float longitude, @Param("latitude") float latitude);
+
+    @Update("""
+            update water_detection_data.equipment
+            set electronic_fence = #{electronicFence}, fence_latitude = #{latitude},fence_longitude = #{longitude}
+            where id = #{id}
+            """)
+    int updateEquipmentFencePosById(@Param("id") int id,@Param("electronicFence") boolean electronicFence, @Param("longitude") float longitude, @Param("latitude") float latitude);
+
     @Select("""
             select *
             from water_detection_data.equipment

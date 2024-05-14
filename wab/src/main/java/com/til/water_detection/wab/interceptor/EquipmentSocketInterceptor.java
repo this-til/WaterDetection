@@ -3,6 +3,7 @@ package com.til.water_detection.wab.interceptor;
 import com.til.water_detection.wab.config.LoginConfig;
 import com.til.water_detection.wab.socket_data.EquipmentSocketContext;
 import jakarta.annotation.Resource;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
@@ -20,7 +21,7 @@ public class EquipmentSocketInterceptor implements HandshakeInterceptor {
     private LoginConfig loginConfig;
 
     @Override
-    public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
+    public boolean beforeHandshake(@NotNull ServerHttpRequest request,@NotNull  ServerHttpResponse response, @NotNull  WebSocketHandler wsHandler, @NotNull  Map<String, Object> attributes) throws Exception {
         if (!(request instanceof ServletServerHttpRequest servletServerHttpRequest)) {
             return false;
         }
@@ -37,7 +38,7 @@ public class EquipmentSocketInterceptor implements HandshakeInterceptor {
     }
 
     @Override
-    public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Exception exception) {
+    public void afterHandshake(@NotNull  ServerHttpRequest request, @NotNull ServerHttpResponse response,@NotNull   WebSocketHandler wsHandler, Exception exception) {
 
     }
 }

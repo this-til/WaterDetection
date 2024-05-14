@@ -153,13 +153,12 @@ ___
 
 服务端:
 
-- write rule 01{int:dataType.index}{float:exceptionUpper}{float:warnUpper}{float:warnLower}{float:exceptionLower}
+- write rule 0101{int:dataType.index}{float:exceptionUpper}{float:warnUpper}{float:warnLower}{float:exceptionLower}
+- write equipmentName 0102{string:newName} 
 
-- reporting 02 {int:dataType.index}{value}
+- reporting data 0201{int:dataType.index}{value}
+- reporting GPS 0202{float:longitude}{float:latitude}
 
 - time 03 -> {long}
-
-
-
 
 
