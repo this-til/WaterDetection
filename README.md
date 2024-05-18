@@ -91,6 +91,8 @@ ___
 | password  | 0x03 | 表示用户密码    | string [8-32]  |
 | equipment | 0x04 | 表示当前设备的名称 | string [1-32]  |
 
+url?username={username}&password={password}&equipment={equipment}&dataTypeList=a,b,c&actuatorList=
+
 ### getTag
 
 |              | tag  | int:index?          | 解释        | value    | 
@@ -108,10 +110,12 @@ ___
 | FAIL       | 0x02 | 失败 |
 | EXCEPTION  | 0x03 | 异常 |
 
-### 来源
+### from | to
 
-服务端 0x01
-客户端 0x02
+    服务端 0x01
+    客户端|主控 0x02
+    屏幕 0x03
+    4G 0x04
 
 ### commandTrigger
 
@@ -125,15 +129,17 @@ ___
 
 ## 指令包
 
-|      | 来源   | 头    | id         | 数据码     | 尾        |
-|------|------|------|------------|---------|----------|
-| byte | 0x00 | 0x01 | 0x00000000 | 0x00~00 | 0xFFFFFF |
+|      | 帧头       | from | to   | 头    | id         | 数据码     | 尾        |
+|------|----------|------|------|------|------------|---------|----------|
+| byte | 0xAAAAAA | 0x00 | 0x00 | 0x01 | 0x00000000 | 0x00~00 | 0xFFFFFF |
 
 ## 应答包
 
-|      | 来源   | 头    | id        | {answerState} | 数据码     | 尾        |
-|------|------|------|-----------|---------------|---------|----------|
-| byte | 0x00 | 0x02 | 0x0000000 | 0x00          | 0x00~00 | 0xFFFFFF |
+|      | 帧头       | from | to   | 头    | id         | {answerState} | 数据码     | 尾        |
+|------|----------|------|------|------|------------|---------------|---------|----------|
+| byte | 0xAAAAAA | 0x00 | 0x00 | 0x02 | 0x00000000 | 0x00          | 0x00~00 | 0xFFFFFF |
+
+
 
 ---
 
@@ -154,7 +160,7 @@ ___
 服务端:
 
 - write rule 0101{int:dataType.index}{float:exceptionUpper}{float:warnUpper}{float:warnLower}{float:exceptionLower}
-- write equipmentName 0102{string:newName} 
+- write equipmentName 0102{string:newName}
 
 - reporting data 0201{int:dataType.index}{value}
 - reporting GPS 0202{float:longitude}{float:latitude}

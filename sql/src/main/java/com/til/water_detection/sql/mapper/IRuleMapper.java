@@ -38,7 +38,7 @@ public interface IRuleMapper {
             insert into water_detection_data.rule(equipment_id, data_type_id)
             values (#{equipmentId}, #{dataTypeId})
             """)
-    int registerRuleSimple(@Param("equipmentId") int equipmentId, @Param("dataTypeId")int dataTypeId);
+    int registerRuleSimple(@Param("equipmentId") int equipmentId, @Param("dataTypeId") int dataTypeId);
 
     @Delete("""
             delete from water_detection_data.rule
@@ -57,37 +57,37 @@ public interface IRuleMapper {
                 warn_send_message=#{rule.warnSendMessage}
             where id = #{id}
             """)
-    int updateById(@Param("id") int id,@Param("rule") Rule rule);
+    int updateById(@Param("id") int id, @Param("rule") Rule rule);
 
     @Select("""
             select *
             from water_detection_data.rule
             where id=#{id}
             """)
-    Rule getRuleById(int id);
+    Rule getRuleById(@Param("id") int id);
 
     @Select("""
             select *
             from water_detection_data.rule
             where equipment_id=#{equipmentId} and data_type_id=#{dataTypeId}
             """)
-    Rule getRuleByLimitId(int equipmentId, int dataTypeId);
+    Rule getRuleByLimitId(@Param("equipmentId") int equipmentId, @Param("dataTypeId") int dataTypeId);
 
     @Select("""
             select *
             from water_detection_data.rule
             where equipment_id = #{equipmentId}
             """)
-    List<Rule> getRuleByEquipmentId(int equipmentId);
+    List<Rule> getRuleByEquipmentId(@Param("equipmentId") int equipmentId);
 
     @Select("""
             select *
             from water_detection_data.rule
             where data_type_id = #{dataTypeId}
             """)
-    List<Rule> getRuleByDataTypeId(int dataTypeId);
+    List<Rule> getRuleByDataTypeId(@Param("dataTypeId") int dataTypeId);
 
-    List<Rule> getRuleByEquipmentIdArray(int[] id);
+    List<Rule> getRuleByEquipmentIdArray(@Param("id") int[] id);
 
     @Select("""
             select *

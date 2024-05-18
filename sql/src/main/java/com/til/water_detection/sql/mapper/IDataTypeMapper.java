@@ -43,7 +43,7 @@ public interface IDataTypeMapper {
             where name = #{name}
             """)
     @Nullable
-    DataType getDataTypeByName(String name);
+    DataType getDataTypeByName(@Param("name")  String name);
 
     @Select("""
             select *

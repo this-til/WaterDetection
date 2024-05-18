@@ -1,7 +1,9 @@
 package com.til.water_detection.wab.interceptor;
 
+import com.til.water_detection.data.util.FinalString;
 import com.til.water_detection.wab.config.LoginConfig;
 import com.til.water_detection.wab.socket_data.EquipmentSocketContext;
+import com.til.water_detection.wab.socket_handler.EquipmentSocketHandler;
 import jakarta.annotation.Resource;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.server.ServerHttpRequest;
@@ -21,24 +23,19 @@ public class EquipmentSocketInterceptor implements HandshakeInterceptor {
     private LoginConfig loginConfig;
 
     @Override
-    public boolean beforeHandshake(@NotNull ServerHttpRequest request,@NotNull  ServerHttpResponse response, @NotNull  WebSocketHandler wsHandler, @NotNull  Map<String, Object> attributes) throws Exception {
+    public boolean beforeHandshake(@NotNull ServerHttpRequest request, @NotNull ServerHttpResponse response, @NotNull WebSocketHandler wsHandler, @NotNull Map<String, Object> attributes) throws Exception {
         if (!(request instanceof ServletServerHttpRequest servletServerHttpRequest)) {
             return false;
         }
+        Map<String, String[]> parameterMap = servletServerHttpRequest.getServletRequest().getParameterMap();
+        attributes.put(FinalString.ATTRIBUTES, parameterMap);
+        attributes.putAll(parameterMap);
 
-        String username = servletServerHttpRequest.getServletRequest().getParameter("username");
-        String password = servletServerHttpRequest.getServletRequest().getParameter("password");
-        String isDeBug = servletServerHttpRequest.getServletRequest().getParameter("isDeBug");
-
-        attributes.put("username", username);
-        attributes.put("password", password);
-        attributes.put("isDeBug", Objects.equals(isDeBug, "true"));
-
-        return loginConfig.tryLogin(username, password);
+        return loginConfig.tryLogin(parameterMap.get(FinalString.USERNAME)[0], parameterMap.get(FinalString.PASSWORD)[0]);
     }
 
     @Override
-    public void afterHandshake(@NotNull  ServerHttpRequest request, @NotNull ServerHttpResponse response,@NotNull   WebSocketHandler wsHandler, Exception exception) {
+    public void afterHandshake(@NotNull ServerHttpRequest request, @NotNull ServerHttpResponse response, @NotNull WebSocketHandler wsHandler, Exception exception) {
 
     }
 }

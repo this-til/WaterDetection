@@ -6,6 +6,7 @@ import com.til.water_detection.data.run_time.DataTypeRunTime;
 import com.til.water_detection.data.state.DataState;
 import com.til.water_detection.data.state.ResultType;
 import com.til.water_detection.data.util.FinalByte;
+import com.til.water_detection.data.util.FinalString;
 import com.til.water_detection.wab.service.*;
 import com.til.water_detection.wab.socket_data.CommandCallback;
 import com.til.water_detection.wab.socket_data.EquipmentSocketContext;
@@ -39,10 +40,90 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
     private ICommandService commandService;
 
     @Override
-    protected EquipmentSocketContext mackSocketContext(WebSocketSession session) {
+    protected EquipmentSocketContext mackSocketContext(WebSocketSession session) throws IOException {
         EquipmentSocketContext equipmentSocketContext = new EquipmentSocketContext(session);
 
-        boolean isDeBug = (boolean) session.getAttributes().get("isDeBug");
+        String equipmentName = ((String[]) session.getAttributes().get(FinalString.EQUIPMENT))[0];
+
+        String[] dataTypeList = ((String[]) session.getAttributes().get(FinalString.DATA_TYPE_LIST))[0].split(",");
+        String[] actuatorList = ((String[]) session.getAttributes().get(FinalString.ACTUATOR_LIST))[0].split(",");
+
+        Equipment equipment = equipmentService.getEquipmentByName(equipmentName);
+        if (equipment == null) {
+            equipmentService.registerEquipment(equipmentName);
+            equipment = equipmentService.getEquipmentByName(equipmentName);
+            assert equipment != null;
+        }
+
+        for (EquipmentSocketContext context : getSocketContext()) {
+            if (context.getEquipmentRunTime().getEquipment().getId() == equipment.getId()) {
+                session.close();
+            }
+        }
+
+        equipmentSocketContext.setEquipment(equipment);
+
+        List<DataTypeRunTime> dataTypeRunTimeList = new ArrayList<>();
+
+        for (int i = 0; i < dataTypeList.length; i++) {
+            String name = dataTypeList[i];
+            DataType dataType = dataTypeService.getDataTypeByName(name);
+            if (dataType == null) {
+                dataTypeService.registerDataType(name);
+                dataType = dataTypeService.getDataTypeByName(name);
+                assert dataType != null;
+            }
+            int equipmentId = equipmentSocketContext.getEquipmentRunTime().getEquipment().getId();
+            int dataTypeId = dataType.getId();
+            Rule rule = ruleService.getRuleByLimitId(equipmentId, dataTypeId);
+            if (rule == null) {
+                ruleService.registerRuleSimple(equipmentId, dataTypeId);
+                rule = ruleService.getRuleByLimitId(equipmentId, dataTypeId);
+                assert rule != null;
+            }
+            dataTypeRunTimeList.add(new DataTypeRunTime(0, DataState.NORMAL, i, dataType, rule));
+        }
+
+        equipmentSocketContext.setDataTypeRuntimeList(dataTypeRunTimeList);
+
+
+        List<ActuatorRuntime> actuatorRuntimeList = new ArrayList<>();
+
+        for (int i = 0; i < actuatorList.length; i++) {
+            String name = actuatorList[i];
+
+            Actuator actuator = actuatorService.getActuatorByName(name);
+
+            if (actuator == null) {
+                actuatorService.registerActuator(name);
+                actuator = actuatorService.getActuatorByName(name);
+                assert actuator != null;
+            }
+
+            actuatorRuntimeList.add(new ActuatorRuntime(false, i, actuator));
+        }
+
+        equipmentSocketContext.setActuatorRuntimeList(actuatorRuntimeList);
+
+        for (DataTypeRunTime dataTypeRunTime : equipmentSocketContext.getEquipmentRunTime().getDataTypeRuntimeList()) {
+
+            Rule rule = dataTypeRunTime.getRule();
+
+            equipmentSocketContext.addCommandCallback(new CommandCallback<>(
+                    Unpooled.buffer()
+                            .writeByte(FinalByte.WRITE)
+                            .writeByte(FinalByte.RULE)
+                            .writeInt(dataTypeRunTime.getEmbeddedId())
+                            .writeInt((int) (rule.getExceptionUpper() * 10000))
+                            .writeInt((int) (rule.getWarnUpper() * 10000))
+                            .writeInt((int) (rule.getWarnLower() * 10000))
+                            .writeInt((int) (rule.getExceptionLower() * 10000))
+            ) {
+            });
+
+        }
+
+        /*  boolean isDeBug = (boolean) session.getAttributes().get("isDeBug");
         if (isDeBug) {
             return equipmentSocketContext;
         }
@@ -74,9 +155,8 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
                 socketContext.setEquipment(equipment);
             }
         });
-
-
-        equipmentSocketContext.addCommandCallback(new CommandCallback<>(
+*/
+        /*equipmentSocketContext.addCommandCallback(new CommandCallback<>(
                 Unpooled.buffer()
                         .writeByte(FinalByte.GET)
                         .writeByte(FinalByte.DATA_TYPE_LIST)
@@ -130,8 +210,8 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
 
             }
         });
-
-        equipmentSocketContext.addCommandCallback(new CommandCallback<>(
+*/
+        /*equipmentSocketContext.addCommandCallback(new CommandCallback<>(
                 Unpooled.buffer()
                         .writeByte(FinalByte.GET)
                         .writeByte(FinalByte.ACTUATOR_LIST)
@@ -166,13 +246,12 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
 
                 socketContext.setActuatorRuntimeList(actuatorRuntimeList);
             }
-        });
+        });*/
 
         equipmentSocketContext.addCommandCallback(new CommandCallback<>(
                 Unpooled.buffer()
-                        .writeByte(FinalByte.INIT_END)
-                        .array()
-        ) {
+                        .writeByte(FinalByte.SYNC_END)
+        ) /*{
             @Override
             public void successCallback(ByteBuf byteBuf, EquipmentSocketContext socketContext) throws IOException {
                 super.successCallback(byteBuf, socketContext);
@@ -213,7 +292,7 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
                 }
 
             }
-        });
+        }*/);
 
 
        /* equipmentSocketContext.addCommandCallback(new CommandCallback<>(FinalString.READ, FinalString.EQUIPMENT) {

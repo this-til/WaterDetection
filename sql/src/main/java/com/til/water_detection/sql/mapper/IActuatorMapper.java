@@ -1,10 +1,7 @@
 package com.til.water_detection.sql.mapper;
 
 import com.til.water_detection.data.Actuator;
-import org.apache.ibatis.annotations.Delete;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -12,19 +9,18 @@ import java.util.List;
 @Mapper
 public interface IActuatorMapper {
 
-
     @Insert("""
             insert into  water_detection_data.actuator(name)
             values (#{name})
             """)
-    int registerActuator(String name);
+    int registerActuator(@Param("name") String name);
 
     @Delete("""
             delete
             from water_detection_data.actuator
             where id = #{id}
             """)
-    int removeActuatorById(int actuatorId);
+    int removeActuatorById(@Param("actuatorId") int actuatorId);
 
     @Select("""
             select *
@@ -32,7 +28,7 @@ public interface IActuatorMapper {
             where id = #{id}
             """)
     @Nullable
-    Actuator getActuatorById(int id);
+    Actuator getActuatorById(@Param("id") int id);
 
     @Select("""
             select *
@@ -40,11 +36,11 @@ public interface IActuatorMapper {
             where name = #{name}
             """)
     @Nullable
-    Actuator getActuatorByName(String name);
+    Actuator getActuatorByName(@Param("name") String name);
 
-    List<Actuator> getActuatorByIdArray(int[] id);
+    List<Actuator> getActuatorByIdArray(@Param("id") int[] id);
 
-    List<Actuator> getActuatorByNameArray(String[] name);
+    List<Actuator> getActuatorByNameArray(@Param("name") String[] name);
 
     @Select("""
             select *

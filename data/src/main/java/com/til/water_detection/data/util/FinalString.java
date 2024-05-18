@@ -29,4 +29,6 @@ public class FinalString {
     public static final String TIME = "time";
     public static final String UPDATE = "update";
     public static final String REPORT = "report";
+
+    public static final String ATTRIBUTES = "attributes";
 }

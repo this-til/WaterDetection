@@ -37,7 +37,7 @@ public interface ICommandMapper {
             from water_detection_data.command
             where id = #{id}
             """)
-    Command getCommandById(int id);
+    Command getCommandById(@Param("id")  int id);
 
     List<Command> getCommandByIdArray(@Param("id") int[] id);
 

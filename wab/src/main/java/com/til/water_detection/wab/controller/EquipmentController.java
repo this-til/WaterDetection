@@ -69,9 +69,7 @@ public class EquipmentController {
                     .writeByte(FinalByte.WRITE)
                     .writeByte(FinalByte.EQUIPMENT);
             ByteBufUtil.writeString(byteBuf, anotherName);
-            equipmentSocketContext.addCommandCallback(new CommandCallback<>(
-                    byteBuf.array()
-            ));
+            equipmentSocketContext.addCommandCallback(new CommandCallback<>(byteBuf));
         }
 
         return new Result<>(i > 0 ? ResultType.SUCCESSFUL : ResultType.FAIL, null, null);

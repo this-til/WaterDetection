@@ -22,4 +22,10 @@ logging:
   level:
     org.mybatis: DEBUG
 
+server:
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
 

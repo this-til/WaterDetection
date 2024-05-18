@@ -65,7 +65,7 @@ public interface IEquipmentMapper {
             where name = #{name}
             """)
     @Nullable
-    Equipment getEquipmentByName(String name);
+    Equipment getEquipmentByName(@Param("name") String name);
 
     @Select("""
             select *

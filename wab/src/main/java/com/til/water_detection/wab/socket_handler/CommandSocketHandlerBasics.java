@@ -1,6 +1,7 @@
 package com.til.water_detection.wab.socket_handler;
 
 import com.til.water_detection.data.util.FinalByte;
+import com.til.water_detection.data.util.FinalString;
 import com.til.water_detection.data.util.Util;
 import com.til.water_detection.wab.socket_data.CommandCallback;
 import com.til.water_detection.wab.socket_data.ReturnPackage;
@@ -84,11 +85,12 @@ public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> ext
                         logger.error("发送指令时异常：", e);
                     }
                 }
+                commandCallback.send();
             }
         }
     }
 
-    protected abstract S mackSocketContext(WebSocketSession session);
+    protected abstract S mackSocketContext(WebSocketSession session) throws IOException;
 
     @Override
     public void afterConnectionEstablished(@NotNull WebSocketSession session) throws Exception {
@@ -108,25 +110,34 @@ public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> ext
         super.handleBinaryMessage(session, message);
         logger.info("新的消息 id={} remoteAddress={} message={}", session.getId(), session.getRemoteAddress(), message.getPayload());
 
-        if ((boolean) session.getAttributes().get("isDeBug")) {
-            session.close(CloseStatus.NOT_ACCEPTABLE.withReason("debug模式不能使用二进制数据"));
-        }
-
         S socketContext = map.get(session);
         socketContext.update();
 
         ByteBuffer byteBuffer = message.getPayload();
-        ByteBuf byteBuf = Unpooled.copiedBuffer(byteBuffer);
 
-        byte source = byteBuf.readByte(); // 不使用
+        ByteBuffer _byteBuffer = FinalByte.extractFrame(byteBuffer, FinalByte.FRAME_HEADER, FinalByte.FRAME_FOOTER);
+        if (_byteBuffer == null) {
+            return;
+        }
+        ByteBuf byteBuf = Unpooled.copiedBuffer(_byteBuffer);
+
+        byte from = byteBuf.readByte();
+        byte to = byteBuf.readByte();
         byte head = byteBuf.readByte();
         int id = byteBuf.readInt();
+
+        if (id != FinalByte.SERVER) {
+            synchronized (session) {
+                session.sendMessage(new BinaryMessage(byteBuffer));
+            }
+        }
 
         switch (head) {
             case FinalByte.ORDER -> {
                 ReturnPackage command = command(byteBuf, socketContext);
                 ByteBuf buf = Unpooled.buffer();
-                buf.writeByte(FinalByte.SERVER);
+                buf.writeByte(to);
+                buf.writeByte(from);
                 buf.writeByte(FinalByte.ANSWER_BACK);
                 buf.writeInt(id);
                 buf.writeByte(command.getReturnState().getState());
