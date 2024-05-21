@@ -24,6 +24,12 @@ public class ConverterConfig implements WebMvcConfigurer {
     @Resource
     private IntToDataStateConverter intToDataStateConverter;
 
+    @Resource
+    private DateToLongSerializer dateToLongSerializer;
+
+    @Resource
+    private DataStateToIntSerializer dataStateToIntSerializer;
+
     @Override
     public void addFormatters(FormatterRegistry registry) {
         registry.addConverter(stringToTimestampConverter);
@@ -33,8 +39,8 @@ public class ConverterConfig implements WebMvcConfigurer {
     @Bean
     public SimpleModule customModule() {
         SimpleModule module = new SimpleModule();
-        module.addSerializer(Date.class, new DateToLongSerializer());
-        module.addSerializer(DataState.class, new DataStateToIntSerializer());
+        module.addSerializer(Date.class, dateToLongSerializer);
+        module.addSerializer(DataState.class, dataStateToIntSerializer);
         return module;
     }
 

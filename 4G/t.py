@@ -4,6 +4,11 @@ import uwebsocket
 from machine import UART
 import time
 import ucollections
+import ubinascii
+import ujson
+from uio import StringIO
+from misc import Power
+from queue import Queue
 
 header = b'\xAA\xAA\xAA'
 footer = b'\xFF\xFF\xFF'
@@ -38,15 +43,22 @@ FAIL = 0x02
 EXCEPTION = 0x03
 
 url: str = ''
-username: str = ''
-password: str = ''
-equipment: str = ''
-dataNameList: list[str] = []
-actuatorNameList: list[str] = []
+
+
+class LoginData:
+    username: str = ''
+    password: str = ''
+    equipment: str = ''
+    dataNameList: list[str] = []
+    actuatorNameList: list[str] = []
+    pass
+
+
+loginData = LoginData()
 
 isDebug = True
 
-uart_main = UART(UART.UART2, 9600, 8, 0, 1, 0)
+uart_client = UART(UART.UART2, 9600, 8, 0, 1, 0)
 uart_screen = UART(UART.UART1, 9600, 8, 0, 1, 0)
 cli = None
 
@@ -54,13 +66,14 @@ _idAdd: int = 0
 
 sentToServerCache: list[bytes] = []
 
-toBeSentToClient: list[bytes] = ucollections.deque((), 32, 0)
-# toBeSentToServer: list[bytes] = ucollections.deque((), 32, 0)
-toBeSentToScreen: list[bytes] = ucollections.deque((), 32, 0)
+toBeSentToClient = Queue(16)
+toBeSentToServer = Queue(16)
+toBeSentToScreen = Queue(16)
 
-toBeSentToClientLock = _thread.allocate_lock()
+
+# toBeSentToClientLock = _thread.allocate_lock()
 # toBeSentToServerLock = _thread.allocate_lock()
-toBeSentToScreenLock = _thread.allocate_lock()
+# toBeSentToScreenLock = _thread.allocate_lock()
 
 
 class CommandCallback:
@@ -137,52 +150,48 @@ def init():
 
 def w_url(p: bytes):
     global url
-    url = p[0:-1].decode('utf-8')
+    url = p[0:-1].decode('')
     if isDebug:
         print("url", url)
     pass
 
 
 def w_username(p: bytes):
-    global username
-    username = p[0:-1].decode('utf-8')
+    loginData.username = p[0:-1].decode('')
     if isDebug:
-        print("username", username)
+        print("username", loginData.username)
     pass
 
 
 def w_password(p: bytes):
-    global password
-    password = p[0:-1].decode('utf-8')
+    loginData.password = p[0:-1].decode('')
     if isDebug:
-        print("password", password)
+        print("password", loginData.password)
     pass
 
 
 def w_equipment(p: bytes):
-    global equipment
-    equipment = p[0:-1].decode('utf-8')
+    loginData.equipment = p[0:-1].decode()
     if isDebug:
-        print("equipment", equipment)
+        print("equipment", loginData.equipment)
     pass
 
 
 def w_dataTypeList(p: bytes):
-    global dataNameList
     for e in p[4:].split(b'\0'):
         if len(e) is not 0:
-            dataNameList.append(e.decode('utf-8'))
+            loginData.dataNameList.append(e.decode())
     if isDebug:
-        print("dataNameList", dataNameList)
+        print("dataNameList", loginData.dataNameList)
     pass
 
 
 def w_actuatorList(p: bytes):
     for e in p[4:].split(b'\0'):
         if len(e) is not 0:
-            actuatorNameList.append(e.decode('utf-8'))
+            loginData.actuatorNameList.append(e.decode())
     if isDebug:
-        print("actuatorNameList", actuatorNameList)
+        print("actuatorNameList", loginData.actuatorNameList)
     pass
 
 
@@ -192,19 +201,49 @@ def w_end(p: bytes):
     if isDebug:
         print("IN END")
 
-    _url = bytearray()
-    _url.extend(url)
-    _url.extend(b'?')
-    _url.extend(b'username=')
-    _url.extend(username)
-    _url.extend(b'&password=')
-    _url.extend(password)
-    _url.extend(b'&dataTypeList=')
-    _url.extend(b','.join(dataNameList))
-    _url.extend(b'&actuatorList=')
-    _url.extend(b','.join(actuatorNameList))
+    # _url = bytearray()
+    # _url.extend(url)
+    # _url.extend(b'?')
+    # _url.extend(b'username=')
+    # _url.extend(username)
+    # _url.extend(b'&password=')
+    # _url.extend(password)
+    # _url.extend(b'&dataTypeList=')
+    # _url.extend(b','.join(dataNameList))
+    # _url.extend(b'&actuatorList=')
+    # _url.extend(b','.join(actuatorNameList))
 
-    
+    dataNameList = []
+    for e in loginData.dataNameList:
+        dataNameList.append("\"" + e + "\"")
+
+    actuatorNameList = []
+    for e in loginData.actuatorNameList:
+        actuatorNameList.append("\"" + e + "\"")
+
+    json = ("""
+    {
+        "username":"%s",
+        "password":"%s",
+        "equipment":"%s",
+        "dataNameList":[%s],
+        "actuatorNameList":[%s]
+    }
+    """ % (loginData.username,
+           loginData.password,
+           loginData.equipment,
+           ','.join(dataNameList),
+           ','.join(actuatorNameList)))
+
+    if isDebug:
+        print("json", json)
+
+    _loginData = ubinascii.b2a_base64(json.encode()).decode()
+
+    if isDebug:
+        print("_loginData", _loginData)
+
+    _url = url + "?" + "loginData=" + _loginData
 
     # _url = ("%s?username=%s&password=%s&equipment=%s&dataTypeList=%s&actuatorList=%s" %
     #         (url, username, password, equipment, ','.join(dataNameList), ','.join(actuatorNameList)))
@@ -214,7 +253,15 @@ def w_end(p: bytes):
     if isDebug:
         print("uwebsocket url", _url)
 
-    cli = uwebsocket.Client.connect(_url, headers=None, debug=isDebug)
+    try:
+        cli = uwebsocket.Client.connect(_url, headers=None, debug=isDebug)
+    except Exception as e:
+        if isDebug:
+            print(e)
+
+    if isDebug:
+        print("cli", cli)
+
     # global sentToServerCache
     # for e in sentToServerCache:
     #     cli.send(e)
@@ -245,9 +292,9 @@ def uwebsocketMonitoring():
 
 
 # 串口监听
-def serialMonitoring(uart):
+def serialMonitoring(uart, logStr):
     while True:
-
+        time.sleep(0.3)
         any = uart.any()
         if any == 0:
             continue
@@ -255,7 +302,7 @@ def serialMonitoring(uart):
         pack = uart.read(any)
 
         if isDebug:
-            print("uart.read()", pack)
+            print(logStr, pack)
 
         pack = extractDataBetweenHeaders(pack, header, footer)
         if pack is None:
@@ -294,12 +341,12 @@ def forwardData(pack: bytes):
     if len(pack) <= 3 + 7 + 3:
         return
 
-    _from = pack[3 + 0]
-    _to = pack[3 + 1]
-    _header = pack[3 + 2]
+    _from: int = pack[3 + 0]
+    _to: int = pack[3 + 1]
+    _header: int = pack[3 + 2]
 
     if isDebug:
-        print("IN FORWARD DATA", "len(pack)", len(pack), "_from", _from, "_to", _to, "_header", _header)
+        print("IN FORWARD DATA", "len", len(pack), "_from", _from, "_to", _to, "_header", _header)
 
     if _from == _to:
         return
@@ -315,17 +362,13 @@ def forwardData(pack: bytes):
         if isDebug:
             print("TO SEND SERVER")
     elif _to == CLIENT:
-        toBeSentToClientLock.acquire()
         # uart_main.write(pack)
-        toBeSentToClient.append(pack)
-        toBeSentToClientLock.release()
+        toBeSentToClient.put(pack)
         if isDebug:
             print("TO SEND CLIENT")
     elif _to == SCREEN:
-        toBeSentToScreenLock.acquire()
         # uart_screen.write(pack[10:])
-        toBeSentToScreen.append(pack[10:])
-        toBeSentToScreenLock.release()
+        toBeSentToScreen.put(pack[10:])
         if isDebug:
             print("TO SEND SCREEN")
     elif _to == _4G:
@@ -355,7 +398,7 @@ def forwardData(pack: bytes):
             result = pack[3 + 7]
             _pack = pack[3 + 8: len(pack) - 3]
 
-            callback: CommandCallback = None
+            callback: CommandCallback | None = None
             for e in commandCallbackList:
                 if e.cId == id:
                     callback = e
@@ -410,58 +453,56 @@ def readInt32FromBytes(array: bytes, h: int) -> int:
     return i
 
 
-# def sendToServer():
-#     while True:
-#         time.sleep(0.25)
-#         if cli is None:
-#             continue
-#         if len(toBeSentToServer) == 0:
-#             continue
-#         # toBeSentToServerLock.acquire()
-#         cli.send(toBeSentToServer.popleft())
-#         # toBeSentToServerLock.release()
-#     pass
-#
-#
+def sendToServer():
+    while True:
+        time.sleep(0.75)
+        if cli is None:
+            continue
+        if toBeSentToServer.empty():
+            continue
+        pack = toBeSentToServer.get()
+        if isDebug:
+            print("sentToServer", pack)
+        cli.send(pack)
+    pass
+
+
 def sendToClient():
     while True:
-        time.sleep(1)
-        if len(toBeSentToClient) == 0:
+        time.sleep(0.75)
+        if toBeSentToClient.empty():
             continue
-        pack = None
-        toBeSentToClientLock.acquire()
-        pack = toBeSentToClient.popleft()
-        toBeSentToClientLock.release()
-
+        pack = toBeSentToClient.get()
         if isDebug:
             print("sendToClient", pack)
-            time.sleep(1)
-
-        uart_main.write(pack)
+        uart_client.write(pack)
     pass
 
 
 def sendToScreen():
     while True:
-        time.sleep(1)
-        if len(toBeSentToScreen) == 0:
+        time.sleep(0.75)
+        if toBeSentToScreen.empty():
             continue
-        pack = None
-        toBeSentToScreenLock.acquire()
-        pack = toBeSentToScreen.popleft()
-        toBeSentToScreenLock.release()
+        pack = toBeSentToScreen.get()
         if isDebug:
             print("sendToScreen", pack)
-
         uart_screen.write(pack)
     pass
 
 
-_thread.start_new_thread(init, ())
-# cli = uwebsocket.Client.connect("wss://218.204.179.10:60762/EquipmentSocket?username=til&password=114514&equipment=AJCBD&dataTypeList=PH&actuatorList=", headers=None, debug=True)
-_thread.start_new_thread(serialMonitoring, (uart_main,))
-_thread.start_new_thread(serialMonitoring, (uart_screen,))
+reason = Power.powerDownReason()
+if isDebug:
+    print("POWER ON REASON", reason)
 
-# _thread.start_new_thread(sendToServer, ())
+init()
+# _thread.start_new_thread(init, ())
+# cli = uwebsocket.Client.connect("wss://113.56.218.150:60762/EquipmentSocket?loginData=CiAgICB7CiAgICAgICAgInVzZXJuYW1lIjoidGlsIiwKICAgICAgICAicGFzc3dvcmQiOiIxMTQ1MTQiLAogICAgICAgICJlcXVpcG1lbnQiOiJBSkNCRCIsCiAgICAgICAgImRhdGFOYW1lTGlzdCI6WyLmuKnluqYiLCJQSCIsIueUteWvvOeOhyIsIua1kea1iuW6piJdLAogICAgICAgICJhY3R1YXRvck5hbWVMaXN0IjpbIuaKpeitpuWZqCIsIuaKpeitpueBryIsIuawtOaztSJdCiAgICB9CiAgICA=", headers=None, debug=True)
+
+_thread.start_new_thread(uwebsocketMonitoring, ())
+_thread.start_new_thread(serialMonitoring, (uart_client, "uart_client"))
+_thread.start_new_thread(serialMonitoring, (uart_screen, "uart_screen"))
+
+_thread.start_new_thread(sendToServer, ())
 _thread.start_new_thread(sendToClient, ())
 _thread.start_new_thread(sendToScreen, ())

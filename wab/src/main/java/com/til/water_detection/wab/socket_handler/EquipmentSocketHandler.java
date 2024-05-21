@@ -3,6 +3,7 @@ package com.til.water_detection.wab.socket_handler;
 import com.til.water_detection.data.*;
 import com.til.water_detection.data.run_time.ActuatorRuntime;
 import com.til.water_detection.data.run_time.DataTypeRunTime;
+import com.til.water_detection.data.run_time.LoginData;
 import com.til.water_detection.data.state.DataState;
 import com.til.water_detection.data.state.ResultType;
 import com.til.water_detection.data.util.FinalByte;
@@ -43,10 +44,12 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
     protected EquipmentSocketContext mackSocketContext(WebSocketSession session) throws IOException {
         EquipmentSocketContext equipmentSocketContext = new EquipmentSocketContext(session);
 
-        String equipmentName = ((String[]) session.getAttributes().get(FinalString.EQUIPMENT))[0];
+        LoginData loginData = (LoginData) session.getAttributes().get(FinalString.LOGIN_DATA);
 
-        String[] dataTypeList = ((String[]) session.getAttributes().get(FinalString.DATA_TYPE_LIST))[0].split(",");
-        String[] actuatorList = ((String[]) session.getAttributes().get(FinalString.ACTUATOR_LIST))[0].split(",");
+        String equipmentName = loginData.getEquipment();
+
+        List<String> dataTypeList = loginData.getDataNameList();
+        List<String> actuatorList = loginData.getActuatorNameList();
 
         Equipment equipment = equipmentService.getEquipmentByName(equipmentName);
         if (equipment == null) {
@@ -65,8 +68,8 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
 
         List<DataTypeRunTime> dataTypeRunTimeList = new ArrayList<>();
 
-        for (int i = 0; i < dataTypeList.length; i++) {
-            String name = dataTypeList[i];
+        for (int i = 0; i < dataTypeList.size(); i++) {
+            String name = dataTypeList.get(i);
             DataType dataType = dataTypeService.getDataTypeByName(name);
             if (dataType == null) {
                 dataTypeService.registerDataType(name);
@@ -89,8 +92,8 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
 
         List<ActuatorRuntime> actuatorRuntimeList = new ArrayList<>();
 
-        for (int i = 0; i < actuatorList.length; i++) {
-            String name = actuatorList[i];
+        for (int i = 0; i < actuatorList.size(); i++) {
+            String name = actuatorList.get(i);
 
             Actuator actuator = actuatorService.getActuatorByName(name);
 

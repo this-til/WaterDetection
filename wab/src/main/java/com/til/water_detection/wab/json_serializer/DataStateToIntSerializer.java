@@ -5,9 +5,11 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.til.water_detection.data.state.DataState;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+@Component
 public class DataStateToIntSerializer extends JsonSerializer<DataState> {
 
     @Override

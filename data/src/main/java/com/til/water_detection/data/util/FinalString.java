@@ -30,5 +30,7 @@ public class FinalString {
     public static final String UPDATE = "update";
     public static final String REPORT = "report";
 
+    public static final String LOGIN_DATA = "loginData";
+
     public static final String ATTRIBUTES = "attributes";
 }
