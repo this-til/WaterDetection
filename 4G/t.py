@@ -9,6 +9,7 @@ import ujson
 from uio import StringIO
 from misc import Power
 from queue import Queue
+import gc
 
 header = b'\xAA\xAA\xAA'
 footer = b'\xFF\xFF\xFF'
@@ -69,6 +70,11 @@ sentToServerCache: list[bytes] = []
 toBeSentToClient = Queue(16)
 toBeSentToServer = Queue(16)
 toBeSentToScreen = Queue(16)
+
+planExecution = Queue(16)
+
+toBeClientAnalyze: list[bytes] = []
+toBeScreenAnalyze: list[bytes] = []
 
 
 # toBeSentToClientLock = _thread.allocate_lock()
@@ -196,86 +202,64 @@ def w_actuatorList(p: bytes):
 
 
 def w_end(p: bytes):
+    planExecution.put(lambda: connect())
+
+    pass
+
+
+def connect():
+    global loginData
     global cli
 
     if isDebug:
         print("IN END")
 
-    # _url = bytearray()
-    # _url.extend(url)
-    # _url.extend(b'?')
-    # _url.extend(b'username=')
-    # _url.extend(username)
-    # _url.extend(b'&password=')
-    # _url.extend(password)
-    # _url.extend(b'&dataTypeList=')
-    # _url.extend(b','.join(dataNameList))
-    # _url.extend(b'&actuatorList=')
-    # _url.extend(b','.join(actuatorNameList))
-
-    dataNameList = []
+    dataNameList: list[str] = []
     for e in loginData.dataNameList:
         dataNameList.append("\"" + e + "\"")
 
-    actuatorNameList = []
+    actuatorNameList: list[str] = []
     for e in loginData.actuatorNameList:
         actuatorNameList.append("\"" + e + "\"")
 
     json = ("""
-    {
-        "username":"%s",
-        "password":"%s",
-        "equipment":"%s",
-        "dataNameList":[%s],
-        "actuatorNameList":[%s]
-    }
-    """ % (loginData.username,
-           loginData.password,
-           loginData.equipment,
-           ','.join(dataNameList),
-           ','.join(actuatorNameList)))
+        {
+            "username":"%s",
+            "password":"%s",
+            "equipment":"%s",
+            "dataNameList":[%s],
+            "actuatorNameList":[%s]
+        }
+        """ % (loginData.username,
+               loginData.password,
+               loginData.equipment,
+               ','.join(dataNameList),
+               ','.join(actuatorNameList)))
 
     if isDebug:
         print("json", json)
 
-    _loginData = ubinascii.b2a_base64(json.encode()).decode()
+    _loginData = ubinascii.b2a_base64(json.encode()).decode()[0:-1]
 
     if isDebug:
         print("_loginData", _loginData)
 
     _url = url + "?" + "loginData=" + _loginData
 
-    # _url = ("%s?username=%s&password=%s&equipment=%s&dataTypeList=%s&actuatorList=%s" %
-    #         (url, username, password, equipment, ','.join(dataNameList), ','.join(actuatorNameList)))
-
-    # _url = _url.decode()
-
     if isDebug:
         print("uwebsocket url", _url)
 
-    try:
-        cli = uwebsocket.Client.connect(_url, headers=None, debug=isDebug)
-    except Exception as e:
-        if isDebug:
-            print(e)
+    cli = uwebsocket.Client.connect(_url, debug=isDebug)
 
     if isDebug:
         print("cli", cli)
-
-    # global sentToServerCache
-    # for e in sentToServerCache:
-    #     cli.send(e)
-
-    # sentToServerCache.clear()
-    # sentToServerCache = None
-
     pass
 
 
 def uwebsocketMonitoring():
     while True:
+        time.sleep(1)
         if cli is None:
-            time.sleep(1)
             continue
         recv_data = cli.recv()
         if not (isinstance(recv_data, bytes)):
@@ -287,14 +271,15 @@ def uwebsocketMonitoring():
         pack = extractDataBetweenHeaders(recv_data, header, footer)
         if pack is None:
             continue
-        forwardData(pack)
+        forwardData(pack[0])
         pass
 
 
 # 串口监听
 def serialMonitoring(uart, logStr):
+    cache = bytearray()
     while True:
-        time.sleep(0.3)
+        time.sleep(1)
         any = uart.any()
         if any == 0:
             continue
@@ -304,15 +289,17 @@ def serialMonitoring(uart, logStr):
         if isDebug:
             print(logStr, pack)
 
-        pack = extractDataBetweenHeaders(pack, header, footer)
-        if pack is None:
-            continue
-        forwardData(pack)
+        cache.extend(pack)
 
+        pack = extractDataBetweenHeaders(bytes(cache), header, footer)
+        while pack is not None:
+            forwardData(pack[0])
+            cache = cache[pack[1]:]
+            pack = extractDataBetweenHeaders(bytes(cache), header, footer)
     pass
 
 
-def extractDataBetweenHeaders(data: bytes, header: bytes, footer: bytes) -> (bytes, bytes):
+def extractDataBetweenHeaders(data: bytes, header: bytes, footer: bytes) -> (bytes, int) | None:
     """
     从给定的bytes数据中提取帧头和帧尾之间的数据。
 
@@ -322,19 +309,20 @@ def extractDataBetweenHeaders(data: bytes, header: bytes, footer: bytes) -> (byt
     :return: 帧头和帧尾之间的bytes数据，如果没有找到则返回null
     """
     # 寻找帧头的位置
-    header_start = data.find(header)
+    header_start: int = data.find(header)
     if header_start == -1:
         # 没有找到帧头
         return None
 
-    header_end = header_start + len(header)
-    footer_start = data.find(footer, header_end)
+    header_end: int = header_start + len(header)
+    footer_start: int = data.find(footer, header_end)
     if footer_start == -1:
         # 没有找到帧尾，或者帧尾在帧头之前（这通常是不应该发生的）
         return None
 
         # 提取帧头和帧尾之间的数据
-    return data[header_start:footer_start + len(footer)]
+
+    return data[header_start:footer_start + len(footer)], footer_start + len(footer)
 
 
 def forwardData(pack: bytes):
@@ -346,6 +334,7 @@ def forwardData(pack: bytes):
     _header: int = pack[3 + 2]
 
     if isDebug:
+        print("forwardData", pack)
         print("IN FORWARD DATA", "len", len(pack), "_from", _from, "_to", _to, "_header", _header)
 
     if _from == _to:
@@ -428,9 +417,6 @@ def forwardData(pack: bytes):
 
 
 def down(command: CommandCallback):
-    if isDebug:
-        print("DOWN", command.command)
-
     forwardData(command.command)
     commandCallbackList.append(command)
     pass
@@ -491,18 +477,28 @@ def sendToScreen():
     pass
 
 
-reason = Power.powerDownReason()
+powerDownReason = Power.powerDownReason()
+powerOnReason = Power.powerOnReason()
 if isDebug:
-    print("POWER ON REASON", reason)
+    print("powerDownReason", powerDownReason)
+    print("powerOnReason", powerOnReason)
 
+gc.enable()
 init()
 # _thread.start_new_thread(init, ())
-# cli = uwebsocket.Client.connect("wss://113.56.218.150:60762/EquipmentSocket?loginData=CiAgICB7CiAgICAgICAgInVzZXJuYW1lIjoidGlsIiwKICAgICAgICAicGFzc3dvcmQiOiIxMTQ1MTQiLAogICAgICAgICJlcXVpcG1lbnQiOiJBSkNCRCIsCiAgICAgICAgImRhdGFOYW1lTGlzdCI6WyLmuKnluqYiLCJQSCIsIueUteWvvOeOhyIsIua1kea1iuW6piJdLAogICAgICAgICJhY3R1YXRvck5hbWVMaXN0IjpbIuaKpeitpuWZqCIsIuaKpeitpueBryIsIuawtOaztSJdCiAgICB9CiAgICA=", headers=None, debug=True)
+# cli = uwebsocket.Client.connect(
+#    "wss://113.56.218.150:60762/EquipmentSocket?loginData=CiAgICB7CiAgICAgICAgInVzZXJuYW1lIjoidGlsIiwKICAgICAgICAicGFzc3dvcmQiOiIxMTQ1MTQiLAogICAgICAgICJlcXVpcG1lbnQiOiJBSkNCRCIsCiAgICAgICAgImRhdGFOYW1lTGlzdCI6WyLmuKnluqYiLCJQSCIsIueUteWvvOeOhyIsIua1kea1iuW6piJdLAogICAgICAgICJhY3R1YXRvck5hbWVMaXN0IjpbIuaKpeitpuWZqCIsIuaKpeitpueBryIsIuawtOaztSJdCiAgICB9CiAgICA=",
+#     headers=None, debug=True)
 
 _thread.start_new_thread(uwebsocketMonitoring, ())
-_thread.start_new_thread(serialMonitoring, (uart_client, "uart_client"))
-_thread.start_new_thread(serialMonitoring, (uart_screen, "uart_screen"))
+_thread.start_new_thread(serialMonitoring, (uart_client, "uart_client.read()"))
+_thread.start_new_thread(serialMonitoring, (uart_screen, "uart_screen.read()"))
 
 _thread.start_new_thread(sendToServer, ())
 _thread.start_new_thread(sendToClient, ())
 _thread.start_new_thread(sendToScreen, ())
+
+while (True):
+    time.sleep(0.4)
+    while not planExecution.empty():
+        planExecution.get()()
