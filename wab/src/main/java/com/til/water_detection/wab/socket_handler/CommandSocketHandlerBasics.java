@@ -54,7 +54,7 @@ public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> ext
     }
 
     protected void timeoutDetection() {
-        long timeMillis = System.currentTimeMillis() - 60 * 1000;
+        long timeMillis = System.currentTimeMillis() - 10 * 1000;
 
         for (Map.Entry<WebSocketSession, S> entry : map.entrySet()) {
             for (CommandCallback<?> commandCallback : entry.getValue().getCommandCallbacks()) {
@@ -62,10 +62,11 @@ public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> ext
                     continue;
                 }
                 if (commandCallback.getSendTime() < timeMillis) {
-                    try {
-                        entry.getKey().close(CloseStatus.SESSION_NOT_RELIABLE);
-                    } catch (IOException e) {
-                        logger.error("任务超时关闭时发生异常：", e);
+                    commandCallback.outTime(Util.cast(entry.getValue()));
+
+                    if (commandCallback.getTheRemainingNumberOfResends() > 0) {
+                        commandCallback.setTheRemainingNumberOfResends(commandCallback.getTheRemainingNumberOfResends() - 1);
+                        commandCallback.setSend(false);
                     }
                 }
             }
@@ -84,7 +85,7 @@ public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> ext
                     try {
                         key.sendMessage(new BinaryMessage(commandCallback.getCommand()));
                     } catch (IOException e) {
-                        logger.error("发送指令时异常：", e);
+                        logger.error("发送指令异常：", e);
                     }
                 }
                 commandCallback.send();
@@ -110,7 +111,7 @@ public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> ext
     @Override
     protected void handleBinaryMessage(@NotNull WebSocketSession session, @NotNull BinaryMessage message) throws Exception {
         super.handleBinaryMessage(session, message);
-        logger.info("新的消息 id={} remoteAddress={} message={}", session.getId(), session.getRemoteAddress(), message.getPayload());
+        logger.info("新的消息 id={} remoteAddress={} message={}", session.getId(), session.getRemoteAddress(), message.getPayload().array());
 
         S socketContext = map.get(session);
         socketContext.update();
@@ -143,7 +144,9 @@ public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> ext
                 buf.writeByte(FinalByte.ANSWER_BACK);
                 buf.writeInt(id);
                 buf.writeByte(command.getReturnState().getState());
-                buf.writeBytes(command.getInformation());
+                if (command.getInformation() != null) {
+                    buf.writeBytes(command.getInformation());
+                }
                 buf.writeByte(0xff).writeByte(0xff).writeByte(0xff);
             }
             case FinalByte.ANSWER_BACK -> {
@@ -163,24 +166,19 @@ public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> ext
                 }
 
                 if (commandCallback == null) {
-                    session.close(CloseStatus.NOT_ACCEPTABLE.withReason("未知的应答:" + id));
                     return;
                 }
 
                 switch (answerState) {
                     case FinalByte.SUCCESSFUL -> commandCallback.successCallback(byteBuf, Util.cast(socketContext));
-                    case FinalByte.FAIL -> {
-                        commandCallback.failCallback(byteBuf, Util.cast(socketContext));
-                        session.close(CloseStatus.NOT_ACCEPTABLE);
-                    }
-                    case FinalByte.EXCEPTION -> {
-                        commandCallback.exceptionCallback(byteBuf, Util.cast(socketContext));
-                        session.close(CloseStatus.NOT_ACCEPTABLE);
-                    }
+                    case FinalByte.FAIL -> commandCallback.failCallback(byteBuf, Util.cast(socketContext));
+                    case FinalByte.EXCEPTION -> commandCallback.exceptionCallback(byteBuf, Util.cast(socketContext));
                     default -> session.close(CloseStatus.NOT_ACCEPTABLE.withReason("未定状态:" + answerState));
                 }
             }
-            default -> session.close(CloseStatus.NOT_ACCEPTABLE.withReason("未定义头:" + head));
+            default -> {
+                // session.close(CloseStatus.NOT_ACCEPTABLE.withReason("未定义头:" + head));
+            }
         }
 
     }

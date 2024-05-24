@@ -44,6 +44,8 @@ public class FinalByte {
 
     public static final byte S_DATA = 0x01;
     public static final byte S_GPS = 0x02;
+    public static final byte S_DATA_LIST = 0x03;
+    public static final byte S_ACTUATOR_LIST = 0x04;
 
     public static final byte[] FRAME_HEADER = {(byte) 0xAA, (byte) 0xAA, (byte) 0xAA};
     public static final byte[] FRAME_FOOTER = {(byte) 0xFF, (byte) 0xFF, (byte) 0xFF};

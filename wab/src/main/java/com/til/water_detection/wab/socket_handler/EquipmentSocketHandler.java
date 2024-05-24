@@ -495,34 +495,34 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
                                 rule.isExceptionSendMessage());
                         ruleService.updateById(rule.getId(), nRule);
                         dataTypeRunTime.setRule(ruleService.getRuleById(rule.getId()));
-                        return new ReturnPackage(ResultType.SUCCESSFUL, new byte[0]);
+                        return new ReturnPackage(ResultType.SUCCESSFUL, null);
                     }
                     case FinalByte.S_EQUIPMENT_NAME -> {
                         String s = ByteBufUtil.readString(byteBuf, null);
 
                         if (s.isEmpty() || s.length() > 30) {
-                            return new ReturnPackage(ResultType.ERROR, new byte[0]);
+                            return new ReturnPackage(ResultType.ERROR, null);
                         }
 
                         if (s.equals(equipmentSocketContext.getEquipmentRunTime().getEquipment().getName())) {
-                            return new ReturnPackage(ResultType.SUCCESSFUL, new byte[0]);
+                            return new ReturnPackage(ResultType.SUCCESSFUL, null);
                         }
 
                         Equipment equipment = equipmentService.getEquipmentByName(s);
 
                         if (equipment != null) {
-                            return new ReturnPackage(ResultType.FAIL, new byte[0]);
+                            return new ReturnPackage(ResultType.FAIL, null);
                         }
 
                         equipmentService.updateEquipmentAnotherNameById(equipmentSocketContext.getEquipmentRunTime().getEquipment().getId(), s);
 
                         equipmentSocketContext.getEquipmentRunTime().getEquipment().setName(s);
 
-                        return new ReturnPackage(ResultType.SUCCESSFUL, new byte[0]);
+                        return new ReturnPackage(ResultType.SUCCESSFUL, null);
 
                     }
                     default -> {
-                        return new ReturnPackage(ResultType.ERROR, new byte[0]);
+                        return new ReturnPackage(ResultType.ERROR, null);
                     }
                 }
             }
@@ -541,7 +541,7 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
 
                         dataTypeRunTime.setDataState(dataTypeRunTime.getRule().ofDataState(value));
 
-                        return new ReturnPackage(ResultType.SUCCESSFUL, new byte[0]);
+                        return new ReturnPackage(ResultType.SUCCESSFUL, null);
                     }
                     case FinalByte.S_GPS -> {
 
@@ -560,158 +560,38 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
 
                         equipmentSocketContext.getEquipmentRunTime().setEquipment(equipmentService.getEquipmentById(equipment.getId()));
 
-                        return new ReturnPackage(ResultType.SUCCESSFUL, new byte[0]);
+                        return new ReturnPackage(ResultType.SUCCESSFUL, null);
 
                     }
+                    case FinalByte.S_DATA_LIST -> {
+                        equipmentService.updateEquipmentTimeById(equipmentSocketContext.getEquipmentRunTime().getEquipment().getId());
+                        for (DataTypeRunTime dataTypeRunTime : equipmentSocketContext.getEquipmentRunTime().getDataTypeRuntimeList()) {
+                            float value = (float) ((double) byteBuf.readInt() / 10000d);
+                            dataService.addData(new Data(0L, equipmentSocketContext.getEquipmentRunTime().getEquipment().getId(), dataTypeRunTime.getDataType().getId(), null, value));
+                            dataTypeRunTime.setDataState(dataTypeRunTime.getRule().ofDataState(value));
+                        }
+                        return new ReturnPackage(ResultType.SUCCESSFUL, null);
+                    }
+                    case FinalByte.S_ACTUATOR_LIST -> {
+                        for (ActuatorRuntime actuatorRuntime : equipmentSocketContext.getEquipmentRunTime().getActuatorRuntimeList()) {
+                            boolean run = byteBuf.readBoolean();
+                            actuatorRuntime.setActivated(run);
+                        }
+                        return new ReturnPackage(ResultType.SUCCESSFUL, null);
+                    }
+
                     default -> {
-                        return new ReturnPackage(ResultType.ERROR, new byte[0]);
+                        return new ReturnPackage(ResultType.ERROR, null);
                     }
                 }
             }
             case FinalByte.S_TIME -> {
-                return new ReturnPackage(ResultType.SUCCESSFUL, Unpooled.buffer().writeLong(System.currentTimeMillis()).array());
+                return new ReturnPackage(ResultType.SUCCESSFUL, Unpooled.buffer().writeLong(System.currentTimeMillis()));
             }
             default -> {
-                return new ReturnPackage(ResultType.ERROR, new byte[0]);
+                return new ReturnPackage(ResultType.ERROR, null);
             }
         }
 
     }
-
-/*    @Override
-    protected ReturnPackage command(String[] pack, EquipmentSocketContext equipmentSocketContext) {
-        if (!equipmentSocketContext.isInit()) {
-            return super.command(pack, equipmentSocketContext);
-        }
-
-
-     *//*   switch (pack[0]) {
-            case FinalString.REPORT -> {
-                if (pack.length < 3) {
-                    return new ReturnPackage(ReturnState.FAIL, "指令位数不符合标准");
-                }
-                String dataTypeName = pack[1];
-                DataType dataType = dataTypeService.getDataTypeByName(dataTypeName);
-                if (dataType == null) {
-                    return new ReturnPackage(ReturnState.FAIL, "未知的数据类型");
-                }
-                float value;
-                try {
-                    value = Float.parseFloat(pack[2]);
-                } catch (NumberFormatException e) {
-                    return new ReturnPackage(ReturnState.FAIL, "数据错误");
-                }
-                dataService.addData(new Data(0, equipmentSocketContext.getEquipment().getId(), dataType.getId(), null, value));
-                return new ReturnPackage(ReturnState.SUCCESSFUL);
-            }
-
-            case FinalString.UPDATE -> {
-                switch (pack[1]) {
-                    case FinalString.RULE -> {
-                        if (pack.length < 7) {
-                            return new ReturnPackage(ReturnState.FAIL, "指令位数不符合标准");
-                        }
-                        DataType dataType = dataTypeService.getDataTypeByName(pack[2]);
-                        if (dataType == null) {
-                            return new ReturnPackage(ReturnState.FAIL, "未知的数据类型");
-                        }
-                        Rule rule = ruleService.getRuleByLimitId(equipmentSocketContext.getEquipment().getId(), dataType.getId());
-                        if (rule == null) {
-                            return new ReturnPackage(ReturnState.FAIL, "未知的规则");
-                        }
-                        float exceptionUpper;
-                        float warnUpper;
-                        float warnLower;
-                        float exceptionLower;
-                        try {
-                            exceptionUpper = Float.parseFloat(pack[3]);
-                            warnUpper = Float.parseFloat(pack[4]);
-                            warnLower = Float.parseFloat(pack[5]);
-                            exceptionLower = Float.parseFloat(pack[6]);
-                        } catch (NumberFormatException e) {
-                            return new ReturnPackage(ReturnState.FAIL, "数据错误");
-                        }
-                        rule.setExceptionLower(exceptionLower);
-                        rule.setExceptionUpper(exceptionUpper);
-                        rule.setWarnLower(warnLower);
-                        rule.setWarnUpper(warnUpper);
-                        ruleService.updateById(rule.getId(), rule);
-                        return new ReturnPackage(ReturnState.SUCCESSFUL);
-                    }
-
-                    case FinalString.COMMAND -> {
-                        if (pack.length < 8) {
-                            return new ReturnPackage(ReturnState.FAIL, "指令位数不符合标准");
-                        }
-                        int commandId;
-
-                        try {
-                            commandId = Integer.parseInt(pack[2]);
-                        } catch (NumberFormatException e) {
-                            return new ReturnPackage(ReturnState.FAIL, "ID错误");
-                        }
-
-                        Command command = commandService.getCommandById(commandId);
-
-                        if (command == null) {
-                            return new ReturnPackage(ReturnState.FAIL, "未知的指令");
-                        }
-
-                        DataType dataType = dataTypeService.getDataTypeByName(pack[3]);
-                        if (dataType == null) {
-                            return new ReturnPackage(ReturnState.FAIL, "未知的数据类型");
-                        }
-
-                        Rule rule = ruleService.getRuleByLimitId(equipmentSocketContext.getEquipment().getId(), dataType.getId());
-                        if (rule == null) {
-                            return new ReturnPackage(ReturnState.FAIL, "未知的规则");
-                        }
-
-                        if (rule.getEquipmentId() != equipmentSocketContext.getEquipment().getId()) {
-                            return new ReturnPackage(ReturnState.FAIL, "越界");
-                        }
-
-                        String actuatorName = pack[4];
-
-                        Actuator actuator = actuatorService.getActuatorByName(actuatorName);
-                        if (actuator == null) {
-                            return new ReturnPackage(ReturnState.FAIL, "未知的执行器");
-                        }
-                        String commandTrigger = pack[5];
-                        String[] split = commandTrigger.split("\\|");
-                        List<CommandTrigger> commandTriggers = new ArrayList<>();
-                        for (String s : split) {
-                            try {
-                                commandTriggers.add(CommandTrigger.valueOf(s));
-                            } catch (Exception e) {
-                                return new ReturnPackage(ReturnState.FAIL, "未定义的 CommandTrigger");
-                            }
-                        }
-                        int _commandTrigger = CommandTrigger.of(commandTriggers);
-
-                        float upper;
-                        float low;
-
-                        try {
-                            upper = Float.parseFloat(pack[6]);
-                            low = Float.parseFloat(pack[7]);
-                        } catch (Exception e) {
-                            return new ReturnPackage(ReturnState.FAIL, "数据错误");
-                        }
-                        command.setRuleId(rule.getId());
-                        command.setCommandTrigger(_commandTrigger);
-                        command.setActuatorId(actuator.getId());
-                        command.setLow(low);
-                        command.setUpper(upper);
-                        commandService.updateCommand(command.getRuleId(), command);
-                        return new ReturnPackage(ReturnState.SUCCESSFUL);
-                    }
-
-
-                }
-            }
-
-        }*//*
-        return super.command(pack, equipmentSocketContext);
-    }*/
 }

@@ -6,6 +6,7 @@ import io.netty.buffer.CompositeByteBuf;
 import io.netty.buffer.EmptyByteBuf;
 import io.netty.buffer.Unpooled;
 import lombok.Getter;
+import lombok.Setter;
 import org.apache.ibatis.javassist.bytecode.ByteArray;
 import org.springframework.core.codec.ByteBufferEncoder;
 import io.netty.buffer.ByteBuf;
@@ -18,8 +19,12 @@ public class CommandCallback<S extends SocketContext<?>> {
     public final byte[] command;
     public final int cId;
 
+    @Setter
     public boolean send;
     public long sendTime;
+
+    @Setter
+    public int theRemainingNumberOfResends = 5;
 
     private static int id;
 

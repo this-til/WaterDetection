@@ -164,6 +164,7 @@ url?username={username}&password={password}&equipment={equipment}&dataTypeList=a
 
 - reporting data 0201{int:dataType.index}{value}
 - reporting GPS 0202{float:longitude}{float:latitude}
+- reporting dataList 0203{list::dataList}
 
 - time 03 -> {long}
 
