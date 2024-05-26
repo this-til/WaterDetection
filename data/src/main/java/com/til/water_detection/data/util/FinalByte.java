@@ -52,45 +52,44 @@ public class FinalByte {
 
     //public static final byte S_EQUIPMENT_NAME_SUCCESSFUL = 0x01;
     //public static final byte S_EQUIPMENT_NAME_DUPLICATE_NAME = 0x02;
+    public static byte[] extractFrame(byte[] buffer, byte[] FRAME_HEADER, byte[] FRAME_FOOTER) {
+        if (buffer == null || FRAME_HEADER == null || FRAME_FOOTER == null || buffer.length < FRAME_HEADER.length + FRAME_FOOTER.length) {
+            return null; // 无效输入或buffer太短
+        }
 
-    public static ByteBuffer extractFrame(ByteBuffer buffer, byte[] FRAME_HEADER, byte[] FRAME_FOOTER) {
-        while (buffer.remaining() >= FRAME_HEADER.length) {
-            // 检查是否找到帧头
-            int headerPosition = buffer.position();
-            for (byte b : FRAME_HEADER) {
-                if (buffer.get(buffer.position()) != b) {
-                    buffer.position(headerPosition + 1); // 移动到下一个字节并继续搜索
+        int headerIndex = indexOf(buffer, FRAME_HEADER, 0);
+        if (headerIndex == -1) {
+            return null; // 未找到帧头
+        }
+
+        int footerIndex = indexOf(buffer, FRAME_FOOTER, headerIndex + FRAME_HEADER.length);
+        if (footerIndex == -1) {
+            return null; // 未找到帧尾
+        }
+
+        // 提取帧数据（不包括帧头和帧尾）
+        int frameLength = footerIndex - headerIndex - FRAME_HEADER.length;
+        byte[] frameData = new byte[frameLength];
+        System.arraycopy(buffer, headerIndex + FRAME_HEADER.length, frameData, 0, frameLength);
+
+        return frameData;
+    }
+
+    // 辅助方法：从buffer的指定位置开始查找子数组
+    public static int indexOf(byte[] buffer, byte[] subArray, int fromIndex) {
+        for (int i = fromIndex; i <= buffer.length - subArray.length; i++) {
+            int j;
+            for (j = 0; j < subArray.length; j++) {
+                if (buffer[i + j] != subArray[j]) {
                     break;
                 }
-                buffer.position(buffer.position() + 1);
             }
-
-            // 如果找到帧头，则尝试提取帧内容
-            if (buffer.remaining() >= FRAME_HEADER.length + FRAME_FOOTER.length) {
-                ByteBuffer frameBuffer = ByteBuffer.allocate(buffer.remaining() - FRAME_FOOTER.length);
-                frameBuffer.put(buffer.array(), buffer.position(), buffer.remaining() - FRAME_FOOTER.length);
-                frameBuffer.flip();
-
-                // 搜索帧尾
-                boolean foundFooter = false;
-                for (int i = 0; i < FRAME_FOOTER.length; i++) {
-                    if (frameBuffer.get(frameBuffer.limit() - FRAME_FOOTER.length + i) != FRAME_FOOTER[i]) {
-                        foundFooter = false;
-                        break;
-                    }
-                    foundFooter = true;
-                }
-
-                // 如果找到帧尾，则截断缓冲区并返回它
-                if (foundFooter) {
-                    frameBuffer.limit(frameBuffer.limit() - FRAME_FOOTER.length);
-                    buffer.position(buffer.position() + frameBuffer.limit() + FRAME_FOOTER.length); // 移动到下一个帧的开始
-                    return frameBuffer;
-                }
+            if (j == subArray.length) {
+                return i; // 找到子数组
             }
         }
-        // 如果没有找到帧，则返回null或抛出异常
-        return null;
+        return -1; // 未找到子数组
     }
+
 
 }

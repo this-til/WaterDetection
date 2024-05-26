@@ -131,6 +131,7 @@ export const EquipmentApi = {
     getEquipmentByName: (name: string): Promise<AxiosResponse<Result<Equipment>>> => api.get('/equipment/getEquipmentByName', {params: {name}}),
     getAllEquipment: (): Promise<AxiosResponse<Result<Equipment[]>>> => api.get('/equipment/getAllEquipment'),
     getAllOnlineEquipment: (): Promise<AxiosResponse<Result<Equipment[]>>> => api.get('/equipment/getAllOnlineEquipment'),
+    getAllOnlineEquipmentId:() : Promise<AxiosResponse<Result<number[]>>> => api.get('/equipment/getAllOnlineEquipmentId'),
     getOnlineEquipment: (id: number): Promise<AxiosResponse<Result<Equipment[]>>> => api.get('/equipment/getOnlineEquipment', {params: {id}}),
     getEquipmentByIdArray: (idArray: number[]): Promise<AxiosResponse<Result<Equipment[]>>> => api.get('/equipment/getEquipmentByIdArray', {params: {id: idArray.join(',')}}),
     getEquipmentByNameArray: (nameArray: string[]): Promise<AxiosResponse<Result<Equipment[]>>> => api.get('/equipment/getEquipmentByNameArray', {params: {name: nameArray.join(',')}}),

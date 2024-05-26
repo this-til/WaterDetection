@@ -5,20 +5,20 @@
 
     <el-divider direction="vertical"/>
 
-    <el-popover
-        width="300"
-        trigger="click"
-        placement="bottom"
-        @before-enter="clickRename"
-    >
-      <template #reference>
-        <el-button style="margin-right: 16px">重命名</el-button>
-      </template>
+    <!--    <el-popover
+            width="300"
+            trigger="click"
+            placement="bottom"
+            @before-enter="clickRename"
+        >
+          <template #reference>
+            <el-button style="margin-right: 16px">重命名</el-button>
+          </template>
 
-      <el-input v-model="newEquipmentName"/>
-      <el-button @click=upEquipmentName>确定</el-button>
+          <el-input v-model="newEquipmentName"/>
+          <el-button @click=upEquipmentName>确定</el-button>
 
-    </el-popover>
+        </el-popover>-->
 
     <el-divider direction="vertical"/>
 

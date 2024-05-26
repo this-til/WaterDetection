@@ -14,6 +14,7 @@ import com.til.water_detection.wab.util.ByteBufUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import jakarta.annotation.Resource;
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -118,6 +119,17 @@ public class EquipmentController {
                         .stream()
                         .map(EquipmentSocketContext::getEquipmentRunTime)
                         .map(EquipmentRunTime::getEquipment)
+                        .toList());
+    }
+
+    @GetMapping("/getAllOnlineEquipmentId")
+    public Result<List<Integer>> getAllOnlineEquipmentId() {
+        return new Result<>(ResultType.SUCCESSFUL, null,
+                equipmentSocketHandler.getSocketContext()
+                        .stream()
+                        .map(EquipmentSocketContext::getEquipmentRunTime)
+                        .map(EquipmentRunTime::getEquipment)
+                        .map(Equipment::getId)
                         .toList());
     }
 

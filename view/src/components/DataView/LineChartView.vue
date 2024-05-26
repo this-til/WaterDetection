@@ -48,23 +48,39 @@ const update = () => {
 
   const series = []
 
+  const eName = []
   for (let i = 0; i < data.equipmentList.length; i++) {
     series.push({
       name: data.equipmentList[i].name,
       type: 'line',
+      stack: 'Total',
       data: data.value[i],
     })
+    eName.push(data.equipmentList[i].name)
   }
 
   lineChart.setOption(markRaw({
-    tooltip: {},
+    tooltip: {
+      trigger: 'axis'
+    },
+    legend: {
+      data: eName
+    },
+    toolbox: {
+      feature: {
+        saveAsImage: {}
+      }
+    },
+    grid: {
+      containLabel: true
+    },
     xAxis: {
       type: 'category',
-      data: timestampList
+      data: timestampList,
+      boundaryGap: false,
     },
     yAxis: {
       type: 'value',
-      name: '值'
     },
     series: series
   }), true, false);

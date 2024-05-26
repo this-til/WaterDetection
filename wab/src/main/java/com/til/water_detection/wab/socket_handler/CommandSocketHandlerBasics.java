@@ -1,6 +1,8 @@
 package com.til.water_detection.wab.socket_handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.til.water_detection.data.Tag;
+import com.til.water_detection.data.state.ResultType;
 import com.til.water_detection.data.util.FinalByte;
 import com.til.water_detection.data.util.FinalString;
 import com.til.water_detection.data.util.Util;
@@ -21,6 +23,7 @@ import org.springframework.web.socket.handler.AbstractWebSocketHandler;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -118,18 +121,19 @@ public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> ext
 
         ByteBuffer byteBuffer = message.getPayload();
 
-        ByteBuffer _byteBuffer = FinalByte.extractFrame(byteBuffer, FinalByte.FRAME_HEADER, FinalByte.FRAME_FOOTER);
+        byte[] _byteBuffer = FinalByte.extractFrame(byteBuffer.array(), FinalByte.FRAME_HEADER, FinalByte.FRAME_FOOTER);
         if (_byteBuffer == null) {
             return;
         }
         ByteBuf byteBuf = Unpooled.copiedBuffer(_byteBuffer);
-
         byte from = byteBuf.readByte();
         byte to = byteBuf.readByte();
         byte head = byteBuf.readByte();
         int id = byteBuf.readInt();
 
-        if (id != FinalByte.SERVER) {
+        Tag tag = new Tag(from, to, head, id, (byte) 0);
+
+        if (to != FinalByte.SERVER) {
             synchronized (session) {
                 session.sendMessage(new BinaryMessage(byteBuffer));
             }
@@ -137,21 +141,29 @@ public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> ext
 
         switch (head) {
             case FinalByte.ORDER -> {
-                ReturnPackage command = command(byteBuf, socketContext);
                 ByteBuf buf = Unpooled.buffer();
                 buf.writeByte(to);
                 buf.writeByte(from);
                 buf.writeByte(FinalByte.ANSWER_BACK);
                 buf.writeInt(id);
-                buf.writeByte(command.getReturnState().getState());
-                if (command.getInformation() != null) {
-                    buf.writeBytes(command.getInformation());
+                try {
+                    command(byteBuf, buf, tag, socketContext);
+                } catch (Exception e) {
+                    logger.error(e);
+                    buf = Unpooled.buffer();
+                    buf.writeByte(to);
+                    buf.writeByte(from);
+                    buf.writeByte(FinalByte.ANSWER_BACK);
+                    buf.writeInt(id);
+                    buf.writeByte(ResultType.ERROR.getState());
+                    buf.writeBytes(e.getMessage().getBytes(StandardCharsets.UTF_8));
                 }
                 buf.writeByte(0xff).writeByte(0xff).writeByte(0xff);
             }
             case FinalByte.ANSWER_BACK -> {
 
                 byte answerState = byteBuf.readByte();
+                tag.setAnswerState(answerState);
 
                 CommandCallback<?> commandCallback = null;
 
@@ -173,11 +185,12 @@ public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> ext
                     case FinalByte.SUCCESSFUL -> commandCallback.successCallback(byteBuf, Util.cast(socketContext));
                     case FinalByte.FAIL -> commandCallback.failCallback(byteBuf, Util.cast(socketContext));
                     case FinalByte.EXCEPTION -> commandCallback.exceptionCallback(byteBuf, Util.cast(socketContext));
-                    default -> session.close(CloseStatus.NOT_ACCEPTABLE.withReason("未定状态:" + answerState));
+                    default -> {
+                        return;
+                    }
                 }
-            }
-            default -> {
-                // session.close(CloseStatus.NOT_ACCEPTABLE.withReason("未定义头:" + head));
+
+                socketContext.getCommandCallbacks().remove(commandCallback);
             }
         }
 
@@ -261,7 +274,7 @@ public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> ext
         }
     }*/
 
-    protected abstract ReturnPackage command(ByteBuf byteBuf, S s);
+    protected abstract void command(ByteBuf source, ByteBuf output, Tag tag, S s);
 
     public Collection<S> getSocketContext() {
         return map.values();

@@ -38,7 +38,7 @@
                   @click=displayEquipmentView(e)
               >
                 <template #title>{{ e.name }} ({{
-                    allOnlineEquipment.indexOf(e) !== -1 ? ("在线") : ("离线")
+                    allOnlineEquipment.indexOf(e.id) >= 0 ? ("在线") : ("离线")
                                  }})
                 </template>
 
@@ -78,7 +78,6 @@
         <EquipmentView
             v-else-if=isEquipmentView
             :equipment=useEquipment
-            :online=" allOnlineEquipment.indexOf(useEquipment) !== -1 "
             @needUp="needUp"
         >
 
@@ -141,7 +140,7 @@ const isSet = ref<boolean>(false)
 
 const allDataType = ref<DataType[]>([])
 const allEquipment = ref<Equipment[]>([])
-const allOnlineEquipment = ref<Equipment[]>([])
+const allOnlineEquipment = ref<number[]>([])
 
 const erase = () => {
   isDataView.value = false
@@ -183,7 +182,7 @@ const up = () => {
   EquipmentApi.getAllEquipment().then(r => {
     allEquipment.value = r.data.data == null ? [] : r.data.data
   })
-  EquipmentApi.getAllOnlineEquipment().then(r => {
+  EquipmentApi.getAllOnlineEquipmentId().then(r => {
     allOnlineEquipment.value = r.data.data == null ? [] : r.data.data
   })
 }
