@@ -31,6 +31,7 @@ public class FinalString {
     public static final String REPORT = "report";
 
     public static final String LOGIN_DATA = "loginData";
-
     public static final String ATTRIBUTES = "attributes";
+    public static final String TOKEN = "token";
+    public static final String STRING = "siberianGiantCat";
 }

@@ -120,7 +120,14 @@ import DataView from "@/components/DataView/DataView.vue";
 import OrderView from "@/components/OrderView.vue";
 import SetView from "@/components/SetView.vue";
 import EquipmentView from "@/components/EquipmentView/EquipmentView.vue"
-import {DataType, Equipment, DataApi, EquipmentApi, DataTypeApi} from "@/api";
+import {DataType, Equipment, DataApi, EquipmentApi, DataTypeApi, _token} from "@/api";
+import {useRouter} from "vue-router";
+
+const router = useRouter();
+
+if (_token == null || _token == "") {
+  router.replace({path: "/login"});
+}
 
 const handleOpen = (key: string, keyPath: string[]) => {
   console.log(key, keyPath)

@@ -30,7 +30,15 @@ public class Main {
 
         IAPI iapi = retrofit.create(IAPI.class);
 
-        Response<Result<List<Equipment>>> allEquipmentExecute = iapi.getAllEquipment().execute();
+        Response<Result<String>> login = iapi.login("til", "114514").execute();
+        assert login.isSuccessful();
+        Result<String> loginBody = login.body();
+
+        assert loginBody != null;
+        assert loginBody.getResultType() == ResultType.SUCCESSFUL;
+        assert loginBody.getData() != null;
+
+        Response<Result<List<Equipment>>> allEquipmentExecute = iapi.getAllEquipment(loginBody.getData()).execute();
 
         assert allEquipmentExecute.isSuccessful();
 
@@ -42,7 +50,7 @@ public class Main {
         assert !allEquipmentBody.getData().isEmpty();
 
 
-        Response<Result<List<DataType>>> allDataTypeExecute = iapi.getAllDataType().execute();
+        Response<Result<List<DataType>>> allDataTypeExecute = iapi.getAllDataType(loginBody.getData()).execute();
 
         assert allDataTypeExecute.isSuccessful();
 
@@ -62,7 +70,7 @@ public class Main {
         for (Equipment equipment : allEquipment) {
             for (DataType dataType : allDataType) {
                 packList.add(new Pack(new PerlinNoise(), equipment, dataType, i));
-                i  += 0.1f;
+                i += 0.1f;
             }
         }
 
@@ -83,7 +91,7 @@ public class Main {
             }*/
 
 
-            Response<Result<Void>> execute = iapi.addDataList(dataList).execute();
+            Response<Result<Void>> execute = iapi.addDataList(loginBody.getData(), dataList).execute();
 
             assert execute.isSuccessful();
             assert execute.body() != null;

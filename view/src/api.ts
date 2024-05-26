@@ -1,48 +1,66 @@
 import axios, {AxiosResponse} from 'axios';
 import {ElMessage} from "element-plus";
+import {AxiosInstance} from "axios/index";
 
 const apiString = () => {
     return "/api"
 };
-const api = axios.create({
-    headers: {
-        'Content-Type': 'application/json',
-    },
-    baseURL: apiString(),
-});
+var api: AxiosInstance;
+addToken('')
+export var _token: string = '';
 
-api.interceptors.response.use(function (response) {
-    // 对响应数据做点什么
-    // 例如，你可以在这里处理错误代码
+export function addToken(token: string) {
+    _token = token
+    api = axios.create({
+        headers: {
+            'Content-Type': 'application/json',
+            'token': token
+        },
+        baseURL: apiString(),
+    });
+    api.interceptors.response.use(function (response) {
+        // 对响应数据做点什么
+        // 例如，你可以在这里处理错误代码
 
-    switch (response.data.resultType) {
-        case 'FAIL':
+        switch (response.data.resultType) {
+            case 'FAIL':
 
-            ElMessage({
-                message: '执行失败:' + response.data.message,
-                type: 'warning',
-            })
-            break
-        case 'ERROR':
-            ElMessage({
-                message: '执行错误:' + response.data.message,
-                type: 'error',
-            })
-            break
-    }
+                ElMessage({
+                    message: '执行失败:' + response.data.message,
+                    type: 'warning',
+                })
+                break
+            case 'ERROR':
+                ElMessage({
+                    message: '执行错误:' + response.data.message,
+                    type: 'error',
+                })
+                break
+        }
 
 
-    if (response.data.errorCode) {
-        return Promise.reject(response.data.errorMessage);
-    }
-    return response;
-}, function (error) {
-    ElMessage({
-        message: '响应错误:' + error.message,
-        type: 'error',
-    })
-    return Promise.reject(error);
-});
+        if (response.data.errorCode) {
+            return Promise.reject(response.data.errorMessage);
+        }
+        return response;
+    }, function (error) {
+        ElMessage({
+            message: '响应错误:' + error.message,
+            type: 'error',
+        })
+        return Promise.reject(error);
+    });
+}
+
+
+export const LoginApi = {
+    login: (username: string, password: string): Promise<AxiosResponse<Result<string>>> => api.post('/login', null, {
+        params: {
+            username,
+            password
+        }
+    }),
+}
 
 
 export const CommandApi = {
@@ -131,7 +149,7 @@ export const EquipmentApi = {
     getEquipmentByName: (name: string): Promise<AxiosResponse<Result<Equipment>>> => api.get('/equipment/getEquipmentByName', {params: {name}}),
     getAllEquipment: (): Promise<AxiosResponse<Result<Equipment[]>>> => api.get('/equipment/getAllEquipment'),
     getAllOnlineEquipment: (): Promise<AxiosResponse<Result<Equipment[]>>> => api.get('/equipment/getAllOnlineEquipment'),
-    getAllOnlineEquipmentId:() : Promise<AxiosResponse<Result<number[]>>> => api.get('/equipment/getAllOnlineEquipmentId'),
+    getAllOnlineEquipmentId: (): Promise<AxiosResponse<Result<number[]>>> => api.get('/equipment/getAllOnlineEquipmentId'),
     getOnlineEquipment: (id: number): Promise<AxiosResponse<Result<Equipment[]>>> => api.get('/equipment/getOnlineEquipment', {params: {id}}),
     getEquipmentByIdArray: (idArray: number[]): Promise<AxiosResponse<Result<Equipment[]>>> => api.get('/equipment/getEquipmentByIdArray', {params: {id: idArray.join(',')}}),
     getEquipmentByNameArray: (nameArray: string[]): Promise<AxiosResponse<Result<Equipment[]>>> => api.get('/equipment/getEquipmentByNameArray', {params: {name: nameArray.join(',')}}),
