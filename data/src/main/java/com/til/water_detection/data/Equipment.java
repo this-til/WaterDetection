@@ -20,4 +20,5 @@ public class Equipment {
     private boolean electronicFence;
     private float fenceLongitude;
     private float fenceLatitude;
+    private float fenceRange;
 }

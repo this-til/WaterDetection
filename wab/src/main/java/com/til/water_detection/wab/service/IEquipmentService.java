@@ -16,7 +16,7 @@ public interface IEquipmentService {
 
     int updateEquipmentPosById(int id, float longitude, float latitude);
 
-    int updateEquipmentFencePosById(int id,boolean electronicFence, float longitude, float latitude);
+    int updateEquipmentFencePosById(int id,boolean electronicFence, float longitude, float latitude, float range);
 
     List<Equipment> getAllEquipment();
 

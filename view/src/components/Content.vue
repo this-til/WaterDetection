@@ -33,6 +33,14 @@
               </template>
 
               <el-menu-item
+                  @click="displayAllEquipmentView"
+              >
+
+                <template #title>-总览-</template>
+
+              </el-menu-item>
+
+              <el-menu-item
                   v-for="e in allEquipment"
                   :index="'2-' + e.id"
                   @click=displayEquipmentView(e)
@@ -74,6 +82,14 @@
             :equipmentList=allEquipment
             :dataType=useDataType>
         </DataView>
+
+        <AllEquipmentView
+            v-else-if=isAllEquipmentView
+            :allEquipment="allEquipment"
+            :allOnlineEquipment="allOnlineEquipment"
+        >
+
+        </AllEquipmentView>
 
         <EquipmentView
             v-else-if=isEquipmentView
@@ -122,6 +138,7 @@ import SetView from "@/components/SetView.vue";
 import EquipmentView from "@/components/EquipmentView/EquipmentView.vue"
 import {DataType, Equipment, DataApi, EquipmentApi, DataTypeApi, _token} from "@/api";
 import {useRouter} from "vue-router";
+import AllEquipmentView from "@/components/EquipmentView/AllEquipmentView.vue";
 
 const router = useRouter();
 
@@ -142,6 +159,8 @@ const useDataType = ref<DataType>(undefined)
 const isEquipmentView = ref<boolean>(false)
 const useEquipment = ref<Equipment>(undefined)
 
+const isAllEquipmentView = ref<boolean>(false)
+
 const isOrder = ref<boolean>(false)
 const isSet = ref<boolean>(false)
 
@@ -153,6 +172,7 @@ const erase = () => {
   isDataView.value = false
   useDataType.value = undefined
 
+  isAllEquipmentView.value = false
   isEquipmentView.value = false
   useEquipment.value = undefined
 
@@ -164,6 +184,11 @@ const displayDataView = (dataType: DataType) => {
   erase()
   isDataView.value = true
   useDataType.value = dataType
+}
+
+const displayAllEquipmentView = () => {
+  erase()
+  isAllEquipmentView.value = true
 }
 
 const displayEquipmentView = (equipment: Equipment) => {

@@ -24,7 +24,7 @@ public class CommandCallback<S extends SocketContext<?>> {
     public long sendTime;
 
     @Setter
-    public int theRemainingNumberOfResends = 5;
+    public int theRemainingNumberOfResends ;
 
     private static int id;
 

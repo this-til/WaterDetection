@@ -41,8 +41,8 @@ public class EquipmentIdServiceImpl implements IEquipmentService {
     }
 
     @Override
-    public int updateEquipmentFencePosById(int id, boolean electronicFence, float longitude, float latitude) {
-        return equipmentMapper.updateEquipmentFencePosById(id, electronicFence , longitude, latitude);
+    public int updateEquipmentFencePosById(int id, boolean electronicFence, float longitude, float latitude, float range) {
+        return equipmentMapper.updateEquipmentFencePosById(id, electronicFence , longitude, latitude, range);
     }
 
     @Override

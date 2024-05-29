@@ -137,12 +137,13 @@ export const EquipmentApi = {
             longitude
         }
     }),
-    updateEquipmentFencePosById: (id: number, electronicFence: boolean, longitude: number, latitude: number): Promise<AxiosResponse<Result<void>>> => api.put('equipment/updateEquipmentFencePosById', null, {
+    updateEquipmentFencePosById: (id: number, electronicFence: boolean, longitude: number, latitude: number, range: number): Promise<AxiosResponse<Result<void>>> => api.put('equipment/updateEquipmentFencePosById', null, {
         params: {
             id,
             latitude,
             longitude,
-            electronicFence
+            electronicFence,
+            range
         }
     }),
     getEquipmentById: (id: number): Promise<AxiosResponse<Result<Equipment>>> => api.get('/equipment/getEquipmentById', {params: {id}}),
@@ -169,6 +170,13 @@ export const RuleApi = {
 export const ActuatorApi = {
     registerActuator: (name: string): Promise<AxiosResponse<Result<void>>> => api.post('/actuator/registerActuator', {name}),
     removeActuatorById: (id: number): Promise<AxiosResponse<Result<void>>> => api.delete('/actuator/removeActuatorById', {params: {id}}),
+    updateActuatorByEquipmentId: (equipmentId: number, embeddedId: number, open: boolean): Promise<AxiosResponse<Result<void>>> => api.put('/actuator/updateActuatorByEquipmentId', null, {
+        params: {
+            equipmentId,
+            embeddedId,
+            open
+        }
+    }),
     getActuatorById: (id: number): Promise<AxiosResponse<Result<Actuator>>> => api.get('/actuator/getActuatorById', {params: {id}}),
     getActuatorByName: (name: string): Promise<AxiosResponse<Result<Actuator>>> => api.get('/actuator/getActuatorByName', {params: {name}}),
     getAllActuator: (): Promise<AxiosResponse<Result<Actuator[]>>> => api.get('/actuator/getAllActuator'),
@@ -220,6 +228,7 @@ export interface Equipment {
     electronicFence: boolean
     fenceLongitude: number
     fenceLatitude: number
+    fenceRange: number
 }
 
 export interface DataSheet {

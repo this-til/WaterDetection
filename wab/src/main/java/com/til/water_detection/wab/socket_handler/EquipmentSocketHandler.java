@@ -3,6 +3,7 @@ package com.til.water_detection.wab.socket_handler;
 import com.til.water_detection.data.*;
 import com.til.water_detection.data.run_time.ActuatorRuntime;
 import com.til.water_detection.data.run_time.DataTypeRunTime;
+import com.til.water_detection.data.run_time.EquipmentRunTime;
 import com.til.water_detection.data.run_time.LoginData;
 import com.til.water_detection.data.state.DataState;
 import com.til.water_detection.data.state.ResultType;
@@ -16,7 +17,9 @@ import com.til.water_detection.wab.socket_data.ReturnPackage;
 import com.til.water_detection.wab.util.ByteBufUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import jakarta.annotation.Nullable;
 import jakarta.annotation.Resource;
+import lombok.Getter;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -27,16 +30,22 @@ import java.util.*;
 @Controller
 public class EquipmentSocketHandler extends CommandSocketHandlerBasics<EquipmentSocketContext> {
     @Resource
+    @Getter
     private IEquipmentService equipmentService;
     @Resource
+    @Getter
     private IDataService dataService;
     @Resource
+    @Getter
     private IDataTypeService dataTypeService;
     @Resource
+    @Getter
     private IActuatorService actuatorService;
     @Resource
+    @Getter
     private IRuleService ruleService;
     @Resource
+    @Getter
     private ICommandService commandService;
 
     private List<ComEntry<EquipmentSocketContext>> rootComEntryList;
@@ -71,7 +80,7 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
                     equipment.setUpTime(new Timestamp(System.currentTimeMillis()));
 
                     if (equipment.isElectronicFence() && equipment.getLongitude() == 0 && equipment.getLatitude() == 0) {
-                        equipmentService.updateEquipmentFencePosById(equipment.getId(), true, longitude, latitude);
+                        equipmentService.updateEquipmentFencePosById(equipment.getId(), true, longitude, latitude, equipment.getFenceRange());
                     }
 
                     c.getEquipmentRunTime().setEquipment(equipmentService.getEquipmentById(equipment.getId()));
@@ -162,7 +171,7 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
 
     @Override
     protected EquipmentSocketContext mackSocketContext(WebSocketSession session) throws IOException {
-        EquipmentSocketContext equipmentSocketContext = new EquipmentSocketContext(session);
+        EquipmentSocketContext equipmentSocketContext = new EquipmentSocketContext(session, this);
 
         LoginData loginData = (LoginData) session.getAttributes().get(FinalString.LOGIN_DATA);
 
@@ -231,12 +240,11 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
         }
 
         equipmentSocketContext.setActuatorRuntimeList(actuatorRuntimeList);
-
         for (DataTypeRunTime dataTypeRunTime : equipmentSocketContext.getEquipmentRunTime().getDataTypeRuntimeList()) {
 
             Rule rule = dataTypeRunTime.getRule();
 
-            equipmentSocketContext.addCommandCallback(new CommandCallback<>(
+            CommandCallback<EquipmentSocketContext> commandCallback = new CommandCallback<>(
                     Unpooled.buffer()
                             .writeByte(FinalByte.WRITE)
                             .writeByte(FinalByte.RULE)
@@ -245,8 +253,9 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
                             .writeInt((int) (rule.getWarnUpper() * 10000))
                             .writeInt((int) (rule.getWarnLower() * 10000))
                             .writeInt((int) (rule.getExceptionLower() * 10000))
-            ) {
-            });
+            );
+            commandCallback.setTheRemainingNumberOfResends(5);
+            equipmentSocketContext.addCommandCallback(commandCallback);
 
         }
 
@@ -722,5 +731,27 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
     @Override
     protected void command(ByteBuf source, ByteBuf output, Tag tag, EquipmentSocketContext equipmentSocketContext) {
         generalDecode(source, output, tag, equipmentSocketContext, rootComEntryList);
+    }
+
+    @Nullable
+    public EquipmentRunTime getEquipmentRunTimeById(int id) {
+        //noinspection OptionalGetWithoutIsPresent
+        return getSocketContext()
+                .stream()
+                .map(EquipmentSocketContext::getEquipmentRunTime)
+                .filter(equipmentRunTime -> equipmentRunTime.getEquipment().getId() == id)
+                .findFirst()
+                .get();
+    }
+
+
+    @Nullable
+    public EquipmentSocketContext getEquipmentSocketContextByid(int id) {
+        //noinspection OptionalGetWithoutIsPresent
+        return getSocketContext()
+                .stream()
+                .filter(equipmentRunTime -> equipmentRunTime.getEquipmentRunTime().getEquipment().getId() == id)
+                .findFirst()
+                .get();
     }
 }

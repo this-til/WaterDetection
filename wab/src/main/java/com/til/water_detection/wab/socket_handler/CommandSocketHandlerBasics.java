@@ -15,10 +15,7 @@ import jakarta.annotation.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.web.socket.BinaryMessage;
-import org.springframework.web.socket.CloseStatus;
-import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.*;
 import org.springframework.web.socket.handler.AbstractWebSocketHandler;
 
 import java.io.IOException;
@@ -36,10 +33,22 @@ public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> ext
     protected final Map<WebSocketSession, S> map = new ConcurrentHashMap<>();
     protected final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
+
     public CommandSocketHandlerBasics() {
+        scheduler.scheduleAtFixedRate(this::sendHeartbeat, 0, 30, TimeUnit.SECONDS);
         scheduler.scheduleAtFixedRate(this::heartbeatDetection, 0, 30, TimeUnit.SECONDS);
         scheduler.scheduleAtFixedRate(this::timeoutDetection, 0, 30, TimeUnit.SECONDS);
         scheduler.scheduleAtFixedRate(this::send, 0, 1, TimeUnit.SECONDS);
+    }
+
+    protected void sendHeartbeat() {
+        for (Map.Entry<WebSocketSession, S> entry : map.entrySet()) {
+            try {
+                entry.getKey().sendMessage(new BinaryMessage(new byte[]{0x00}));
+            } catch (IOException e) {
+                logger.error("心跳发送失败:：", e);
+            }
+        }
     }
 
     protected void heartbeatDetection() {
@@ -81,7 +90,7 @@ public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> ext
 
             for (CommandCallback<?> commandCallback : entry.getValue().getCommandCallbacks()) {
                 if (commandCallback.isSend()) {
-                    return;
+                    continue;
                 }
                 WebSocketSession key = entry.getKey();
                 synchronized (key) {
@@ -100,7 +109,9 @@ public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> ext
 
     @Override
     public void afterConnectionEstablished(@NotNull WebSocketSession session) throws Exception {
-        map.put(session, mackSocketContext(session));
+        S value = mackSocketContext(session);
+        map.put(session, value);
+        value.update();
         logger.info("新的连接 id={} remoteAddress={}", session.getId(), session.getRemoteAddress());
     }
 
@@ -142,7 +153,7 @@ public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> ext
         switch (head) {
             case FinalByte.ORDER -> {
                 ByteBuf buf = Unpooled.buffer();
-                buf.writeByte(to);
+                buf.writeBytes(FinalByte.FRAME_HEADER);
                 buf.writeByte(from);
                 buf.writeByte(FinalByte.ANSWER_BACK);
                 buf.writeInt(id);
@@ -150,7 +161,11 @@ public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> ext
                     command(byteBuf, buf, tag, socketContext);
                 } catch (Exception e) {
                     logger.error(e);
+
                     buf = Unpooled.buffer();
+                    buf.writeByte(0xaa);
+                    buf.writeByte(0xaa);
+                    buf.writeByte(0xaa);
                     buf.writeByte(to);
                     buf.writeByte(from);
                     buf.writeByte(FinalByte.ANSWER_BACK);
@@ -158,7 +173,8 @@ public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> ext
                     buf.writeByte(ResultType.ERROR.getState());
                     buf.writeBytes(e.getMessage().getBytes(StandardCharsets.UTF_8));
                 }
-                buf.writeByte(0xff).writeByte(0xff).writeByte(0xff);
+                buf.writeBytes(FinalByte.FRAME_FOOTER);
+                session.sendMessage(new BinaryMessage(buf.array()));
             }
             case FinalByte.ANSWER_BACK -> {
 

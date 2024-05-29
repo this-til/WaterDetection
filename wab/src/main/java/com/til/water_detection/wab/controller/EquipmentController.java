@@ -89,8 +89,8 @@ public class EquipmentController {
     }
 
     @PutMapping("/updateEquipmentFencePosById")
-    public Result<Void> updateEquipmentFencePosById(@RequestParam int id, @RequestParam boolean electronicFence, @RequestParam float longitude, @RequestParam float latitude) {
-        int i = equipmentService.updateEquipmentFencePosById(id, electronicFence, longitude, latitude);
+    public Result<Void> updateEquipmentFencePosById(@RequestParam int id, @RequestParam boolean electronicFence, @RequestParam float longitude, @RequestParam float latitude,  @RequestParam float range) {
+        int i = equipmentService.updateEquipmentFencePosById(id, electronicFence, longitude, latitude, range);
         return new Result<>(i > 0 ? ResultType.SUCCESSFUL : ResultType.FAIL, null, null);
     }
 
@@ -139,7 +139,7 @@ public class EquipmentController {
                 .stream()
                 .filter(e -> e.getEquipmentRunTime().getEquipment().getId() == id)
                 .findFirst()
-                .map(equipmentSocketContext -> new Result<>(ResultType.SUCCESSFUL, null, equipmentSocketContext.getEquipmentRunTime()))
+                .map(equipmentSocketContext -> new Result<>(ResultType.SUCCESSFUL, null, equipmentSocketContext.upEquipmentRunTime()))
                 .orElseGet(() -> new Result<>(ResultType.SUCCESSFUL, null, null));
     }
 

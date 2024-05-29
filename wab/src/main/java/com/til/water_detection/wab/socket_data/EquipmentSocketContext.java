@@ -6,6 +6,7 @@ import com.til.water_detection.data.Equipment;
 import com.til.water_detection.data.run_time.ActuatorRuntime;
 import com.til.water_detection.data.run_time.DataTypeRunTime;
 import com.til.water_detection.data.run_time.EquipmentRunTime;
+import com.til.water_detection.wab.socket_handler.EquipmentSocketHandler;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,9 +21,11 @@ public class EquipmentSocketContext extends SocketContext<CommandCallback<Equipm
     @Getter
     private EquipmentRunTime equipmentRunTime;
     private boolean isInit;
+    private final EquipmentSocketHandler equipmentSocketHandler;
 
-    public EquipmentSocketContext(WebSocketSession webSocketSession) {
+    public EquipmentSocketContext(WebSocketSession webSocketSession, EquipmentSocketHandler equipmentSocketHandler) {
         super(webSocketSession);
+        this.equipmentSocketHandler = equipmentSocketHandler;
     }
 
     public void setEquipment(Equipment equipment) {
@@ -40,6 +43,7 @@ public class EquipmentSocketContext extends SocketContext<CommandCallback<Equipm
         this.equipmentRunTime.setDataTypeRuntimeList(Collections.unmodifiableList(dataTypeRuntimeList));
     }
 
+
     public boolean isInit() {
         return isInit;
     }
@@ -47,6 +51,15 @@ public class EquipmentSocketContext extends SocketContext<CommandCallback<Equipm
     public void initEnd() {
         assert !isInit;
         isInit = true;
+    }
+
+    public EquipmentRunTime upEquipmentRunTime() {
+        equipmentRunTime.setEquipment(equipmentSocketHandler.getEquipmentService().getEquipmentById(equipmentRunTime.getEquipment().getId()));
+        for (DataTypeRunTime dataTypeRunTime : equipmentRunTime.getDataTypeRuntimeList()) {
+            dataTypeRunTime.setRule(equipmentSocketHandler.getRuleService().getRuleById(dataTypeRunTime.getRule().getId()));
+            dataTypeRunTime.setDataState(dataTypeRunTime.getRule().ofDataState(dataTypeRunTime.getValue()));
+        }
+        return equipmentRunTime;
     }
 
 }

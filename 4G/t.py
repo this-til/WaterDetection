@@ -59,7 +59,6 @@ b_dataNameList: list[bytes] = list()
 
 isDebug = True
 isConnectionTest = False
-isAutomaticReporting = False
 
 uart_client = UART(UART.UART2, 9600, 8, 0, 1, 0)
 uart_screen = UART(UART.UART1, 9600, 8, 0, 1, 0)
@@ -67,14 +66,15 @@ c_cache = bytearray()
 s_cache = bytearray()
 
 cli = None
+heartbeatTime = 0
 
 _idAdd: int = 0
 
-toBeSentToClient = Queue(64)
-toBeSentToServer = Queue(64)
-toBeSentToScreen = Queue(64)
+toBeSentToClient = Queue(32)
+toBeSentToServer = Queue(32)
+toBeSentToScreen = Queue(32)
 
-planExecution = Queue(8)
+planExecution = Queue(4)
 
 
 class CommandCallback:
@@ -128,6 +128,8 @@ class WatchDog:
         pass
 
     def feed(self):
+        if isDebug:
+            print('WatchDog feed')
         self.__count = self.__max_count  # 喂狗，重置看门狗计数器
 
     def __check(self):
@@ -165,6 +167,13 @@ commandCallbackListLock = _thread.allocate_lock()
 
 
 def init():
+    global _idAdd
+    _idAdd = 0
+
+    commandCallbackListLock.acquire()
+    commandCallbackList.clear()
+    commandCallbackListLock.release()
+
     com = bytearray()
     com.append(0x00)
     com.append(0x00)
@@ -192,8 +201,6 @@ def init():
     com = bytearray()
     com.append(INIT_END)
     down(CommandCallback(com, CLIENT, w_end, None, None, None))
-
-    wdt.feed()
 
     pass
 
@@ -266,12 +273,11 @@ def connect():
     global cli
 
     if isDebug:
-        print("IN END")
+        print("--------------------------------------------------------")
 
     if len(url) == 0 or len(username) == 0 or len(password) == 0 or len(equipment) == 0 or len(
             dataNameList) == 0 or len(actuatorNameList) == 0:
         print("ERROR")
-        init()
         return
 
     _dataNameList: list[str] = []
@@ -281,27 +287,17 @@ def connect():
     _actuatorNameList: list[str] = []
     for e in actuatorNameList:
         _actuatorNameList.append("\"" + e + "\"")
-    json = ("""
-        {
-            "username":"%s",
-            "password":"%s",
-            "equipment":"%s",
-            "dataNameList":[%s],
-            "actuatorNameList":[%s]
-        }
-        """ % (username,
-               password,
-               equipment,
-               ','.join(_dataNameList),
-               ','.join(_actuatorNameList)))
+    json = ("""{"username":"%s","password":"%s","equipment":"%s","dataNameList":[%s],"actuatorNameList":[%s]}""" % (
+        username,
+        password,
+        equipment,
+        ','.join(_dataNameList),
+        ','.join(_actuatorNameList)))
 
     if isDebug:
         print("json", json)
 
     _loginData = ubinascii.b2a_base64(json.encode()).decode()[0:-1]
-
-    if isDebug:
-        print("_loginData", _loginData)
 
     _url = url + "?" + "loginData=" + _loginData
 
@@ -311,13 +307,11 @@ def connect():
     try:
         cli = uwebsocket.Client.connect(_url, debug=isDebug)
     except Exception as e:
-        print("ERROR")
-        init()
+        print("CONNECTION FAILURE", e)
         return
 
-    if cli is None:
-        init()
-        return
+    if isDebug:
+        print("--------------------------------------------------------")
 
 
 pass
@@ -326,23 +320,29 @@ pass
 def uwebsocketMonitoring():
     global cli
     while True:
-        time.sleep(0.5)
         if cli is None:
-            return
-        recv_data = cli.recv()
-        if recv_data is None:
-            cli.close()
+            time.sleep(0.5)
+            continue
+        try:
+            recv_data = cli.recv()
+        except Exception as e:
+            print("RECEIVE FAILURE", e)
             cli = None
-            return
+            continue
+        if recv_data is None:
+            continue
         if not (isinstance(recv_data, bytes)):
             recv_data = bytes(recv_data)
 
         if isDebug:
             print("cli.recv()", recv_data)
 
+        global heartbeatTime
+        heartbeatTime = time.time()
+
         pack = extractDataBetweenHeaders(recv_data, header, footer)
         if pack is None:
-            return
+            continue
         forwardData(pack[0])
     pass
 
@@ -434,7 +434,6 @@ def forwardData(pack: bytes):
 
     if isDebug:
         print("forwardData", pack)
-        print("IN FORWARD DATA", "len", len(pack), "_from", _from, "_to", _to, "_header", _header)
 
     if _from == _to:
         return
@@ -504,9 +503,6 @@ def forwardData(pack: bytes):
                 if callback.exceptionCallback is not None:
                     callback.exceptionCallback(_pack)
             pass
-
-    if isDebug:
-        print("OUT FORWARD DATA")
     pass
 
 
@@ -572,7 +568,6 @@ def sendScreen():
 def timeoutDetection():
     while True:
         time.sleep(10)
-
         if len(commandCallbackList) != 0:
             ntime = utime.time()
             commandCallbackListLock.acquire()
@@ -582,19 +577,13 @@ def timeoutDetection():
                     if rList is None:
                         rList = []
                     rList.append(c)
-
             if rList is not None:
                 for r in rList:
                     commandCallbackList.remove(r)
                 for e in rList:
                     if e.outTime is not None:
                         e.outTime()
-
             commandCallbackListLock.release()
-        if cli is not None:
-            wdt.feed()
-            if isDebug:
-                print("FEED")
     pass
 
 
@@ -670,32 +659,25 @@ def connect_test_out():
     pass
 
 
-def automaticPut():
-    global dataNameList
+def feedThread():
     while True:
-        time.sleep(8)
-        if len(dataNameList) == 0:
-            continue
-        for i in range(dataNameList):
-            down(CommandCallback(b_dataNameList[i], CLIENT, automaticPut_success, None, None, None))
+        time.sleep(10)
+        if wdt is not None:
+            wdt.feed()
     pass
 
 
-def automaticPut_success(p):
-    if cli is None:
-        return
-    pass
-
-    data = readInt32FromBytes(p, 0)
-
-    b = bytearray()
-    b.append(0x02)
-    b.append(0x01)
-    addInt32ToBytes(data, b)
-
-    down(CommandCallback(bytes(data), SCREEN, None, None, None, None))
-
-    pass
+def reconnectionThread():
+    global cli
+    while True:
+        if cli is None:
+            init()
+        else:
+            cli.send(b"\x00")
+            if time.time() - heartbeatTime > 60:
+                cli.close()
+                cli = None
+        time.sleep(10)
 
 
 if __name__ == '__main__':
@@ -715,12 +697,7 @@ if __name__ == '__main__':
         _thread.start_new_thread(connect_test, ())
         _thread.start_new_thread(connect_test_log, ())
     else:
-        init()
-    pass
-
-    if isAutomaticReporting:
-        _thread.start_new_thread(automaticPut, ())
-    pass
+        _thread.start_new_thread(reconnectionThread, ())
 
     _thread.start_new_thread(uwebsocketMonitoring, ())
     _thread.start_new_thread(clientSerialMonitoring, ())
@@ -731,19 +708,11 @@ if __name__ == '__main__':
 
     _thread.start_new_thread(timeoutDetection, ())
 
+    _thread.start_new_thread(feedThread, ())
+
     print("end")
 
-    while (True):
+    while True:
         time.sleep(1)
         while not planExecution.empty():
             planExecution.get()()
-        if wdt is not None:
-            if isConnectionTest:
-                wdt.feed()
-                if isDebug:
-                    print("FEED")
-                continue
-            if cli is not None:
-                wdt.feed()
-                if isDebug:
-                    print("FEED")

@@ -14,15 +14,15 @@ import usys as sys
 isDebug = True
 wdt = None
 
-uart_client = UART(UART.UART1, 9600, 8, 0, 1, 0)
+uart_client = UART(UART.UART2, 9600, 8, 0, 1, 0)
 
 cli = None
 
-url: str = ""
+url: str = "wss://113.56.218.150:60762/EquipmentSocket"
 username: str = "til"
 password: str = "114514"
-equipment: str = "AABB"
-dataNameList: list[str] = ["PH", "浑浊度", "温度", "电导率"]
+equipment: str = "maniubi"
+dataNameList: list[str] = ["温度", "PH", "电导率", "浑浊度"]
 actuatorNameList: list[str] = ["报警器", "报警灯", "水泵"]
 
 toBeSentToClient = Queue(64)
@@ -39,6 +39,7 @@ class WatchDog:
 
     def feed(self):
         self.__count = self.__max_count  # 喂狗，重置看门狗计数器
+        print("FEED")
 
     def __check(self):
         while True:  # 循环中检查计数器
@@ -86,13 +87,13 @@ def uwebsocketMonitoring():
     while True:
         if cli is None:
             time.sleep(1)
-            return
+            continue
 
         recv_data = cli.recv()
         if recv_data is None:
             cli.close()
             cli = None
-            return
+            continue
 
         if not (isinstance(recv_data, bytes)):
             recv_data = bytes(recv_data)

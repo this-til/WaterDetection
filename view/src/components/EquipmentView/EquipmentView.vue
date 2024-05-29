@@ -1,24 +1,26 @@
 <template>
+
+
   <el-header class="header-class">
 
     设备：{{ equipment.name }}
 
     <el-divider direction="vertical"/>
 
-    <!--    <el-popover
-            width="300"
-            trigger="click"
-            placement="bottom"
-            @before-enter="clickRename"
-        >
-          <template #reference>
-            <el-button style="margin-right: 16px">重命名</el-button>
-          </template>
+    <el-popover
+        width="300"
+        trigger="click"
+        placement="bottom"
+        @before-enter="clickRename"
+    >
+      <template #reference>
+        <el-button style="margin-right: 16px">重命名</el-button>
+      </template>
 
-          <el-input v-model="newEquipmentName"/>
-          <el-button @click=upEquipmentName>确定</el-button>
+      <el-input v-model="newEquipmentName"/>
+      <el-button @click=upEquipmentName>确定</el-button>
 
-        </el-popover>-->
+    </el-popover>
 
     <el-divider direction="vertical"/>
 
@@ -53,6 +55,10 @@
       <el-input v-model="newFenceLatitude" :disabled="!equipment.electronicFence" placeholder="latitude"
                 type="number"/>
 
+      范围(m):
+      <el-input v-model="newFenceRange" :disabled="!equipment.electronicFence" placeholder="range"
+                type="number"/>
+
       <el-button @click=upElectronicFence>确定</el-button>
 
       <!--      <el-transfer
@@ -77,6 +83,24 @@
 
     <el-divider direction="vertical"/>
 
+    <el-popover
+        width="300"
+        trigger="click"
+        placement="bottom"
+        @before-enter="clickFence"
+    >
+      <template #reference>
+        <el-button style="margin-right: 16px">删除设备</el-button>
+      </template>
+
+      你确定要删除数据吗，该操作会清除设备的历史上报数据、自定义规则等
+
+      <br>
+
+      <el-button @click=deleteEquipment>确定</el-button>
+
+    </el-popover>
+
   </el-header>
   <el-main
       class="main-class"
@@ -90,7 +114,7 @@
     <el-space
         wrap
     >
-      <p
+      <div
           v-for="item in equipmentRunTime.dataTypeRuntimeList"
           :key="item.dataType.id"
           :class=dataStyle(item)
@@ -98,9 +122,37 @@
 
         {{ item.dataType.name }} : {{ item.value }}
 
+        <div
+            class="lowerp-left-corner"
+        >
+          <el-popover
+              width="300"
+              trigger="click"
+              placement="bottom"
+              @before-enter="clickChangeRule(item)"
+          >
 
-      </p>
+            <template #reference>
+              <el-button style="margin-right: 16px">更改规则</el-button>
+            </template>
+            异常上界:
+            <el-input-number v-model="newExceptionUpper" :min="newWarnUpper"/>
+            <br>
+            警告上界:
+            <el-input-number v-model="newWarnUpper" :min="newWarnLower" :max="newExceptionUpper"/>
+            <br>
+            警告下界:
+            <el-input-number v-model="newWarnLower" :min="newExceptionLower" :max="newWarnUpper"/>
+            <br>
+            异常下界:
+            <el-input-number v-model="newExceptionLower" :max="newWarnLower"/>
+            <br>
+            <el-button @click=changeRule(item)>确定</el-button>
+          </el-popover>
+        </div>
 
+
+      </div>
     </el-space>
 
     <el-row>
@@ -109,17 +161,26 @@
     <el-space
         wrap
     >
-      <p
-
-          v-for="item in 20" :key="item"
+      <div
+          v-for="item in equipmentRunTime.actuatorRuntimeList"
+          :key="item.actuator.id"
           class="scrollbar-demo-item-normal">
-      </p>
+
+        {{ item.actuator.name }} : &nbsp;&nbsp;&nbsp;
+        <el-switch
+            v-model="item.activated"
+            @change="switchActivated(item)"
+        />
+
+      </div>
     </el-space>
+    <!--
 
 
-    <el-row>
-      指令：
-    </el-row>
+        <el-row>
+          指令：
+        </el-row>
+    -->
 
 
   </el-main>
@@ -127,21 +188,27 @@
 
 <script lang="ts" setup>
 import {onMounted, onUnmounted, ref, toRefs, watch} from 'vue'
-import {DataTypeRunTime, Equipment, EquipmentApi, EquipmentRunTime, getResultTypeFromString, ResultType} from "@/api";
+import {
+  ActuatorApi,
+  ActuatorRuntime,
+  DataTypeRunTime,
+  Equipment,
+  EquipmentApi,
+  EquipmentRunTime,
+  getResultTypeFromString,
+  ResultType, RuleApi
+} from "@/api";
 import {ElMessage} from "element-plus";
 import {h} from 'vue'
 import {post} from "axios";
+import {useRouter} from "vue-router";
 
+const router = useRouter();
 const props = defineProps<Props>();
 
 const equipmentRunTime = ref<EquipmentRunTime>(null)
 
 const newEquipmentName = ref<string>()
-
-const newFence = ref<boolean>(false)
-const newFenceLongitude = ref<number>(0)
-const newFenceLatitude = ref<number>(0)
-
 
 const emit = defineEmits(['needUp']);
 
@@ -157,23 +224,61 @@ const upEquipmentName = () => {
       })
 }
 
-const upElectronicFence = () => {
-  EquipmentApi.updateEquipmentFencePosById(props.equipment.id, newFence.value, newFenceLongitude.value, newFenceLatitude.value)
-  emit('needUp');
+const deleteEquipment = () => {
+  EquipmentApi.removeEquipmentPosById(props.equipment.id)
+  router.go(0);
 }
 
 const up = () => {
-
   EquipmentApi.getOnlineEquipment(props.equipment.id).then(r => {
     equipmentRunTime.value = r.data.data
   })
-
 }
+
+const newFence = ref<boolean>(false)
+const newFenceLongitude = ref<number>(0)
+const newFenceLatitude = ref<number>(0)
+const newFenceRange = ref<number>(0)
 
 const clickFence = () => {
   newFence.value = props.equipment.electronicFence
   newFenceLongitude.value = props.equipment.fenceLongitude
   newFenceLatitude.value = props.equipment.fenceLatitude
+  newFenceRange.value = props.equipment.fenceRange * 111320
+}
+
+const upElectronicFence = () => {
+  EquipmentApi.updateEquipmentFencePosById(props.equipment.id, newFence.value, newFenceLongitude.value, newFenceLatitude.value, newFenceRange.value / 111320)
+  emit('needUp');
+}
+
+const newExceptionUpper = ref<number>(0)
+const newWarnUpper = ref<number>(0)
+const newWarnLower = ref<number>(0)
+const newExceptionLower = ref<number>(0)
+
+const clickChangeRule = (dataTypeRunTime: DataTypeRunTime) => {
+  newExceptionUpper.value = dataTypeRunTime.rule.exceptionUpper
+  newWarnUpper.value = dataTypeRunTime.rule.warnUpper
+  newWarnLower.value = dataTypeRunTime.rule.warnLower
+  newExceptionLower.value = dataTypeRunTime.rule.exceptionLower
+}
+
+const changeRule = (dataTypeRunTime: DataTypeRunTime) => {
+  RuleApi.updateById(dataTypeRunTime.rule.id, {
+    exceptionUpper: newExceptionUpper.value,
+    warnUpper: newWarnUpper.value,
+    warnLower: newWarnLower.value,
+    exceptionLower: newExceptionLower.value,
+
+    warnSendMessage: dataTypeRunTime.rule.warnSendMessage,
+    exceptionSendMessage: dataTypeRunTime.rule.exceptionSendMessage
+  })
+  up()
+}
+
+const switchActivated = (actuator: ActuatorRuntime) => {
+  ActuatorApi.updateActuatorByEquipmentId(props.equipment.id, actuator.embeddedId, actuator.activated)
 }
 
 const clickRename = () => {
@@ -207,13 +312,13 @@ watch(equipment, (n, o) => {
 
 const dataStyle = (dataRunTime: DataTypeRunTime): string => {
   switch (dataRunTime.dataState) {
-    case 2:
-      return "scrollbar-demo-item-normal"
-    case 1:
     case 3:
-      return "scrollbar-demo-item-warn"
-    case 0:
+      return "scrollbar-demo-item-normal"
+    case 2:
     case 4:
+      return "scrollbar-demo-item-warn"
+    case 1:
+    case 5:
       return "scrollbar-demo-item-exception"
     default:
       return "scrollbar-demo-item-normal"
@@ -227,6 +332,12 @@ interface Props {
 </script>
 
 <style scoped>
+.lowerp-left-corner {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+
 .scrollbar-demo-item {
   display: flex;
   align-items: center;
@@ -241,7 +352,7 @@ interface Props {
 }
 
 .scrollbar-demo-item-normal {
-
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -257,7 +368,7 @@ interface Props {
 }
 
 .scrollbar-demo-item-warn {
-
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -273,7 +384,7 @@ interface Props {
 }
 
 .scrollbar-demo-item-exception {
-
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;

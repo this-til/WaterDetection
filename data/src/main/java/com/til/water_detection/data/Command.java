@@ -13,8 +13,9 @@ public class Command {
 
     private int id;
     private int ruleId;
+
     private int actuatorId;
-    private int commandTrigger;
+    private int triggerPoint;
     private float upper;
     private float low;
 

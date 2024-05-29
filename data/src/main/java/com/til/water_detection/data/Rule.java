@@ -31,7 +31,7 @@ public class Rule {
         if (v < exceptionLower) {
             return DataState.EXCEPTION_LOWER;
         }
-        if (v > warnUpper) {
+        if (v < warnUpper) {
             return DataState.WARN_UPPER;
         }
         if (v < warnLower) {

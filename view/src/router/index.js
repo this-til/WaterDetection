@@ -9,6 +9,10 @@ const routes = [
         component: NotFound,
     },
     {
+        path: "/",
+        component: Login,
+    },
+    {
         path: "/login",
         component: Login,
     },
