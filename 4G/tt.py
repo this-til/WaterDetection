@@ -75,9 +75,6 @@ class WatchDog:
 def bark():
     global cli
     print("BARK")
-    if cli is not None:
-        cli.close()
-        cli = None
     Power.powerRestart()
     pass
 
@@ -183,13 +180,16 @@ if __name__ == '__main__':
 
             _loginData = ubinascii.b2a_base64(json.encode()).decode()[0:-1]
 
-            if isDebug:
-                print("_loginData", _loginData)
 
             _url = url + "?" + "loginData=" + _loginData
 
-            cli = uwebsocket.Client.connect(_url, debug=isDebug)
+            if isDebug:
+                print("url", _url)
 
+            try:
+                cli = uwebsocket.Client.connect(_url, debug=isDebug)
+            except Exception as e:
+                sys.print_exception(e)
             pass
         time.sleep(10)
         wdt.feed()

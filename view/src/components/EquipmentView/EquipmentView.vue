@@ -3,7 +3,7 @@
 
   <el-header class="header-class">
 
-    设备：{{ equipment.name }}
+    设备：{{ equipment.name }} ({{ equipmentRunTime == null ? "离线" : "在线"}})
 
     <el-divider direction="vertical"/>
 

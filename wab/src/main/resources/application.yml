@@ -4,6 +4,8 @@ spring:
     url: jdbc:mysql://localhost:3306/water_detection_data
     username: root
     password: 20041119LYS&lys
+  thymeleaf:
+
 
 
 mybatis:

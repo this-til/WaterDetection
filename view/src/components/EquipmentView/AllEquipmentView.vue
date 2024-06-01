@@ -4,20 +4,66 @@
   </el-header>
   <el-main
       class="main-class"
+
   >
+
     <div
         v-for="item in allEquipment"
-        :key="item.id"
-        :class=dataStyle(item)
-    ></div>
+    >
+
+      <EquipmentView :equipment=item>
+
+      </EquipmentView>
+
+      <br>
+
+    </div>
+
+
+    <!--    <el-space
+            wrap
+        >
+
+          <div
+              v-for="item in allEquipmentRunTime"
+              :key="item.equipment.id"
+              class=scrollbar-demo-item-normal
+          >
+            {{ item.equipment.name }}
+            <br>
+            <div
+                v-for="i in item.dataTypeRuntimeList"
+                :key="item.equipment.id * i.dataType.id"
+                style="color: #f56c6c"
+                class="txt"
+            >
+              {{ i.dataType.name }}:{{ i.value }}
+
+            </div>
+
+
+          </div>
+
+          <div
+              v-for="item in allEquipment"
+              :key="item.id"
+              :class=dataStyle(item)
+          >
+            {{ item.name }} ({{ allOnlineEquipment.indexOf(item.id) >= 0 ? ("在线") : ("离线") }})
+
+
+          </div>
+        </el-space>-->
+
 
   </el-main>
 </template>
 
 <script setup lang="ts">
-import {defineComponent} from 'vue'
+import {ref} from 'vue'
+
 import {Equipment} from "@/api";
-import {post} from "axios";
+import EquipmentView from "@/components/EquipmentView/EquipmentView.vue";
 
 const props = defineProps<Props>();
 
@@ -25,8 +71,9 @@ const dataStyle = (e: Equipment) => {
   if (props.allOnlineEquipment.indexOf(e.id) < 0) {
     return "scrollbar-demo-item-bereft"
   }
-
+  return "scrollbar-demo-item-normal"
 }
+
 
 interface Props {
   allEquipment: Equipment[];
@@ -36,91 +83,6 @@ interface Props {
 </script>
 
 <style scoped>
-.lowerp-left-corner {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-}
-
-.scrollbar-demo-item {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  width: 350px;
-  height: 150px;
-
-  margin: 5px;
-  text-align: center;
-  border-radius: 4px;
-}
-
-.scrollbar-demo-item-bereft {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  width: 350px;
-  height: 150px;
-
-  margin: 5px;
-  text-align: center;
-  border-radius: 4px;
-
-  background: #818488;
-}
-
-
-.scrollbar-demo-item-normal {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  width: 350px;
-  height: 150px;
-
-  margin: 5px;
-  text-align: center;
-  border-radius: 4px;
-
-  background: #a0cfff;
-}
-
-.scrollbar-demo-item-warn {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  width: 350px;
-  height: 150px;
-
-  margin: 5px;
-  text-align: center;
-  border-radius: 4px;
-
-  background: #f3d19e;
-}
-
-.scrollbar-demo-item-exception {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  width: 350px;
-  height: 150px;
-
-  margin: 5px;
-  text-align: center;
-  border-radius: 4px;
-
-  background: #f56c6c;
-}
-
-
 .header-class {
   width: 100%;
   height: auto;

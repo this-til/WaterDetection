@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/equipment")
@@ -89,7 +90,7 @@ public class EquipmentController {
     }
 
     @PutMapping("/updateEquipmentFencePosById")
-    public Result<Void> updateEquipmentFencePosById(@RequestParam int id, @RequestParam boolean electronicFence, @RequestParam float longitude, @RequestParam float latitude,  @RequestParam float range) {
+    public Result<Void> updateEquipmentFencePosById(@RequestParam int id, @RequestParam boolean electronicFence, @RequestParam float longitude, @RequestParam float latitude, @RequestParam float range) {
         int i = equipmentService.updateEquipmentFencePosById(id, electronicFence, longitude, latitude, range);
         return new Result<>(i > 0 ? ResultType.SUCCESSFUL : ResultType.FAIL, null, null);
     }
@@ -131,6 +132,11 @@ public class EquipmentController {
                         .map(EquipmentRunTime::getEquipment)
                         .map(Equipment::getId)
                         .toList());
+    }
+
+    @GetMapping("/getAllOnlineEquipmentRunTime")
+    public Result<List<EquipmentRunTime>> getAllOnlineEquipmentRunTime() {
+        return new Result<>(ResultType.SUCCESSFUL, null, equipmentSocketHandler.getSocketContext().stream().map(EquipmentSocketContext::getEquipmentRunTime).toList());
     }
 
     @GetMapping("/getOnlineEquipment")

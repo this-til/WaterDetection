@@ -13,6 +13,7 @@ import gc
 import utime
 from machine import Pin
 import usys as sys
+import net
 
 header = b'\xAA\xAA\xAA'
 footer = b'\xFF\xFF\xFF'
@@ -60,8 +61,8 @@ b_dataNameList: list[bytes] = list()
 isDebug = True
 isConnectionTest = False
 
-uart_client = UART(UART.UART2, 9600, 8, 0, 1, 0)
-uart_screen = UART(UART.UART1, 9600, 8, 0, 1, 0)
+uart_client = UART(UART.UART1, 9600, 8, 0, 1, 0)
+uart_screen = UART(UART.UART2, 9600, 8, 0, 1, 0)
 c_cache = bytearray()
 s_cache = bytearray()
 
@@ -170,6 +171,9 @@ def init():
     global _idAdd
     _idAdd = 0
 
+    if not csqTest():
+        return
+
     commandCallbackListLock.acquire()
     commandCallbackList.clear()
     commandCallbackListLock.release()
@@ -269,11 +273,35 @@ def w_end(p: bytes):
     pass
 
 
+def csqTest() -> bool:
+    csq = net.csqQueryPoll()
+
+    if isDebug:
+        print("csq", csq)
+
+    if csq == -1:
+        print("csq query failed")
+        return False
+
+    if csq == 99:
+        print("csq query abnormal")
+        return False
+
+    if csq <= 18:
+        print("csq过低，无法进行连接")
+        return False
+
+    return True
+
+
 def connect():
     global cli
 
     if isDebug:
         print("--------------------------------------------------------")
+
+    if not csqTest():
+        return
 
     if len(url) == 0 or len(username) == 0 or len(password) == 0 or len(equipment) == 0 or len(
             dataNameList) == 0 or len(actuatorNameList) == 0:
@@ -309,6 +337,9 @@ def connect():
     except Exception as e:
         print("CONNECTION FAILURE", e)
         return
+
+    global heartbeatTime
+    heartbeatTime = time.time()
 
     if isDebug:
         print("--------------------------------------------------------")

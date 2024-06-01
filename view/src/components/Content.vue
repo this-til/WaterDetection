@@ -34,6 +34,8 @@
 
               <el-menu-item
                   @click="displayAllEquipmentView"
+                  index="2-all"
+
               >
 
                 <template #title>-总览-</template>

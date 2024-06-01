@@ -57,7 +57,7 @@ public class TestHandler extends AbstractWebSocketHandler {
 
 
     @Override
-    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+    protected void handleTextMessage(@NotNull WebSocketSession session, @NotNull TextMessage message) throws Exception {
         super.handleTextMessage(session, message);
        /* synchronized (session) {
             session.sendMessage(new TextMessage(Base64.getEncoder().encodeToString(message.getPayload().getBytes())));
@@ -67,7 +67,7 @@ public class TestHandler extends AbstractWebSocketHandler {
 
 
     @Override
-    protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) throws Exception {
+    protected void handleBinaryMessage(@NotNull WebSocketSession session, @NotNull BinaryMessage message) throws Exception {
         super.handleBinaryMessage(session, message);
         logger.info("新的数据 id={} data={}", session.getId(), message.getPayload().array());
     }

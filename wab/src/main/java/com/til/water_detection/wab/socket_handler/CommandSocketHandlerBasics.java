@@ -33,6 +33,7 @@ public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> ext
     protected final Map<WebSocketSession, S> map = new ConcurrentHashMap<>();
     protected final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
+    protected boolean haveAResponse = false;
 
     public CommandSocketHandlerBasics() {
         scheduler.scheduleAtFixedRate(this::sendHeartbeat, 0, 30, TimeUnit.SECONDS);
@@ -152,29 +153,39 @@ public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> ext
 
         switch (head) {
             case FinalByte.ORDER -> {
-                ByteBuf buf = Unpooled.buffer();
-                buf.writeBytes(FinalByte.FRAME_HEADER);
-                buf.writeByte(from);
-                buf.writeByte(FinalByte.ANSWER_BACK);
-                buf.writeInt(id);
-                try {
-                    command(byteBuf, buf, tag, socketContext);
-                } catch (Exception e) {
-                    logger.error(e);
 
-                    buf = Unpooled.buffer();
-                    buf.writeByte(0xaa);
-                    buf.writeByte(0xaa);
-                    buf.writeByte(0xaa);
-                    buf.writeByte(to);
+                if (haveAResponse) {
+                    ByteBuf buf = Unpooled.buffer();
+                    buf.writeBytes(FinalByte.FRAME_HEADER);
                     buf.writeByte(from);
                     buf.writeByte(FinalByte.ANSWER_BACK);
                     buf.writeInt(id);
-                    buf.writeByte(ResultType.ERROR.getState());
-                    buf.writeBytes(e.getMessage().getBytes(StandardCharsets.UTF_8));
+                    try {
+                        command(byteBuf, buf, tag, socketContext);
+                    } catch (Exception e) {
+                        logger.error(e);
+
+                        buf = Unpooled.buffer();
+                        buf.writeByte(0xaa);
+                        buf.writeByte(0xaa);
+                        buf.writeByte(0xaa);
+                        buf.writeByte(to);
+                        buf.writeByte(from);
+                        buf.writeByte(FinalByte.ANSWER_BACK);
+                        buf.writeInt(id);
+                        buf.writeByte(ResultType.ERROR.getState());
+                        buf.writeBytes(e.getMessage().getBytes(StandardCharsets.UTF_8));
+                    }
+                    buf.writeBytes(FinalByte.FRAME_FOOTER);
+                    session.sendMessage(new BinaryMessage(buf.array()));
+                } else {
+                    try {
+                        command(byteBuf, Unpooled.buffer(), tag, socketContext);
+                    } catch (Exception e) {
+                        logger.error(e);
+                    }
                 }
-                buf.writeBytes(FinalByte.FRAME_FOOTER);
-                session.sendMessage(new BinaryMessage(buf.array()));
+
             }
             case FinalByte.ANSWER_BACK -> {
 

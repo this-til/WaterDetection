@@ -169,7 +169,7 @@ const shortcuts = ref([
     value: () => {
       const end = new Date()
       const start = new Date()
-      start.setHours(start.getDate() - 12)
+      start.setHours(start.getHours() - 12)
       return [start, end]
     },
   },
