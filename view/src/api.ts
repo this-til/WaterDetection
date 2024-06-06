@@ -110,9 +110,22 @@ export const DataApi = {
     }),
 };
 
+
 export const DataTypeApi = {
     registerDataType: (name: string): Promise<AxiosResponse<Result<void>>> => api.post('/dataType/register', null, {params: {name}}),
     removeDataTypeById: (id: number): Promise<AxiosResponse<Result<void>>> => api.delete('/dataType/removeDataTypeById', {params: {id}}),
+    updateDataTypeSuffixById: (id: number, suffix: string): Promise<AxiosResponse<Result<void>>> => api.post('/dataType/updateDataTypeSuffixById', {
+        params: {
+            id,
+            suffix
+        }
+    }),
+    updateDataTypePercentById: (id: number, percent: boolean): Promise<AxiosResponse<Result<void>>> => api.delete('/dataType/updateDataTypePercentById', {
+        params: {
+            id,
+            percent
+        }
+    }),
     getDataTypeById: (id: number): Promise<AxiosResponse<Result<DataType>>> => api.get('/dataType/getDataTypeById', {params: {id}}),
     getDataTypeByName: (name: string): Promise<AxiosResponse<Result<DataType>>> => api.get('/dataType/getDataTypeByName', {params: {name}}),
     getAllDataType: (): Promise<AxiosResponse<Result<DataType[]>>> => api.get('/dataType/getAllDataType'),
@@ -151,7 +164,7 @@ export const EquipmentApi = {
     getAllEquipment: (): Promise<AxiosResponse<Result<Equipment[]>>> => api.get('/equipment/getAllEquipment'),
     getAllOnlineEquipment: (): Promise<AxiosResponse<Result<Equipment[]>>> => api.get('/equipment/getAllOnlineEquipment'),
     getAllOnlineEquipmentId: (): Promise<AxiosResponse<Result<number[]>>> => api.get('/equipment/getAllOnlineEquipmentId'),
-    getAllOnlineEquipmentRunTime: () :  Promise<AxiosResponse<Result<EquipmentRunTime[]>>> => api.get('/equipment/getAllOnlineEquipmentRunTime'),
+    getAllOnlineEquipmentRunTime: (): Promise<AxiosResponse<Result<EquipmentRunTime[]>>> => api.get('/equipment/getAllOnlineEquipmentRunTime'),
     getOnlineEquipment: (id: number): Promise<AxiosResponse<Result<Equipment[]>>> => api.get('/equipment/getOnlineEquipment', {params: {id}}),
     getEquipmentByIdArray: (idArray: number[]): Promise<AxiosResponse<Result<Equipment[]>>> => api.get('/equipment/getEquipmentByIdArray', {params: {id: idArray.join(',')}}),
     getEquipmentByNameArray: (nameArray: string[]): Promise<AxiosResponse<Result<Equipment[]>>> => api.get('/equipment/getEquipmentByNameArray', {params: {name: nameArray.join(',')}}),
@@ -212,6 +225,8 @@ export interface Data {
 export interface DataType {
     id: number
     name: string
+    suffix: string
+    percent: boolean
 }
 
 export interface Actuator {

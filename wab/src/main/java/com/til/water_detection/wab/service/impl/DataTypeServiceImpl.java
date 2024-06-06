@@ -4,6 +4,8 @@ import com.til.water_detection.data.DataType;
 import com.til.water_detection.sql.mapper.IDataTypeMapper;
 import com.til.water_detection.wab.service.IDataTypeService;
 import jakarta.annotation.Resource;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Update;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +30,16 @@ public class DataTypeServiceImpl implements IDataTypeService {
     @Override
     public int updateDataTypeAnotherName(int id, String anotherName) {
         return dataTypeMapper.updateDataTypeAnotherNameById(id, anotherName);
+    }
+
+    @Override
+    public int updateDataTypeSuffixById(int id, String suffix) {
+        return dataTypeMapper.updateDataTypeSuffixById(id, suffix);
+    }
+
+    @Override
+    public int updateDataTypePercentById(int id, boolean percent) {
+        return dataTypeMapper.updateDataTypePercentById(id, percent);
     }
 
     @Override

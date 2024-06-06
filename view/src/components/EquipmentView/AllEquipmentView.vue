@@ -11,7 +11,10 @@
         v-for="item in allEquipment"
     >
 
-      <EquipmentView :equipment=item>
+      <EquipmentView
+          :equipment=item
+          :hasScript="false"
+      >
 
       </EquipmentView>
 

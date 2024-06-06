@@ -14,5 +14,8 @@ public class DataType {
     private int id;
     private String name;
 
+    private String suffix;
+    private boolean percent;
+
 
 }

@@ -12,6 +12,11 @@ public interface IDataTypeService {
 
     int updateDataTypeAnotherName(int id, String anotherName);
 
+    int updateDataTypeSuffixById(int id, String suffix);
+
+    int updateDataTypePercentById(int id, boolean percent);
+
+
     @Nullable
     DataType getDataTypeById(int id);
 

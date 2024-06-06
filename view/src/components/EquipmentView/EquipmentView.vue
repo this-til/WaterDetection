@@ -3,7 +3,7 @@
 
   <el-header class="header-class">
 
-    设备：{{ equipment.name }} ({{ equipmentRunTime == null ? "离线" : "在线"}})
+    设备：{{ equipment.name }} ({{ equipmentRunTime == null ? "离线" : "在线" }})
 
     <el-divider direction="vertical"/>
 
@@ -182,6 +182,22 @@
         </el-row>
     -->
 
+    <div
+        v-if=hasScript
+    >
+      <el-row
+          v-if=hasScript
+      >
+        脚本：
+      </el-row>
+      <el-input
+          v-if=hasScript
+          v-model="textarea"
+          :autosize="{ minRows: 20, maxRows: 999 }"
+          type="textarea"
+      />
+    </div>
+
 
   </el-main>
 </template>
@@ -285,6 +301,7 @@ const clickRename = () => {
   newEquipmentName.value = props.equipment.name
 }
 
+const textarea = ref<string>()
 
 onMounted(() => {
   up();
@@ -327,6 +344,7 @@ const dataStyle = (dataRunTime: DataTypeRunTime): string => {
 
 interface Props {
   equipment: Equipment
+  hasScript: boolean
 }
 
 </script>

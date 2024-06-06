@@ -29,6 +29,20 @@ public interface IDataTypeMapper {
             """)
     int updateDataTypeAnotherNameById(@Param("id") int id, @Param("anotherName") String anotherName);
 
+    @Update("""
+            update water_detection_data.data_type
+            set suffix = #{suffix}
+            where id = #{id}
+            """)
+    int updateDataTypeSuffixById(@Param("id") int id, @Param("suffix") String suffix);
+
+    @Update("""
+            update water_detection_data.data_type
+            set percent = #{percent}
+            where id = #{id}
+            """)
+    int updateDataTypePercentById(@Param("id") int id, @Param("percent") boolean percent);
+
     @Select("""
             select *
             from water_detection_data.data_type

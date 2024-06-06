@@ -8,6 +8,7 @@ import com.til.water_detection.wab.service.IDataTypeService;
 import com.til.water_detection.data.util.FinalString;
 import jakarta.annotation.Resource;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Update;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,6 +32,18 @@ public class DataTypeController {
     @DeleteMapping("/removeDataTypeById")
     public Result<Void> removeDataTypeById(@RequestParam int id) {
         int i = dataTypeService.removeDataTypeById(id);
+        return new Result<>(i > 0 ? ResultType.SUCCESSFUL : ResultType.FAIL, null, null);
+    }
+
+    @PostMapping("/updateDataTypeSuffixById")
+    public Result<Void> updateDataTypeSuffixById(@RequestParam int id, @RequestParam String suffix) {
+        int i = dataTypeService.updateDataTypeSuffixById(id, suffix);
+        return new Result<>(i > 0 ? ResultType.SUCCESSFUL : ResultType.FAIL, null, null);
+    }
+
+    @PostMapping("/updateDataTypePercentById")
+    public Result<Void> updateDataTypePercentById(@RequestParam int id, @RequestParam boolean percent) {
+        int i = dataTypeService.updateDataTypePercentById(id, percent);
         return new Result<>(i > 0 ? ResultType.SUCCESSFUL : ResultType.FAIL, null, null);
     }
 

@@ -96,6 +96,7 @@
         <EquipmentView
             v-else-if=isEquipmentView
             :equipment=useEquipment
+            :hasScript="true"
             @needUp="needUp"
         >
 
