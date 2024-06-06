@@ -40,6 +40,7 @@ public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> ext
         scheduler.scheduleAtFixedRate(this::heartbeatDetection, 0, 30, TimeUnit.SECONDS);
         scheduler.scheduleAtFixedRate(this::timeoutDetection, 0, 30, TimeUnit.SECONDS);
         scheduler.scheduleAtFixedRate(this::send, 0, 1, TimeUnit.SECONDS);
+        scheduler.scheduleAtFixedRate(this::perMinute, 0, 1, TimeUnit.MINUTES);
     }
 
     protected void sendHeartbeat() {
@@ -86,9 +87,12 @@ public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> ext
         }
     }
 
+    protected void perMinute(){
+
+    }
+
     protected void send() {
         for (Map.Entry<WebSocketSession, S> entry : map.entrySet()) {
-
             for (CommandCallback<?> commandCallback : entry.getValue().getCommandCallbacks()) {
                 if (commandCallback.isSend()) {
                     continue;
@@ -222,84 +226,6 @@ public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> ext
         }
 
     }
-
-/*    @Override
-    protected void handleTextMessage(@NotNull WebSocketSession session, @NotNull TextMessage message) throws Exception {
-        super.handleTextMessage(session, message);
-        logger.info("新的消息 id={} remoteAddress={} message={}", session.getId(), session.getRemoteAddress(), message.getPayload());
-        map.get(session).update();
-        session.sendMessage(new TextMessage(message.getPayload()));
-    }*/
-
-    /*@Override
-    protected void handleTextMessage(@NotNull WebSocketSession session, @NotNull TextMessage message) throws Exception {
-        logger.info("新的消息 id={} url={} message={}", session.getId(), session.getUri(), message.getPayload());
-
-        S equipmentSocketContext = map.get(session);
-
-        String payload = message.getPayload().trim();
-
-        char head = payload.charAt(0);
-
-        equipmentSocketContext.update();
-
-        if (head == '~') {
-            //仅完成心跳
-            return;
-        }
-
-        if (head != '/' && head != '>') {
-            session.close(CloseStatus.NOT_ACCEPTABLE.withReason("未定义标签:" + payload));
-            return;
-        }
-
-        String[] pack = Arrays.stream(payload.substring(1).split(" "))
-                .filter(String::isEmpty)
-                .toArray(String[]::new);
-
-        if (pack.length == 0) {
-            session.close(CloseStatus.NOT_ACCEPTABLE.withReason("未定义语法:" + payload));
-        }
-        switch (head) {
-            case '/':
-                ReturnPackage returnPackage;
-                try {
-                    returnPackage = command(pack, equipmentSocketContext);
-                } catch (Exception e) {
-                    returnPackage = new ReturnPackage(ReturnState.FAIL, e.getMessage());
-                }
-                synchronized (session) {
-                    session.sendMessage(new TextMessage(returnPackage.toString()));
-                }
-                return;
-            case '>':
-
-                String s = pack[0];
-
-                CommandCallback<?> commandCallback = equipmentSocketContext.completeSession();
-
-                switch (s) {
-                    case "SUCCESSFUL":
-                        try {
-                            commandCallback.successCallback(Arrays.copyOfRange(pack, 1, pack.length), Util.cast(equipmentSocketContext));
-                        } catch (Exception e) {
-                            session.close(CloseStatus.SERVER_ERROR.withReason(e.getMessage()));
-                        }
-                        break;
-                    case "FAIL":
-                        try {
-                            commandCallback.failCallback(Arrays.copyOfRange(pack, 1, pack.length), Util.cast(equipmentSocketContext));
-                        } catch (Exception e) {
-                            session.close(CloseStatus.SERVER_ERROR.withReason(e.getMessage()));
-                        }
-                        break;
-                    default:
-                        session.close(CloseStatus.NOT_ACCEPTABLE.withReason("未定义语句:" + payload));
-                }
-
-
-        }
-    }*/
 
     protected abstract void command(ByteBuf source, ByteBuf output, Tag tag, S s);
 

@@ -7,13 +7,28 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.LinkedList;
+import java.util.Queue;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class DataTypeRunTime {
     private float value;
     private DataState dataState;
+
+    private Queue<Float> lastTenRecords ;
+
     private int embeddedId;
     private DataType dataType;
     private Rule rule;
+
+    public DataTypeRunTime setValue(float value) {
+        this.value = value;
+        lastTenRecords.add(value);
+        if (lastTenRecords.size() > 10) {
+            lastTenRecords.poll();
+        }
+        return this;
+    }
 }

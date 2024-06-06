@@ -196,7 +196,7 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
                 rule = ruleService.getRuleByLimitId(equipmentId, dataTypeId);
                 assert rule != null;
             }
-            dataTypeRunTimeList.add(new DataTypeRunTime(0, DataState.NORMAL, i, dataType, rule));
+            dataTypeRunTimeList.add(new DataTypeRunTime(0, DataState.NORMAL, new LinkedList<>(), i, dataType, rule));
         }
 
         equipmentSocketContext.setDataTypeRuntimeList(dataTypeRunTimeList);

@@ -20,7 +20,6 @@ public class EquipmentSocketContext extends SocketContext<CommandCallback<Equipm
 
     @Getter
     private EquipmentRunTime equipmentRunTime;
-    private boolean isInit;
     private final EquipmentSocketHandler equipmentSocketHandler;
 
     public EquipmentSocketContext(WebSocketSession webSocketSession, EquipmentSocketHandler equipmentSocketHandler) {
@@ -29,29 +28,17 @@ public class EquipmentSocketContext extends SocketContext<CommandCallback<Equipm
     }
 
     public void setEquipment(Equipment equipment) {
-        assert !isInit;
         this.equipmentRunTime = new EquipmentRunTime(equipment, null, null);
     }
 
     public void setActuatorRuntimeList(List<ActuatorRuntime> actuatorRuntimeList) {
-        assert !isInit;
         this.equipmentRunTime.setActuatorRuntimeList(Collections.unmodifiableList(actuatorRuntimeList));
     }
 
     public void setDataTypeRuntimeList(List<DataTypeRunTime> dataTypeRuntimeList) {
-        assert !isInit;
         this.equipmentRunTime.setDataTypeRuntimeList(Collections.unmodifiableList(dataTypeRuntimeList));
     }
 
-
-    public boolean isInit() {
-        return isInit;
-    }
-
-    public void initEnd() {
-        assert !isInit;
-        isInit = true;
-    }
 
     public EquipmentRunTime upEquipmentRunTime() {
         equipmentRunTime.setEquipment(equipmentSocketHandler.getEquipmentService().getEquipmentById(equipmentRunTime.getEquipment().getId()));

@@ -587,7 +587,7 @@ def sendClient():
 
 def sendScreen():
     while True:
-        time.sleep(0.25)
+        time.sleep(0.75)
         if not toBeSentToScreen.empty():
             pack = toBeSentToScreen.get()
             if isDebug:

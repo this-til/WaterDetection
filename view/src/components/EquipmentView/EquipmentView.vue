@@ -93,7 +93,7 @@
         <el-button style="margin-right: 16px">删除设备</el-button>
       </template>
 
-      你确定要删除数据吗，该操作会清除设备的历史上报数据、自定义规则等
+      你确定要删除设备历史数据吗
 
       <br>
 
