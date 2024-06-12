@@ -24,6 +24,8 @@ public class SocketContext<C extends CommandCallback<?>> {
     }
 
     public void addCommandCallback(C commandCallback) {
-        commandCallbacks.add(commandCallback);
+        synchronized (commandCallbacks) {
+            commandCallbacks.add(commandCallback);
+        }
     }
 }

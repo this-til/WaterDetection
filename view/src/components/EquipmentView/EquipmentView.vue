@@ -14,7 +14,7 @@
         @before-enter="clickRename"
     >
       <template #reference>
-        <el-button style="margin-right: 16px">重命名</el-button>
+        <el-button>重命名</el-button>
       </template>
 
       <el-input v-model="newEquipmentName"/>
@@ -39,7 +39,7 @@
         @before-enter="clickFence"
     >
       <template #reference>
-        <el-button style="margin-right: 16px">电子栅栏</el-button>
+        <el-button>电子栅栏</el-button>
       </template>
 
 
@@ -90,7 +90,7 @@
         @before-enter="clickFence"
     >
       <template #reference>
-        <el-button style="margin-right: 16px">删除设备</el-button>
+        <el-button>删除设备</el-button>
       </template>
 
       你确定要删除设备历史数据吗
@@ -102,100 +102,156 @@
     </el-popover>
 
   </el-header>
-  <el-main
-      class="main-class"
-      v-if="equipmentRunTime != null"
-  >
+  <el-main class="main-class">
 
-    <el-row>
-      数据：
-    </el-row>
 
-    <el-space
-        wrap
+    <div
+        v-if="equipmentRunTime != null"
     >
-      <div
-          v-for="item in equipmentRunTime.dataTypeRuntimeList"
-          :key="item.dataType.id"
-          :class=dataStyle(item)
+      <el-row>
+        数据：
+      </el-row>
+
+      <br>
+      <el-space
+          wrap
       >
-
-        {{ item.dataType.name }} : {{ item.value }}
-
         <div
-            class="lowerp-left-corner"
+            v-for="item in equipmentRunTime.dataTypeRuntimeList"
+            :key="item.dataType.id"
+            :class=dataStyle(item)
         >
-          <el-popover
-              width="300"
-              trigger="click"
-              placement="bottom"
-              @before-enter="clickChangeRule(item)"
-          >
 
-            <template #reference>
-              <el-button style="margin-right: 16px">更改规则</el-button>
-            </template>
-            异常上界:
-            <el-input-number v-model="newExceptionUpper" :min="newWarnUpper"/>
-            <br>
-            警告上界:
-            <el-input-number v-model="newWarnUpper" :min="newWarnLower" :max="newExceptionUpper"/>
-            <br>
-            警告下界:
-            <el-input-number v-model="newWarnLower" :min="newExceptionLower" :max="newWarnUpper"/>
-            <br>
-            异常下界:
-            <el-input-number v-model="newExceptionLower" :max="newWarnLower"/>
-            <br>
-            <el-button @click=changeRule(item)>确定</el-button>
-          </el-popover>
+          {{ item.dataType.name }} : {{ item.value }}
+
+          <!--          <div
+                        class="lowerp-left-corner"
+                    >
+                      <el-popover
+                          width="300"
+                          trigger="click"
+                          placement="bottom"
+                          @before-enter="clickChangeRule(item)"
+                      >
+
+                        <template #reference>
+                          <el-button style="margin-right: 16px">更改规则</el-button>
+                        </template>
+                        异常上界:
+                        <el-input-number v-model="newExceptionUpper" :min="newWarnUpper"/>
+                        <br>
+                        警告上界:
+                        <el-input-number v-model="newWarnUpper" :min="newWarnLower" :max="newExceptionUpper"/>
+                        <br>
+                        警告下界:
+                        <el-input-number v-model="newWarnLower" :min="newExceptionLower" :max="newWarnUpper"/>
+                        <br>
+                        异常下界:
+                        <el-input-number v-model="newExceptionLower" :max="newWarnLower"/>
+                        <br>
+                        <el-button @click=changeRule(item)>确定</el-button>
+                      </el-popover>
+                    </div>-->
+
+
         </div>
+      </el-space>
 
+      <el-row>
+        执行器：
+      </el-row>
 
-      </div>
-    </el-space>
+      <br>
+      <el-space
+          wrap
+      >
+        <div
+            v-for="item in equipmentRunTime.actuatorRuntimeList"
+            :key="item.actuator.id"
+            class="scrollbar-demo-item-normal">
 
-    <el-row>
-      执行器：
-    </el-row>
-    <el-space
-        wrap
-    >
-      <div
-          v-for="item in equipmentRunTime.actuatorRuntimeList"
-          :key="item.actuator.id"
-          class="scrollbar-demo-item-normal">
+          {{ item.actuator.name }} : &nbsp;&nbsp;&nbsp;
+          <el-switch
+              v-model="item.activated"
+              @change="switchActivated(item)"
+          />
 
-        {{ item.actuator.name }} : &nbsp;&nbsp;&nbsp;
-        <el-switch
-            v-model="item.activated"
-            @change="switchActivated(item)"
-        />
+        </div>
+      </el-space>
 
-      </div>
-    </el-space>
-    <!--
-
-
-        <el-row>
-          指令：
-        </el-row>
-    -->
+    </div>
 
     <div
         v-if=hasScript
     >
-      <el-row
-          v-if=hasScript
-      >
+      <el-row>
         脚本：
+
+        <el-button @click=saveScript>保存脚本</el-button>
+        <el-divider direction="vertical"/>
+        <el-popover
+            width="300"
+            trigger="click"
+            placement="bottom"
+            @before-enter="clickScriptFile"
+        >
+
+          <template #reference>
+            <el-button>选择文件</el-button>
+          </template>
+          <input type="file" @change="handleFileSelect"/>
+
+          <br>
+
+          <el-button @click="coverScriptFile">覆盖</el-button>
+          <el-button @click="coverScriptFileAndSaver">覆盖并上传</el-button>
+
+        </el-popover>
+
+        <el-divider
+            v-if="equipmentRunTime != null"
+            direction="vertical"
+        />
+        <el-popover
+            v-if="equipmentRunTime != null"
+            width="1000"
+            trigger="click"
+            placement="bottom"
+            @before-enter="clickScriptFile"
+        >
+
+          <template #reference>
+            <el-button>日志捕获</el-button>
+          </template>
+
+          <div>
+            {{ equipmentRunTime.log }}
+          </div>
+
+        </el-popover>
+
+
       </el-row>
+
+      <br>
+
+
       <el-input
-          v-if=hasScript
-          v-model="textarea"
+          v-model="script"
           :autosize="{ minRows: 20, maxRows: 999 }"
           type="textarea"
       />
+
+
+      <br>
+
+      <div
+          v-if="equipmentRunTime != null"
+      >
+
+
+      </div>
+
     </div>
 
 
@@ -212,12 +268,13 @@ import {
   EquipmentApi,
   EquipmentRunTime,
   getResultTypeFromString,
-  ResultType, RuleApi
+  ResultType, ScriptApi
 } from "@/api";
 import {ElMessage} from "element-plus";
 import {h} from 'vue'
-import {post} from "axios";
 import {useRouter} from "vue-router";
+import {Bottom} from "@element-plus/icons-vue";
+import * as fs from 'fs';
 
 const router = useRouter();
 const props = defineProps<Props>();
@@ -280,6 +337,7 @@ const clickChangeRule = (dataTypeRunTime: DataTypeRunTime) => {
   newExceptionLower.value = dataTypeRunTime.rule.exceptionLower
 }
 
+/*
 const changeRule = (dataTypeRunTime: DataTypeRunTime) => {
   RuleApi.updateById(dataTypeRunTime.rule.id, {
     exceptionUpper: newExceptionUpper.value,
@@ -292,6 +350,7 @@ const changeRule = (dataTypeRunTime: DataTypeRunTime) => {
   })
   up()
 }
+*/
 
 const switchActivated = (actuator: ActuatorRuntime) => {
   ActuatorApi.updateActuatorByEquipmentId(props.equipment.id, actuator.embeddedId, actuator.activated)
@@ -301,7 +360,67 @@ const clickRename = () => {
   newEquipmentName.value = props.equipment.name
 }
 
-const textarea = ref<string>()
+const script = ref<string>()
+const scriptFile = ref<File | null>()
+
+const saveScript = () => {
+  ScriptApi.updateScriptById(props.equipment.id, script.value)
+  emit('needUp');
+}
+
+const handleFileSelect = (event: Event) => {
+  const fileInput = event.target as HTMLInputElement;
+  const files = fileInput.files;
+  if (files && files.length > 0) {
+    const file = files[0]; // 获取第一个文件
+    if (file) {
+      scriptFile.value = file
+    }
+  }
+}
+
+const clickScriptFile = () => {
+}
+
+const coverScriptFile = () => {
+  if (scriptFile.value == null) {
+    return
+  }
+  const reader: FileReader = new FileReader()
+  reader.onload = (e: ProgressEvent<FileReader>) => {
+    script.value = e.target?.result as string;
+  };
+
+  reader.readAsText(scriptFile.value, 'utf8')
+
+
+  /*  fs.readFile(script.value, 'utf8', (err, data) => {
+      if (err) {
+        ElMessage({
+          message: '读取文件时出错:' + err,
+          type: 'error',
+        })
+        return;
+      }
+      script.value = data
+    });*/
+}
+
+const coverScriptFileAndSaver = () => {
+  if (scriptFile.value == null) {
+    return
+  }
+  const reader: FileReader = new FileReader()
+  reader.onload = (e: ProgressEvent<FileReader>) => {
+    script.value = e.target?.result as string;
+    saveScript()
+  };
+
+  reader.readAsText(scriptFile.value, 'utf8')
+
+
+}
+
 
 onMounted(() => {
   up();
@@ -324,6 +443,10 @@ const updateTime = () => {
 const {equipment} = toRefs(props)
 watch(equipment, (n, o) => {
   up()
+  script.value = ""
+  ScriptApi.getScriptById(n.id).then(r => {
+    script.value = r.data.data
+  })
 })
 
 

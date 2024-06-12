@@ -13,7 +13,7 @@ public interface IEquipmentMapper {
             insert into water_detection_data.equipment (name)
             values (#{name})
             """)
-    int registerEquipment(String name);
+    int registerEquipment(@Param("name") String name);
 
     @Delete("""
             delete
@@ -49,7 +49,8 @@ public interface IEquipmentMapper {
             set electronic_fence = #{electronicFence}, fence_latitude = #{latitude},fence_longitude = #{longitude}, fence_range = #{range}
             where id = #{id}
             """)
-    int updateEquipmentFencePosById(@Param("id") int id,@Param("electronicFence") boolean electronicFence, @Param("longitude") float longitude, @Param("latitude") float latitude, @Param("range") float range);
+    int updateEquipmentFencePosById(@Param("id") int id, @Param("electronicFence") boolean electronicFence, @Param("longitude") float longitude, @Param("latitude") float latitude, @Param("range") float range);
+
 
     @Select("""
             select *

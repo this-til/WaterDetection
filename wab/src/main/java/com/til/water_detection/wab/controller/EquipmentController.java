@@ -145,7 +145,7 @@ public class EquipmentController {
                 .stream()
                 .filter(e -> e.getEquipmentRunTime().getEquipment().getId() == id)
                 .findFirst()
-                .map(equipmentSocketContext -> new Result<>(ResultType.SUCCESSFUL, null, equipmentSocketContext.upEquipmentRunTime()))
+                .map(equipmentSocketContext -> new Result<>(ResultType.SUCCESSFUL, null, equipmentSocketContext.getEquipmentRunTime()))
                 .orElseGet(() -> new Result<>(ResultType.SUCCESSFUL, null, null));
     }
 

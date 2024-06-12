@@ -30,7 +30,7 @@
         placement="bottom"
     >
       <template #reference>
-        <el-button style="margin-right: 16px">筛选设备</el-button>
+        <el-button>筛选设备</el-button>
       </template>
 
       <el-transfer
@@ -84,23 +84,23 @@
 
     <el-divider direction="vertical"/>
 
-<!--    <el-popover
-        width="300"
-        trigger="click"
-        placement="bottom"
-        @before-enter="clickFence"
-    >
-      <template #reference>
-        <el-button style="margin-right: 16px">删除类型</el-button>
-      </template>
+    <!--    <el-popover
+            width="300"
+            trigger="click"
+            placement="bottom"
+            @before-enter="clickFence"
+        >
+          <template #reference>
+            <el-button style="margin-right: 16px">删除类型</el-button>
+          </template>
 
-      你确定要删除该类型的历史上报数据吗
+          你确定要删除该类型的历史上报数据吗
 
-      <br>
+          <br>
 
-      <el-button @click=deleteEquipment>确定</el-button>
+          <el-button @click=deleteEquipment>确定</el-button>
 
-    </el-popover>-->
+        </el-popover>-->
 
   </el-header>
   <el-main class="main-class">

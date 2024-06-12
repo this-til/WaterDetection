@@ -19,6 +19,9 @@ configurations {
 
 repositories {
     mavenCentral()
+    maven { url 'https://maven.aliyun.com/repository/google' }
+    maven { url 'https://maven.aliyun.com/repository/jcenter' }
+    maven { url 'https://maven.aliyun.com/nexus/content/groups/public' }
 }
 
 configurations.configureEach {
@@ -28,6 +31,7 @@ configurations.configureEach {
 dependencies {
 
     api project(":sql")
+    implementation project(":script_api")
 
     compileOnly 'org.jetbrains:annotations:24.0.0'
 
@@ -36,7 +40,7 @@ dependencies {
 
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
-    implementation 'org.codehaus.groovy:groovy-all:3.0.7'
+    implementation("org.apache.groovy:groovy:4.0.21")
 
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 

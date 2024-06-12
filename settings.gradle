@@ -1,3 +1,4 @@
+
 rootProject.name = 'WaterDetection'
 include 'data'
 include 'sql'
@@ -6,4 +7,7 @@ include 'api'
 include ':view'
 include ':4G'
 include 'fictitious_data'
+include 'script_api'
+include 'script_data'
+include 'script'
 

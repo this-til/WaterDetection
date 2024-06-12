@@ -3,6 +3,7 @@ package com.til.water_detection.data;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.Timestamp;
 import java.util.Objects;
@@ -21,4 +22,6 @@ public class Equipment {
     private float fenceLongitude;
     private float fenceLatitude;
     private float fenceRange;
+
+    private int scriptId;
 }

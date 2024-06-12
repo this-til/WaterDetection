@@ -78,48 +78,6 @@ toBeSentToScreen = Queue(32)
 planExecution = Queue(4)
 
 
-class CommandCallback:
-    command: bytes = None
-    cId: int = None
-    to: int = None
-
-    successCallback = None
-    failCallback = None
-    exceptionCallback = None
-    outTime = None
-
-    sendTime: int
-
-    def __init__(self, command: bytearray, to, successCallback, failCallback, exceptionCallback, outTime):
-        self.to = to
-
-        pack = bytearray()
-        pack.extend(header)
-        pack.append(_4G)
-        pack.append(to)
-        pack.append(ORDER)
-
-        global _idAdd
-        _idAdd += 1
-        self.cId = _idAdd
-
-        addInt32ToBytes(self.cId, pack)
-
-        pack.extend(command)
-        pack.extend(footer)
-
-        self.command = bytes(pack)
-
-        self.successCallback = successCallback
-        self.failCallback = failCallback
-        self.exceptionCallback = exceptionCallback
-        self.outTime = outTime
-
-        self.sendTime = utime.time()
-
-        pass
-
-
 class WatchDog:
 
     def __init__(self, max_count):
@@ -163,10 +121,6 @@ class WatchDog:
         self.__tid = None
 
 
-commandCallbackList: list[CommandCallback] = list()
-commandCallbackListLock = _thread.allocate_lock()
-
-
 def init():
     global _idAdd
     _idAdd = 0
@@ -174,37 +128,79 @@ def init():
     if not csqTest():
         return
 
-    commandCallbackListLock.acquire()
-    commandCallbackList.clear()
-    commandCallbackListLock.release()
-
     com = bytearray()
     com.append(0x00)
     com.append(0x00)
 
     com[0] = READ
     com[1] = URL
-    down(CommandCallback(com, CLIENT, w_url, None, None, None))
+    forwardData(toCommand(com, CLIENT, 1))
 
     com[1] = USERNAME
-    down(CommandCallback(com, CLIENT, w_username, None, None, None))
+    forwardData(toCommand(com, CLIENT, 2))
 
     com[1] = PASSWORD
-    down(CommandCallback(com, CLIENT, w_password, None, None, None))
+    forwardData(toCommand(com, CLIENT, 3))
 
     com[1] = EQUIPMENT
-    down(CommandCallback(com, CLIENT, w_equipment, None, None, None))
+    forwardData(toCommand(com, CLIENT, 4))
 
     com[0] = GET
     com[1] = DATA_TYPE_LIST
-    down(CommandCallback(com, CLIENT, w_dataTypeList, None, None, None))
+    forwardData(toCommand(com, CLIENT, 5))
 
     com[1] = ACTUATOR_LIST
-    down(CommandCallback(com, CLIENT, w_actuatorList, None, None, None))
+    forwardData(toCommand(com, CLIENT, 6))
 
     com = bytearray()
     com.append(INIT_END)
-    down(CommandCallback(com, CLIENT, w_end, None, None, None))
+    forwardData(toCommand(com, CLIENT, 7))
+
+    pass
+
+
+def toCommand(cmd: bytearray, to: int, id: int) -> bytes:
+    pack = bytearray()
+    pack.extend(header)
+    pack.append(_4G)
+    pack.append(to)
+    pack.append(ORDER)
+
+    addInt32ToBytes(id, pack)
+
+    pack.extend(cmd)
+    pack.extend(footer)
+
+    return bytes(pack)
+    pass
+
+
+def response(_pack: bytes, result: int, id: int):
+    if (id == 101):
+        if result == SUCCESSFUL:
+            connect_test_success(_pack)
+        elif result == FAIL:
+            connect_test_fail(_pack)
+        elif result == EXCEPTION:
+            connect_test_exception(_pack)
+
+    if (result != SUCCESSFUL):
+        return
+
+    if id == 1:
+        w_url(_pack)
+    elif id == 2:
+        w_username(_pack)
+    elif id == 3:
+        w_password(_pack)
+    elif id == 4:
+        w_equipment(_pack)
+    elif id == 5:
+        w_dataTypeList(_pack)
+    elif id == 6:
+        w_actuatorList(_pack)
+    elif id == 7:
+        w_end(_pack)
 
     pass
 
@@ -510,38 +506,8 @@ def forwardData(pack: bytes):
         if _header == ANSWER_BACK:
             result = pack[3 + 7]
             _pack = pack[3 + 8: len(pack) - 3]
-
-            callback: CommandCallback | None = None
-            for e in commandCallbackList:
-                if e.cId == id:
-                    callback = e
-                    break
-
-            if callback is None:
-                if isDebug:
-                    print("NO callback")
-                return
-
-            commandCallbackList.remove(callback)
-
-            if result == SUCCESSFUL:
-                if callback.successCallback is not None:
-                    callback.successCallback(_pack)
-            elif result == FAIL:
-                if callback.failCallback is not None:
-                    callback.failCallback(_pack)
-            elif result == EXCEPTION:
-                if callback.exceptionCallback is not None:
-                    callback.exceptionCallback(_pack)
-            pass
-    pass
-
-
-def down(command: CommandCallback):
-    forwardData(command.command)
-    commandCallbackListLock.acquire()
-    commandCallbackList.append(command)
-    commandCallbackListLock.release()
+            response(_pack, result, id)
+        pass
     pass
 
 
@@ -596,28 +562,6 @@ def sendScreen():
     pass
 
 
-def timeoutDetection():
-    while True:
-        time.sleep(10)
-        if len(commandCallbackList) != 0:
-            ntime = utime.time()
-            commandCallbackListLock.acquire()
-            rList = None
-            for c in commandCallbackList:
-                if ntime - c.sendTime > 30:
-                    if rList is None:
-                        rList = []
-                    rList.append(c)
-            if rList is not None:
-                for r in rList:
-                    commandCallbackList.remove(r)
-                for e in rList:
-                    if e.outTime is not None:
-                        e.outTime()
-            commandCallbackListLock.release()
-    pass
-
-
 def bark():
     global cli
     print("BARK")
@@ -640,8 +584,7 @@ def connect_test():
     com.append(INIT_END)
     while True:
         time.sleep(0.75)
-        down(CommandCallback(com, CLIENT, connect_test_success, connect_test_fail, connect_test_exception,
-                             connect_test_out))
+        forwardData(toCommand(com, CLIENT, 101))
         global t_all
         t_all += 1
 
@@ -661,7 +604,6 @@ def connect_test_log():
             "t_fail", t_fail,
             "t_exception", t_exception,
             "t_outTime", t_outTime,
-            "commandCallbackList.size()", len(commandCallbackList),
             "toBeSentToClient.size()", toBeSentToClient.size())
     pass
 
@@ -736,8 +678,6 @@ if __name__ == '__main__':
     _thread.start_new_thread(sendServer, ())
     _thread.start_new_thread(sendClient, ())
     _thread.start_new_thread(sendScreen, ())
-
-    _thread.start_new_thread(timeoutDetection, ())
 
     _thread.start_new_thread(feedThread, ())
 

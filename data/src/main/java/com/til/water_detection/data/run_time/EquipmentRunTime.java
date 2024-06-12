@@ -17,4 +17,6 @@ public class EquipmentRunTime {
     private List<ActuatorRuntime> actuatorRuntimeList;
     private List<DataTypeRunTime> dataTypeRuntimeList;
 
+    private String log;
+
 }

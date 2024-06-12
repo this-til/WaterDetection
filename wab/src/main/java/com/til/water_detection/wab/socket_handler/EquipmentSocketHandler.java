@@ -15,20 +15,28 @@ import com.til.water_detection.wab.socket_data.CommandCallback;
 import com.til.water_detection.wab.socket_data.EquipmentSocketContext;
 import com.til.water_detection.wab.socket_data.ReturnPackage;
 import com.til.water_detection.wab.util.ByteBufUtil;
+import groovy.lang.GroovyShell;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import jakarta.annotation.Nullable;
 import jakarta.annotation.Resource;
 import lombok.Getter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.socket.WebSocketSession;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.sql.Timestamp;
 import java.util.*;
 
 @Controller
 public class EquipmentSocketHandler extends CommandSocketHandlerBasics<EquipmentSocketContext> {
+
+    protected static final Logger logger = LogManager.getLogger(EquipmentSocketHandler.class);
+
     @Resource
     @Getter
     private IEquipmentService equipmentService;
@@ -43,10 +51,10 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
     private IActuatorService actuatorService;
     @Resource
     @Getter
-    private IRuleService ruleService;
-    @Resource
+    private IScriptService scriptService;
+
     @Getter
-    private ICommandService commandService;
+    private final GroovyShell groovyShell = new GroovyShell();
 
     private final List<ComEntry<EquipmentSocketContext>> rootComEntryList;
 
@@ -65,7 +73,6 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
             float value = (float) ((double) (source.readInt()) / 10000d);
             dataService.addData(new Data(0L, c.getEquipmentRunTime().getEquipment().getId(), dataType.getId(), null, value));
 
-            dataTypeRunTime.setDataState(dataTypeRunTime.getRule().ofDataState(value));
             output.writeByte(ResultType.SUCCESSFUL.getState());
         }), new ComEntry<>(FinalByte.S_GPS, (source, output, tag, c) -> {
             float longitude = (float) ((double) source.readInt() / 10000d);
@@ -88,7 +95,6 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
             for (DataTypeRunTime dataTypeRunTime : c.getEquipmentRunTime().getDataTypeRuntimeList()) {
                 float value = (float) ((double) source.readInt() / 10000d);
                 dataService.addData(new Data(0L, c.getEquipmentRunTime().getEquipment().getId(), dataTypeRunTime.getDataType().getId(), null, value));
-                dataTypeRunTime.setDataState(dataTypeRunTime.getRule().ofDataState(value));
                 dataTypeRunTime.setValue(value);
             }
             output.writeByte(ResultType.SUCCESSFUL.getState());
@@ -99,15 +105,7 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
             }
             output.writeByte(ResultType.SUCCESSFUL.getState());
         }));
-        weiteComEntryList = List.of(new ComEntry<>(FinalByte.S_RULE, (source, output, tag, c) -> {
-            int index = source.readInt();
-            DataTypeRunTime dataTypeRunTime = c.getEquipmentRunTime().getDataTypeRuntimeList().get(index);
-            Rule rule = dataTypeRunTime.getRule();
-            Rule nRule = new Rule(0, 0, 0, (float) ((double) source.readInt() / 10000d), (float) ((double) source.readInt() / 10000d), (float) ((double) source.readInt() / 10000d), (float) ((double) source.readInt() / 10000d), rule.isWarnSendMessage(), rule.isExceptionSendMessage());
-            ruleService.updateById(rule.getId(), nRule);
-            dataTypeRunTime.setRule(ruleService.getRuleById(rule.getId()));
-            output.writeByte(ResultType.SUCCESSFUL.getState());
-        }), new ComEntry<>(FinalByte.S_EQUIPMENT_NAME, (source, output, tag, c) -> {
+        weiteComEntryList = List.of(new ComEntry<>(FinalByte.S_EQUIPMENT_NAME, (source, output, tag, c) -> {
             String s = ByteBufUtil.readString(source, null);
 
             if (s.isEmpty() || s.length() > 30) {
@@ -188,15 +186,7 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
                 dataType = dataTypeService.getDataTypeByName(name);
                 assert dataType != null;
             }
-            int equipmentId = equipmentSocketContext.getEquipmentRunTime().getEquipment().getId();
-            int dataTypeId = dataType.getId();
-            Rule rule = ruleService.getRuleByLimitId(equipmentId, dataTypeId);
-            if (rule == null) {
-                ruleService.registerRuleSimple(equipmentId, dataTypeId);
-                rule = ruleService.getRuleByLimitId(equipmentId, dataTypeId);
-                assert rule != null;
-            }
-            dataTypeRunTimeList.add(new DataTypeRunTime(0, DataState.NORMAL, i, dataType, rule));
+            dataTypeRunTimeList.add(new DataTypeRunTime(0, DataState.NORMAL, i, dataType));
         }
 
         equipmentSocketContext.setDataTypeRuntimeList(dataTypeRunTimeList);
@@ -239,5 +229,37 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
     public EquipmentSocketContext getEquipmentSocketContextByid(int id) {
         //noinspection OptionalGetWithoutIsPresent
         return getSocketContext().stream().filter(equipmentRunTime -> equipmentRunTime.getEquipmentRunTime().getEquipment().getId() == id).findFirst().get();
+    }
+
+    @Override
+    protected void runScript() {
+        super.runScript();
+
+        for (EquipmentSocketContext equipmentSocketContext : getSocketContext()) {
+
+            if (equipmentSocketContext.getScript() == null) {
+                continue;
+            }
+            PrintStream originalOut = System.out;
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            PrintStream captureOut = new PrintStream(baos);
+            // 重定向 System.out
+            System.setOut(captureOut);
+
+            try {
+                equipmentSocketContext.getScript().invokeMethod("main", equipmentSocketContext);
+            } catch (Exception e) {
+                captureOut.println("-----------------脚本触发异常-----------------");
+                captureOut.println("ERROR: " + e.getMessage());
+                e.printStackTrace(captureOut);
+            }
+            System.setOut(originalOut);
+
+            String capturedLog = baos.toString();
+            equipmentSocketContext.getEquipmentRunTime().setLog(capturedLog);
+
+        }
+
+
     }
 }

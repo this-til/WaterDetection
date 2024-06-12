@@ -1,8 +1,12 @@
 package com.til.water_detection.wab.service.impl;
 
 import com.til.water_detection.data.Equipment;
+import com.til.water_detection.data.run_time.EquipmentRunTime;
 import com.til.water_detection.sql.mapper.IEquipmentMapper;
+import com.til.water_detection.sql.mapper.IScriptMapper;
 import com.til.water_detection.wab.service.IEquipmentService;
+import com.til.water_detection.wab.socket_data.EquipmentSocketContext;
+import com.til.water_detection.wab.socket_handler.EquipmentSocketHandler;
 import jakarta.annotation.Nullable;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
@@ -14,6 +18,7 @@ public class EquipmentIdServiceImpl implements IEquipmentService {
 
     @Resource
     private IEquipmentMapper equipmentMapper;
+
 
     @Override
     public int registerEquipment(String name) {
@@ -42,8 +47,9 @@ public class EquipmentIdServiceImpl implements IEquipmentService {
 
     @Override
     public int updateEquipmentFencePosById(int id, boolean electronicFence, float longitude, float latitude, float range) {
-        return equipmentMapper.updateEquipmentFencePosById(id, electronicFence , longitude, latitude, range);
+        return equipmentMapper.updateEquipmentFencePosById(id, electronicFence, longitude, latitude, range);
     }
+
 
     @Override
     public Equipment getEquipmentById(int id) {

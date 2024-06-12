@@ -62,24 +62,6 @@ export const LoginApi = {
     }),
 }
 
-
-export const CommandApi = {
-    registerCommand: (ruleId: number, actuatorId: number, commandTrigger: number): Promise<AxiosResponse<Result<void>>> => api.post('/command/registerCommand', {
-        params: {
-            ruleId,
-            actuatorId,
-            commandTrigger
-        }
-    }),
-    removeCommandById: (id: number): Promise<AxiosResponse<Result<void>>> => api.delete('/command/removeCommandById', {params: {id}}),
-    updateCommandById: (id: number, command: Command): Promise<AxiosResponse<Result<void>>> => axios.put(`/command/updateCommandById`, command, {params: {id}}),
-    getCommandById: (id: number): Promise<AxiosResponse<Result<Command>>> => api.get('/command/getCommandById', {params: {id}}),
-    getCommandByIdArray: (id: number[]): Promise<AxiosResponse<Result<Command[]>>> => api.get('/command/getCommandByIdArray', {params: {id: id.join(',')}}),
-    getCommandByActuatorId: (actuatorId: number): Promise<AxiosResponse<Result<Command[]>>> => api.get('/command/getCommandByActuatorId', {params: {actuatorId}}),
-    getCommandByRuleId: (ruleId: number): Promise<AxiosResponse<Result<Command[]>>> => api.get('/command/getCommandByRuleId', {params: {ruleId}}),
-    getAllCommands: (): Promise<AxiosResponse<Result<Command[]>>> => api.get('/command/getAllCommands'),
-};
-
 export const DataApi = {
     addData: (data: Data): Promise<AxiosResponse<Result<void>>> => api.post('/data/addData', data),
     addDataSimple: (equipmentId: number, dataTypeId: number, time: Date | null, value: number): Promise<AxiosResponse<Result<void>>> => api.post('/data/addDataSimple', {
@@ -109,7 +91,6 @@ export const DataApi = {
         }
     }),
 };
-
 
 export const DataTypeApi = {
     registerDataType: (name: string): Promise<AxiosResponse<Result<void>>> => api.post('/dataType/register', null, {params: {name}}),
@@ -159,6 +140,15 @@ export const EquipmentApi = {
             range
         }
     }),
+    /*    updateEquipmentScriptById: (id: number, script: string): Promise<AxiosResponse<Result<void>>> => api.put('/equipment/updateEquipmentScriptById', script, {
+            params: {
+                id,
+            },
+            headers: {
+                'Content-Type': 'text/plain',
+                'token': _token
+            }
+        }),*/
     getEquipmentById: (id: number): Promise<AxiosResponse<Result<Equipment>>> => api.get('/equipment/getEquipmentById', {params: {id}}),
     getEquipmentByName: (name: string): Promise<AxiosResponse<Result<Equipment>>> => api.get('/equipment/getEquipmentByName', {params: {name}}),
     getAllEquipment: (): Promise<AxiosResponse<Result<Equipment[]>>> => api.get('/equipment/getAllEquipment'),
@@ -170,16 +160,6 @@ export const EquipmentApi = {
     getEquipmentByNameArray: (nameArray: string[]): Promise<AxiosResponse<Result<Equipment[]>>> => api.get('/equipment/getEquipmentByNameArray', {params: {name: nameArray.join(',')}}),
 };
 
-export const RuleApi = {
-    registerRule: (rule: Rule): Promise<AxiosResponse<Result<void>>> => api.post('/rule/registerRule', rule),
-    deleteByID: (id: number): Promise<AxiosResponse<Result<void>>> => api.delete('/rule/deleteByID', {params: {id}}),
-    updateById: (id: number, rule: Rule): Promise<AxiosResponse<Result<void>>> => api.put('/rule/updateById', rule, {params: {id}}),
-    getRuleById: (id: number): Promise<AxiosResponse<Result<Rule>>> => api.get('/rule/getRuleById', {params: {id}}),
-    getRuleByEquipmentId: (equipmentId: number): Promise<AxiosResponse<Result<Rule[]>>> => api.get('/rule/getRuleByEquipmentId', {params: {equipmentId}}),
-    getRuleByDataTypeId: (dataTypeId: number): Promise<AxiosResponse<Result<Rule[]>>> => api.get('/rule/getRuleByDataTypeId', {params: {dataTypeId}}),
-    getRuleByEquipmentIdArray: (idArray: number[]): Promise<AxiosResponse<Result<Rule[]>>> => api.get('/rule/getRuleByEquipmentIdArray', {params: {id: idArray.join(',')}}),
-    getAllRule: (): Promise<AxiosResponse<Result<Rule[]>>> => api.get('/rule/getAllRule'),
-};
 
 export const ActuatorApi = {
     registerActuator: (name: string): Promise<AxiosResponse<Result<void>>> => api.post('/actuator/registerActuator', {name}),
@@ -196,6 +176,18 @@ export const ActuatorApi = {
     getAllActuator: (): Promise<AxiosResponse<Result<Actuator[]>>> => api.get('/actuator/getAllActuator'),
     getActuatorByIdArray: (idArray: number[]): Promise<AxiosResponse<Result<Actuator[]>>> => api.get('/actuator/getActuatorByIdArray', {params: {id: idArray.join(',')}}),
     getActuatorByNameArray: (nameArray: string[]): Promise<AxiosResponse<Result<Actuator[]>>> => api.get('/actuator/getActuatorByNameArray', {params: {name: nameArray.join(',')}}),
+};
+
+export const ScriptApi = {
+    registerScript: (script: string): Promise<AxiosResponse<Result<void>>> => api.post('/script/registerScript', script),
+    removeScript: (id: number): Promise<AxiosResponse<Result<void>>> => api.delete('/script/removeScript', {params: {id}}),
+    updateScriptById: (id: number, script: string): Promise<AxiosResponse<Result<void>>> => api.post('/script/updateScriptById', script, {
+        params: {id}, headers: {
+            'Content-Type': 'text/plain',
+            'token': _token
+        }
+    }),
+    getScriptById: (id: number): Promise<AxiosResponse<Result<string>>> => api.get('/script/getScriptById', {params: {id}})
 };
 
 export enum ResultType {
@@ -260,27 +252,6 @@ export interface DataSheet {
     value: number[][]
 }
 
-export interface Command {
-    id: number
-    ruleId: number
-    actuatorId: number
-    commandTrigger: number
-}
-
-export interface Rule {
-    id: number
-    datatypeId: number
-    equipmentId: number
-
-    exceptionUpper: number
-    warnUpper: number
-    warnLower: number
-    exceptionLower: number
-
-    warnSendMessage: boolean
-    exceptionSendMessage: boolean
-}
-
 export interface ActuatorRuntime {
 
     activated: boolean
@@ -293,7 +264,6 @@ export interface DataTypeRunTime {
     dataState: number
     embeddedId: number
     dataType: DataType
-    rule: Rule
 }
 
 export interface EquipmentRunTime {
@@ -301,5 +271,6 @@ export interface EquipmentRunTime {
     equipment: Equipment
     actuatorRuntimeList: ActuatorRuntime[];
     dataTypeRuntimeList: DataTypeRunTime[];
+    log: string
 
 }

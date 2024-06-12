@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -29,9 +30,10 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> extends AbstractWebSocketHandler {
-    protected final Logger logger = LogManager.getLogger(EquipmentSocketHandler.class);
+    protected static final Logger logger = LogManager.getLogger(CommandSocketHandlerBasics.class);
     protected final Map<WebSocketSession, S> map = new ConcurrentHashMap<>();
     protected final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    protected final ScheduledExecutorService runScript = Executors.newSingleThreadScheduledExecutor();
 
     protected boolean haveAResponse = false;
 
@@ -40,7 +42,7 @@ public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> ext
         scheduler.scheduleAtFixedRate(this::heartbeatDetection, 0, 30, TimeUnit.SECONDS);
         scheduler.scheduleAtFixedRate(this::timeoutDetection, 0, 30, TimeUnit.SECONDS);
         scheduler.scheduleAtFixedRate(this::send, 0, 1, TimeUnit.SECONDS);
-        scheduler.scheduleAtFixedRate(this::perMinute, 0, 10, TimeUnit.SECONDS);
+        runScript.scheduleAtFixedRate(this::runScript, 0, 10, TimeUnit.SECONDS);
     }
 
     protected void sendHeartbeat() {
@@ -87,26 +89,32 @@ public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> ext
         }
     }
 
-    protected void perMinute() {
+    protected void runScript() {
 
     }
 
     protected void send() {
         for (Map.Entry<WebSocketSession, S> entry : map.entrySet()) {
-            for (CommandCallback<?> commandCallback : entry.getValue().getCommandCallbacks()) {
-                if (commandCallback.isSend()) {
-                    continue;
-                }
-                WebSocketSession key = entry.getKey();
-                synchronized (key) {
-                    try {
-                        key.sendMessage(new BinaryMessage(commandCallback.getCommand()));
-                    } catch (IOException e) {
-                        logger.error("发送指令异常：", e);
+            synchronized (entry.getValue().getCommandCallbacks()) {
+                for (CommandCallback<?> commandCallback : entry.getValue().getCommandCallbacks().toArray(new CommandCallback[0])) {
+                    if (commandCallback.isSend()) {
+                        continue;
+                    }
+                    WebSocketSession key = entry.getKey();
+                    synchronized (key) {
+                        try {
+                            key.sendMessage(new BinaryMessage(commandCallback.getCommand()));
+                        } catch (IOException e) {
+                            logger.error("发送指令异常：", e);
+                        }
+                    }
+                    commandCallback.send();
+                    if (commandCallback.isOnlySend()) {
+                        entry.getValue().getCommandCallbacks().remove(commandCallback);
                     }
                 }
-                commandCallback.send();
             }
+
         }
     }
 
@@ -221,7 +229,9 @@ public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> ext
                     }
                 }
 
-                socketContext.getCommandCallbacks().remove(commandCallback);
+                synchronized (socketContext.getCommandCallbacks()) {
+                    socketContext.getCommandCallbacks().remove(commandCallback);
+                }
             }
         }
 

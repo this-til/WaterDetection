@@ -1,7 +1,6 @@
 package com.til.water_detection.api;
 
 import com.til.water_detection.data.Actuator;
-import com.til.water_detection.data.Command;
 import com.til.water_detection.data.Result;
 import com.til.water_detection.data.util.FinalString;
 import retrofit2.Call;
