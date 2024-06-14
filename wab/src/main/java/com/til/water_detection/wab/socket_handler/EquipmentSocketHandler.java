@@ -9,20 +9,19 @@ import com.til.water_detection.data.state.DataState;
 import com.til.water_detection.data.state.ResultType;
 import com.til.water_detection.data.util.FinalByte;
 import com.til.water_detection.data.util.FinalString;
+import com.til.water_detection.wab.event.ScriptUpEvent;
 import com.til.water_detection.wab.service.*;
 import com.til.water_detection.wab.socket_data.ComEntry;
-import com.til.water_detection.wab.socket_data.CommandCallback;
 import com.til.water_detection.wab.socket_data.EquipmentSocketContext;
-import com.til.water_detection.wab.socket_data.ReturnPackage;
 import com.til.water_detection.wab.util.ByteBufUtil;
 import groovy.lang.GroovyShell;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import jakarta.annotation.Nullable;
 import jakarta.annotation.Resource;
 import lombok.Getter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -33,7 +32,7 @@ import java.sql.Timestamp;
 import java.util.*;
 
 @Controller
-public class EquipmentSocketHandler extends CommandSocketHandlerBasics<EquipmentSocketContext> {
+public class EquipmentSocketHandler extends CommandSocketHandlerBasics<EquipmentSocketContext> implements ApplicationListener<ScriptUpEvent> {
 
     protected static final Logger logger = LogManager.getLogger(EquipmentSocketHandler.class);
 
@@ -98,6 +97,7 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
                 dataTypeRunTime.setValue(value);
             }
             output.writeByte(ResultType.SUCCESSFUL.getState());
+            c.setNeedUp(true);
         }), new ComEntry<>(FinalByte.S_ACTUATOR_LIST, (source, output, tag, c) -> {
             for (ActuatorRuntime actuatorRuntime : c.getEquipmentRunTime().getActuatorRuntimeList()) {
                 boolean run = source.readBoolean();
@@ -234,20 +234,25 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
     @Override
     protected void runScript() {
         super.runScript();
-
         for (EquipmentSocketContext equipmentSocketContext : getSocketContext()) {
-
             if (equipmentSocketContext.getScript() == null) {
                 continue;
             }
+            if (!equipmentSocketContext.isNeedUp()) {
+                continue;
+            }
+            equipmentSocketContext.setNeedUp(false);
             PrintStream originalOut = System.out;
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             PrintStream captureOut = new PrintStream(baos);
             // 重定向 System.out
             System.setOut(captureOut);
-
             try {
-                equipmentSocketContext.getScript().invokeMethod("main", equipmentSocketContext);
+                if (equipmentSocketContext.getScript() == null) {
+                    captureOut.println("-----------------脚本异常，未被创建调用-----------------");
+                } else {
+                    equipmentSocketContext.getScript().invokeMethod("main", equipmentSocketContext);
+                }
             } catch (Exception e) {
                 captureOut.println("-----------------脚本触发异常-----------------");
                 captureOut.println("ERROR: " + e.getMessage());
@@ -257,9 +262,17 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
 
             String capturedLog = baos.toString();
             equipmentSocketContext.getEquipmentRunTime().setLog(capturedLog);
+        }
+    }
 
+    @Override
+    public void onApplicationEvent(ScriptUpEvent event) {
+        EquipmentSocketContext equipmentSocketContextByid = getEquipmentSocketContextByid(event.scriptId);
+
+        if (equipmentSocketContextByid == null) {
+            return;
         }
 
-
+        equipmentSocketContextByid.upScript();
     }
 }

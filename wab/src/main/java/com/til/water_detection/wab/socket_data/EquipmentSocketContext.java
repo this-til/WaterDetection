@@ -35,6 +35,11 @@ public class EquipmentSocketContext extends SocketContext<CommandCallback<Equipm
     private final Map<String, IActuator> actuatorMap = new HashMap<>();
     private final Map<String, IDataType> dataTypeMap = new HashMap<>();
 
+
+    @Getter
+    @Setter
+    private boolean needUp;
+
     @Getter
     @Setter
     private Script script;
@@ -46,8 +51,12 @@ public class EquipmentSocketContext extends SocketContext<CommandCallback<Equipm
 
     public void setEquipment(Equipment equipment) {
         this.equipmentRunTime = new EquipmentRunTime(equipment, null, null, "");
+        upScript();
+    }
+
+    public void upScript() {
         try {
-            script = equipmentSocketHandler.getGroovyShell().parse(equipmentSocketHandler.getScriptService().getScriptById(equipment.getId()));
+            script = equipmentSocketHandler.getGroovyShell().parse(equipmentSocketHandler.getScriptService().getScriptById(equipmentRunTime.getEquipment().getId()));
         } catch (CompilationFailedException e) {
             logger.error(e);
         }
