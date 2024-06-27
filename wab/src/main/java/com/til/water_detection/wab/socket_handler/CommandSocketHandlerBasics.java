@@ -42,7 +42,7 @@ public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> ext
         scheduler.scheduleAtFixedRate(this::heartbeatDetection, 0, 30, TimeUnit.SECONDS);
         scheduler.scheduleAtFixedRate(this::timeoutDetection, 0, 30, TimeUnit.SECONDS);
         scheduler.scheduleAtFixedRate(this::send, 0, 1, TimeUnit.SECONDS);
-        runScript.scheduleAtFixedRate(this::runScript, 0, 10, TimeUnit.SECONDS);
+        runScript.scheduleAtFixedRate(this::runScript, 0, 1, TimeUnit.SECONDS);
     }
 
     protected void sendHeartbeat() {

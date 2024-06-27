@@ -95,13 +95,13 @@ export const DataApi = {
 export const DataTypeApi = {
     registerDataType: (name: string): Promise<AxiosResponse<Result<void>>> => api.post('/dataType/register', null, {params: {name}}),
     removeDataTypeById: (id: number): Promise<AxiosResponse<Result<void>>> => api.delete('/dataType/removeDataTypeById', {params: {id}}),
-    updateDataTypeSuffixById: (id: number, suffix: string): Promise<AxiosResponse<Result<void>>> => api.post('/dataType/updateDataTypeSuffixById', {
+    updateDataTypeSuffixById: (id: number, suffix: string): Promise<AxiosResponse<Result<void>>> => api.post('/dataType/updateDataTypeSuffixById', null, {
         params: {
             id,
             suffix
         }
     }),
-    updateDataTypePercentById: (id: number, percent: boolean): Promise<AxiosResponse<Result<void>>> => api.delete('/dataType/updateDataTypePercentById', {
+    updateDataTypePercentById: (id: number, percent: boolean): Promise<AxiosResponse<Result<void>>> => api.post('/dataType/updateDataTypePercentById', {
         params: {
             id,
             percent
@@ -139,6 +139,7 @@ export const EquipmentApi = {
             electronicFence,
             range
         }
+        
     }),
     /*    updateEquipmentScriptById: (id: number, script: string): Promise<AxiosResponse<Result<void>>> => api.put('/equipment/updateEquipmentScriptById', script, {
             params: {

@@ -14,6 +14,8 @@ import utime
 from machine import Pin
 import usys as sys
 import net
+import quecgnss
+import gnss
 
 header = b'\xAA\xAA\xAA'
 footer = b'\xFF\xFF\xFF'
@@ -61,8 +63,8 @@ b_dataNameList: list[bytes] = list()
 isDebug = True
 isConnectionTest = False
 
-uart_client = UART(UART.UART1, 9600, 8, 0, 1, 0)
-uart_screen = UART(UART.UART2, 9600, 8, 0, 1, 0)
+uart_client = UART(UART.UART2, 9600, 8, 0, 1, 0)
+uart_screen = UART(UART.UART1, 9600, 8, 0, 1, 0)
 c_cache = bytearray()
 s_cache = bytearray()
 
@@ -71,11 +73,13 @@ heartbeatTime = 0
 
 _idAdd: int = 0
 
-toBeSentToClient = Queue(32)
-toBeSentToServer = Queue(32)
-toBeSentToScreen = Queue(32)
+toBeSentToClient = Queue(8)
+toBeSentToServer = Queue(8)
+toBeSentToScreen = Queue(8)
 
 planExecution = Queue(4)
+
+openGnss: bool = False
 
 
 class WatchDog:
@@ -176,7 +180,7 @@ def toCommand(cmd: bytearray, to: int, id: int) -> bytes:
 
 
 def response(_pack: bytes, result: int, id: int):
-    if (id == 101):
+    if id == 101:
         if result == SUCCESSFUL:
             connect_test_success(_pack)
         elif result == FAIL:
@@ -184,7 +188,7 @@ def response(_pack: bytes, result: int, id: int):
         elif result == EXCEPTION:
             connect_test_exception(_pack)
 
-    if (result != SUCCESSFUL):
+    if result != SUCCESSFUL:
         return
 
     if id == 1:
@@ -292,6 +296,12 @@ def csqTest() -> bool:
 
 def connect():
     global cli
+    global url
+    global username
+    global password
+    global equipment
+    global dataNameList
+    global actuatorNameList
 
     if isDebug:
         print("--------------------------------------------------------")
@@ -336,6 +346,13 @@ def connect():
 
     global heartbeatTime
     heartbeatTime = time.time()
+
+    url = None
+    username = None
+    password = None
+    equipment = None
+    dataNameList = None
+    actuatorNameList = None
 
     if isDebug:
         print("--------------------------------------------------------")
@@ -467,7 +484,8 @@ def forwardData(pack: bytes):
 
     if _to == SERVER:
         if cli is None:
-            print("TO SEND VOID")
+            if isDebug:
+                print("TO SEND VOID")
             return
         toBeSentToServer.put(pack)
         if isDebug:
@@ -653,13 +671,34 @@ def reconnectionThread():
         time.sleep(10)
 
 
+def gnss():
+    while True:
+        global openGnss
+        if not openGnss:
+            quecgnss.configSet(0, 5)  # 设置定位星系为GPS+Beidou
+            quecgnss.configSet(2, 1)  # 打开AGPS
+            quecgnss.configSet(4, 1)  # 打开备电
+            ret = quecgnss.init()
+            openGnss = not bool(ret)
+
+            if isDebug:
+
+                if ret == 0:
+                    print('GNSS init ok.')
+                else:
+                    print('GNSS init failed.')
+
+        if openGnss:
+            data = quecgnss.read(4096)
+
+        time.sleep(10)
+
+
 if __name__ == '__main__':
 
     if isDebug:
-        powerDownReason = Power.powerDownReason()
-        powerOnReason = Power.powerOnReason()
-        print("powerDownReason", powerDownReason)
-        print("powerOnReason", powerOnReason)
+        print("powerDownReason", Power.powerDownReason())
+        print("powerOnReason", Power.powerOnReason())
     pass
 
     gc.enable()
@@ -674,10 +713,12 @@ if __name__ == '__main__':
 
     _thread.start_new_thread(uwebsocketMonitoring, ())
     _thread.start_new_thread(clientSerialMonitoring, ())
-    _thread.start_new_thread(screenSerialMonitoring, ())
+    # threadmonitoring.append(_thread.start_new_thread(screenSerialMonitoring, ()))
     _thread.start_new_thread(sendServer, ())
     _thread.start_new_thread(sendClient, ())
-    _thread.start_new_thread(sendScreen, ())
+    # threadmonitoring.append(_thread.start_new_thread(sendScreen, ()))
+
+    # _thread.start_new_thread(gnss, ())
 
     _thread.start_new_thread(feedThread, ())
 

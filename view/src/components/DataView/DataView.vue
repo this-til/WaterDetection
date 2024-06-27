@@ -84,6 +84,7 @@
 
     <el-divider direction="vertical"/>
 
+
     <!--    <el-popover
             width="300"
             trigger="click"
@@ -101,6 +102,28 @@
           <el-button @click=deleteEquipment>确定</el-button>
 
         </el-popover>-->
+
+
+    <el-popover
+        width="300"
+        trigger="click"
+        placement="bottom"
+    >
+      <template #reference>
+        <el-button style="margin-right: 16px">样式</el-button>
+      </template>
+
+      <el-checkbox v-model="dataType.percent" :change="setPercent" label="百分比" border/>
+
+      <br>
+
+      后缀：
+      <el-input
+          v-model="dataType.suffix"
+          :disabled="dataType.percent"
+          @blur=setSuffix placeholder="后缀"/>
+
+    </el-popover>
 
   </el-header>
   <el-main class="main-class">
@@ -125,7 +148,7 @@
 
 <script lang="ts" setup>
 import {markRaw, onMounted, onUnmounted, ref, toRefs, warn, watch} from 'vue'
-import {DataSheet, DataType, Equipment, DataApi} from "@/api";
+import {DataSheet, DataType, Equipment, DataApi, DataTypeApi} from "@/api";
 import {ElMessageBox} from 'element-plus'
 import LineChartView from "@/components/DataView/LineChartView.vue";
 import ChartView from "@/components/DataView/ChartView.vue";
@@ -211,6 +234,14 @@ const selectEquipmentList = ref<Equipment[]>([])
 
 
 const timeStep = ref<number>(10)
+
+const setPercent = () => {
+  DataTypeApi.updateDataTypePercentById(dataType.value.id, dataType.value.percent)
+}
+
+const setSuffix = () => {
+  DataTypeApi.updateDataTypeSuffixById(dataType.value.id, dataType.value.suffix)
+}
 
 
 for (let equipment of props.equipmentList) {

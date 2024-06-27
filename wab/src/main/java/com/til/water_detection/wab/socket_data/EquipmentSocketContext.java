@@ -38,7 +38,7 @@ public class EquipmentSocketContext extends SocketContext<CommandCallback<Equipm
 
     @Getter
     @Setter
-    private boolean needUp;
+    private boolean haveUpdate;
 
     @Getter
     @Setter
@@ -150,5 +150,12 @@ public class EquipmentSocketContext extends SocketContext<CommandCallback<Equipm
     @Override
     public Iterable<IDataType> getDataTypes() {
         return dataTypeMap.values();
+    }
+
+    @Override
+    public boolean haveUpdate() {
+        boolean haveUpdate = this.haveUpdate;
+        this.haveUpdate = false;
+        return haveUpdate;
     }
 }

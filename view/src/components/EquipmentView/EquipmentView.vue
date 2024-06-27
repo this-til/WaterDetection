@@ -122,7 +122,7 @@
             :class=dataStyle(item)
         >
 
-          {{ item.dataType.name }} : {{ item.value }}
+          {{ item.dataType.name }} : {{ item.dataType.percent ? item.value * 100 + "%" : item.value + item.dataType.suffix }}
 
           <!--          <div
                         class="lowerp-left-corner"
@@ -304,7 +304,13 @@ const deleteEquipment = () => {
 
 const up = () => {
   EquipmentApi.getOnlineEquipment(props.equipment.id).then(r => {
-    equipmentRunTime.value = r.data.data
+    if (equipmentRunTime.value != null) {
+      const actuatorRuntimeList = equipmentRunTime.value.actuatorRuntimeList;
+      equipmentRunTime.value = r.data.data
+      equipmentRunTime.value.actuatorRuntimeList = actuatorRuntimeList
+    } else {
+      equipmentRunTime.value = r.data.data
+    }
   })
 }
 
@@ -429,7 +435,7 @@ onMounted(() => {
 let intervalId: number = 0;
 
 onMounted(() => {
-  intervalId = setInterval(updateTime, 16000);
+  intervalId = setInterval(updateTime, 2000);
 });
 
 onUnmounted(() => {

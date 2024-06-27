@@ -13,4 +13,6 @@ public interface IEquipment {
     Iterable<IActuator> getActuators();
 
     Iterable<IDataType> getDataTypes();
+
+    boolean haveUpdate();
 }

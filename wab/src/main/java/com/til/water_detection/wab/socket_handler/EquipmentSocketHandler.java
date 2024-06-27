@@ -97,7 +97,7 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
                 dataTypeRunTime.setValue(value);
             }
             output.writeByte(ResultType.SUCCESSFUL.getState());
-            c.setNeedUp(true);
+            c.setHaveUpdate(true);
         }), new ComEntry<>(FinalByte.S_ACTUATOR_LIST, (source, output, tag, c) -> {
             for (ActuatorRuntime actuatorRuntime : c.getEquipmentRunTime().getActuatorRuntimeList()) {
                 boolean run = source.readBoolean();
@@ -238,10 +238,7 @@ public class EquipmentSocketHandler extends CommandSocketHandlerBasics<Equipment
             if (equipmentSocketContext.getScript() == null) {
                 continue;
             }
-            if (!equipmentSocketContext.isNeedUp()) {
-                continue;
-            }
-            equipmentSocketContext.setNeedUp(false);
+
             PrintStream originalOut = System.out;
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             PrintStream captureOut = new PrintStream(baos);
