@@ -4,8 +4,7 @@
   <div class="example-pagination-block">
     <el-pagination
         v-model:current-page=currentPage
-        :total=pager
-        layout="prev, pager, next"
+        :page-count="pager"
     />
   </div>
 
@@ -29,7 +28,7 @@ import {markRaw, onMounted, ref, toRefs, watch} from "vue";
 const tableData = ref<object[]>([])
 const equipmentList = ref<Equipment[]>([])
 const pager = ref<number>(0)
-const currentPage = ref<number>(0)
+const currentPage = ref<number>(1)
 const props = defineProps<Props>();
 
 const max = 17;
@@ -53,9 +52,9 @@ const update = () => {
   }
   equipmentList.value = value.equipmentList
   tableData.value.length = 0
-  pager.value = value.timestampList.length / max
+  pager.value = Math.ceil(value.timestampList.length / max)
 
-  const s = max * currentPage.value;
+  const s = max * (currentPage.value - 1);
   for (let i = s; i < value.timestampList.length && i < s + max; i++) {
     const obj: Employee = {}
 

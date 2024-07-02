@@ -7,6 +7,7 @@ import com.google.gson.InstanceCreator;
 import com.til.water_detection.api.IAPI;
 import com.til.water_detection.data.*;
 import com.til.water_detection.data.state.ResultType;
+import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
@@ -38,17 +39,6 @@ public class Main {
         assert loginBody.getResultType() == ResultType.SUCCESSFUL;
         assert loginBody.getData() != null;
 
-        Response<Result<List<Equipment>>> allEquipmentExecute = iapi.getAllEquipment(loginBody.getData()).execute();
-
-        assert allEquipmentExecute.isSuccessful();
-
-        Result<List<Equipment>> allEquipmentBody = allEquipmentExecute.body();
-
-        assert allEquipmentBody != null;
-        assert allEquipmentBody.getResultType() == ResultType.SUCCESSFUL;
-        assert allEquipmentBody.getData() != null;
-        assert !allEquipmentBody.getData().isEmpty();
-
 
         Response<Result<List<DataType>>> allDataTypeExecute = iapi.getAllDataType(loginBody.getData()).execute();
 
@@ -60,80 +50,20 @@ public class Main {
         assert allDataTypeBody.getData() != null;
         assert !allDataTypeBody.getData().isEmpty();
 
-        List<Equipment> allEquipment = allEquipmentBody.getData();
-        List<DataType> allDataType = allDataTypeBody.getData();
 
-
-        List<Pack> packList = new ArrayList<>();
-
-        float i = 0;
-        for (Equipment equipment : allEquipment) {
-            for (DataType dataType : allDataType) {
-                packList.add(new Pack(new PerlinNoise(), equipment, dataType, i));
-                i += 0.1f;
-            }
-        }
-
-        List<Data> dataList = new ArrayList<>();
         while (true) {
 
-            for (Pack pack : packList) {
-                dataList.add(new Data(
-                        0,
-                        pack.getEquipment().getId(),
-                        pack.getDataType().getId(),
-                        null,
-                        pack.nextValue()));
-            }
 
-           /* for (Data data : dataList) {
-                iapi.addData(data).execute();
-            }*/
-
-
-            Response<Result<Void>> execute = iapi.addDataList(loginBody.getData(), dataList).execute();
-
-            assert execute.isSuccessful();
-            assert execute.body() != null;
-            assert execute.body().getResultType() == ResultType.SUCCESSFUL;
-
-
-            dataList.clear();
+            iapi.addDataList(loginBody.getData(), List.of(
+                    new Data(0, 24, 9, null, 26),
+                    new Data(0, 24, 10, null, 7),
+                    new Data(0, 24, 11, null, 10),
+                    new Data(0, 24, 12, null, 2000)
+            )).execute();
 
             Thread.sleep(1000 * 3);
         }
 
-    }
-
-    public static class Pack {
-
-        private final PerlinNoise perlinNoise;
-
-        private final Equipment equipment;
-        private final DataType dataType;
-        private final float y;
-        private float x;
-
-        public Pack(PerlinNoise perlinNoise, Equipment equipment, DataType dataType, float y) {
-            this.perlinNoise = perlinNoise;
-            this.equipment = equipment;
-            this.dataType = dataType;
-            this.y = y;
-        }
-
-        public float nextValue() {
-            x += 0.001f;
-            return (float) perlinNoise.noise(x, y);
-        }
-
-
-        public Equipment getEquipment() {
-            return equipment;
-        }
-
-        public DataType getDataType() {
-            return dataType;
-        }
     }
 
 }

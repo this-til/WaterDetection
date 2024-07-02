@@ -1,29 +1,39 @@
 import _thread
+
 import uwebsocket
 from machine import UART
 import time
 import ucollections
 import ubinascii
+import ujson
+from uio import StringIO
 from misc import Power
 from queue import Queue
 import gc
 import utime
 from machine import Pin
 import usys as sys
+import net
+import quecgnss
+import gnss
+
+time.sleep(5)
 
 isDebug = True
 wdt = None
 
 uart_client = UART(UART.UART2, 9600, 8, 0, 1, 0)
 
+heartbeatTime = 0
+
 cli = None
 
-url: str = "wss://113.56.218.150:60762/EquipmentSocket"
+url: str = "wss://frp-oil.top:60762/EquipmentSocket"
 username: str = "til"
 password: str = "114514"
 equipment: str = "maniubi"
 dataNameList: list[str] = ["温度", "PH", "电导率", "浑浊度"]
-actuatorNameList: list[str] = ["报警器", "报警灯", "水泵"]
+actuatorNameList: list[str] = ["报警器", "水泵", "LED"]
 
 toBeSentToClient = Queue(64)
 toBeSentToServer = Queue(64)
@@ -87,10 +97,9 @@ def uwebsocketMonitoring():
             continue
 
         recv_data = cli.recv()
-        if recv_data is None:
-            cli.close()
-            cli = None
-            continue
+
+        global heartbeatTime
+        heartbeatTime = time.time()
 
         if not (isinstance(recv_data, bytes)):
             recv_data = bytes(recv_data)
@@ -105,7 +114,7 @@ def uwebsocketMonitoring():
 # 串口监听
 def clientSerialMonitoring():
     while True:
-        time.sleep(0.5)
+        time.sleep(0.75)
         any = uart_client.any()
         if any == 0:
             continue
@@ -124,8 +133,6 @@ def sendServer():
         if cli is not None:
             while not toBeSentToServer.empty():
                 pack = toBeSentToServer.get()
-                if isDebug:
-                    print("sentToServer", pack)
                 cli.send(pack)
     pass
 
@@ -135,8 +142,6 @@ def sendClient():
         time.sleep(0.75)
         if not toBeSentToClient.empty():
             pack = toBeSentToClient.get()
-            if isDebug:
-                print("sendToClient", pack)
             uart_client.write(pack)
     pass
 
@@ -152,44 +157,42 @@ if __name__ == '__main__':
 
     gc.enable()
 
-    wdt = WatchDog(5)
-    wdt.start()
+    _dataNameList: list[str] = []
+    for e in dataNameList:
+        _dataNameList.append("\"" + e + "\"")
+
+    _actuatorNameList: list[str] = []
+    for e in actuatorNameList:
+        _actuatorNameList.append("\"" + e + "\"")
+    json = (
+            """{"username":"%s","password":"%s","equipment":"%s","dataNameList":[%s],"actuatorNameList":[%s]} """
+            % (username, password, equipment, ','.join(_dataNameList), ','.join(_actuatorNameList))
+    )
+
+    if isDebug:
+        print("json", json)
+
+    _loginData = ubinascii.b2a_base64(json.encode()).decode()[0:-1]
+
+    _url = url + "?" + "loginData=" + _loginData
+
+    if isDebug:
+        print("url", _url)
+
+    cli = uwebsocket.Client.connect(_url, debug=isDebug)
+
+    heartbeatTime = time.time()
 
     _thread.start_new_thread(uwebsocketMonitoring, ())
     _thread.start_new_thread(clientSerialMonitoring, ())
     _thread.start_new_thread(sendServer, ())
     _thread.start_new_thread(sendClient, ())
 
+    wdt = WatchDog(5)
+    wdt.start()
+
     while True:
-        if cli is None:
-
-            _dataNameList: list[str] = []
-            for e in dataNameList:
-                _dataNameList.append("\"" + e + "\"")
-
-            _actuatorNameList: list[str] = []
-            for e in actuatorNameList:
-                _actuatorNameList.append("\"" + e + "\"")
-            json = (
-                    """{"username":"%s","password":"%s","equipment":"%s","dataNameList":[%s],"actuatorNameList":[%s]} """
-                    % (username, password, equipment, ','.join(_dataNameList), ','.join(_actuatorNameList))
-            )
-
-            if isDebug:
-                print("json", json)
-
-            _loginData = ubinascii.b2a_base64(json.encode()).decode()[0:-1]
-
-
-            _url = url + "?" + "loginData=" + _loginData
-
-            if isDebug:
-                print("url", _url)
-
-            try:
-                cli = uwebsocket.Client.connect(_url, debug=isDebug)
-            except Exception as e:
-                sys.print_exception(e)
-            pass
-        time.sleep(10)
         wdt.feed()
+        time.sleep(10)
+        if time.time() - heartbeatTime > 60:
+            bark()

@@ -35,7 +35,7 @@ public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> ext
     protected final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     protected final ScheduledExecutorService runScript = Executors.newSingleThreadScheduledExecutor();
 
-    protected boolean haveAResponse = false;
+    protected boolean haveAResponse = true;
 
     public CommandSocketHandlerBasics() {
         scheduler.scheduleAtFixedRate(this::sendHeartbeat, 0, 30, TimeUnit.SECONDS);
@@ -103,7 +103,8 @@ public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> ext
                     WebSocketSession key = entry.getKey();
                     synchronized (key) {
                         try {
-                            key.sendMessage(new BinaryMessage(commandCallback.getCommand()));
+                            byte[] command = commandCallback.getCommand();
+                            key.sendMessage(new BinaryMessage(com.til.water_detection.wab.util.Util.trimTrailingZeros(command)));
                         } catch (IOException e) {
                             logger.error("发送指令异常：", e);
                         }
@@ -189,7 +190,8 @@ public abstract class CommandSocketHandlerBasics<S extends SocketContext<?>> ext
                         buf.writeBytes(e.getMessage().getBytes(StandardCharsets.UTF_8));
                     }
                     buf.writeBytes(FinalByte.FRAME_FOOTER);
-                    session.sendMessage(new BinaryMessage(buf.array()));
+
+                    session.sendMessage(new BinaryMessage(com.til.water_detection.wab.util.Util.trimTrailingZeros(buf.array())));
                 } else {
                     try {
                         command(byteBuf, Unpooled.buffer(), tag, socketContext);

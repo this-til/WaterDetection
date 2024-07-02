@@ -312,6 +312,13 @@ const up = () => {
       equipmentRunTime.value = r.data.data
     }
   })
+
+  /*if (script.value.length <= 0) {
+    ScriptApi.getScriptById(props.equipment.id).then(r => {
+      script.value = r.data.data
+    })
+  }*/
+
 }
 
 const newFence = ref<boolean>(false)
@@ -453,6 +460,10 @@ watch(equipment, (n, o) => {
   ScriptApi.getScriptById(n.id).then(r => {
     script.value = r.data.data
   })
+})
+
+ScriptApi.getScriptById(props.equipment.id).then(r => {
+  script.value = r.data.data
 })
 
 

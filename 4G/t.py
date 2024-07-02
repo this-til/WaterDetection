@@ -61,7 +61,6 @@ actuatorNameList: list[str] = list()
 b_dataNameList: list[bytes] = list()
 
 isDebug = True
-isConnectionTest = False
 
 uart_client = UART(UART.UART2, 9600, 8, 0, 1, 0)
 uart_screen = UART(UART.UART1, 9600, 8, 0, 1, 0)
@@ -180,14 +179,6 @@ def toCommand(cmd: bytearray, to: int, id: int) -> bytes:
 
 
 def response(_pack: bytes, result: int, id: int):
-    if id == 101:
-        if result == SUCCESSFUL:
-            connect_test_success(_pack)
-        elif result == FAIL:
-            connect_test_fail(_pack)
-        elif result == EXCEPTION:
-            connect_test_exception(_pack)
-
     if result != SUCCESSFUL:
         return
 
@@ -338,11 +329,7 @@ def connect():
     if isDebug:
         print("uwebsocket url", _url)
 
-    try:
-        cli = uwebsocket.Client.connect(_url, debug=isDebug)
-    except Exception as e:
-        print("CONNECTION FAILURE", e)
-        return
+    cli = uwebsocket.Client.connect(_url, debug=isDebug)
 
     global heartbeatTime
     heartbeatTime = time.time()
@@ -358,7 +345,11 @@ def connect():
         print("--------------------------------------------------------")
 
 
-pass
+def close():
+    global cli
+    cli.close()
+    cli = None
+    pass
 
 
 def uwebsocketMonitoring():
@@ -583,70 +574,7 @@ def sendScreen():
 def bark():
     global cli
     print("BARK")
-    if cli is not None:
-        cli.close()
-        cli = None
     Power.powerRestart()
-    pass
-
-
-t_all: int = 0
-t_success: int = 0
-t_fail: int = 0
-t_exception: int = 0
-t_outTime: int = 0
-
-
-def connect_test():
-    com = bytearray()
-    com.append(INIT_END)
-    while True:
-        time.sleep(0.75)
-        forwardData(toCommand(com, CLIENT, 101))
-        global t_all
-        t_all += 1
-
-        if t_all > 100:
-            return
-
-    pass
-
-
-def connect_test_log():
-    while True:
-        time.sleep(10)
-        print(
-            ">>> >",
-            "t_all", t_all,
-            "t_success", t_success,
-            "t_fail", t_fail,
-            "t_exception", t_exception,
-            "t_outTime", t_outTime,
-            "toBeSentToClient.size()", toBeSentToClient.size())
-    pass
-
-
-def connect_test_success(p):
-    global t_success
-    t_success += 1
-    pass
-
-
-def connect_test_fail(p):
-    global t_fail
-    t_fail += 1
-    pass
-
-
-def connect_test_exception(p):
-    global t_exception
-    t_exception += 1
-    pass
-
-
-def connect_test_out():
-    global t_outTime
-    t_outTime += 1
     pass
 
 
@@ -664,10 +592,9 @@ def reconnectionThread():
         if cli is None:
             init()
         else:
-            cli.send(b"\x00")
+            toBeSentToServer.put(b"\x00")
             if time.time() - heartbeatTime > 60:
-                cli.close()
-                cli = None
+                planExecution.put(lambda: close())
         time.sleep(10)
 
 
@@ -705,11 +632,7 @@ if __name__ == '__main__':
     wdt = WatchDog(5)
     wdt.start()
 
-    if isConnectionTest:
-        _thread.start_new_thread(connect_test, ())
-        _thread.start_new_thread(connect_test_log, ())
-    else:
-        _thread.start_new_thread(reconnectionThread, ())
+    _thread.start_new_thread(reconnectionThread, ())
 
     _thread.start_new_thread(uwebsocketMonitoring, ())
     _thread.start_new_thread(clientSerialMonitoring, ())
@@ -727,4 +650,7 @@ if __name__ == '__main__':
     while True:
         time.sleep(1)
         while not planExecution.empty():
-            planExecution.get()()
+            try:
+                planExecution.get()()
+            except Exception as e:
+                print("错误:", e)

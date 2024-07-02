@@ -5,10 +5,6 @@ plugins {
 group = 'com.til.water_detection.fictitious_data'
 version = 'unspecified'
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     api project(':api')
     implementation 'com.google.code.gson:gson:2.8.9'
