@@ -1,0 +1,19 @@
+plugins {
+    id 'groovy'
+}
+
+group = 'com.til.water_detection'
+version = 'unspecified'
+
+
+dependencies {
+    implementation project(":script_api")
+
+    implementation 'org.apache.groovy:groovy:4.0.14'
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}
