@@ -11,9 +11,5 @@ import router from './router/index.js'
 const app = createApp(App);
 app.use(ElementPlus)
 app.use(router)
-
-//const url = (await axios.get("./config.json")).data.url
-
 axios.defaults.withCredentials = true
-
 app.mount('#app')

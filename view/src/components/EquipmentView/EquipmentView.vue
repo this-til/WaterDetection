@@ -27,59 +27,41 @@
     最后更新时间：{{ new Date(equipment.upTime) }}
 
     <el-divider direction="vertical"/>
+    <!--
+        坐标：({{ equipment.longitude }},{{ equipment.latitude }})
 
-    坐标：({{ equipment.longitude }},{{ equipment.latitude }})
+        <el-divider direction="vertical"/>
 
-    <el-divider direction="vertical"/>
-
-    <el-popover
-        width="300"
-        trigger="click"
-        placement="bottom"
-        @before-enter="clickFence"
-    >
-      <template #reference>
-        <el-button>电子栅栏</el-button>
-      </template>
-
-
-      <el-checkbox v-model="newFence" label="启用" border/>
-
-      <br>
-
-      longitude:
-      <el-input v-model="newFenceLongitude" :disabled="!equipment.electronicFence" placeholder="longitude"
-                type="number"/>
-
-      latitude:
-      <el-input v-model="newFenceLatitude" :disabled="!equipment.electronicFence" placeholder="latitude"
-                type="number"/>
-
-      范围(m):
-      <el-input v-model="newFenceRange" :disabled="!equipment.electronicFence" placeholder="range"
-                type="number"/>
-
-      <el-button @click=upElectronicFence>确定</el-button>
-
-      <!--      <el-transfer
-                v-model=selectEquipmentIdList
-                :data=equipmentFiltration
-
-                filterable
-                :filter-method=filterMethod
-                filter-placeholder="搜索设备"
-            />-->
+        <el-popover
+            width="300"
+            trigger="click"
+            placement="bottom"
+            @before-enter="clickFence"
+        >
+          <template #reference>
+            <el-button>电子栅栏</el-button>
+          </template>
 
 
-      <!--        <template #footer>
-                <div class="dialog-footer">
-                  <el-button @click="displayScreeningEquipment = false">Cancel</el-button>
-                  <el-button type="primary" @click="displayScreeningEquipment = false">
-                    Confirm
-                  </el-button>
-                </div>
-              </template>-->
-    </el-popover>
+          <el-checkbox v-model="newFence" label="启用" border/>
+
+          <br>
+
+          longitude:
+          <el-input v-model="newFenceLongitude" :disabled="!equipment.electronicFence" placeholder="longitude"
+                    type="number"/>
+
+          latitude:
+          <el-input v-model="newFenceLatitude" :disabled="!equipment.electronicFence" placeholder="latitude"
+                    type="number"/>
+
+          范围(m):
+          <el-input v-model="newFenceRange" :disabled="!equipment.electronicFence" placeholder="range"
+                    type="number"/>
+
+          <el-button @click=upElectronicFence>确定</el-button>
+
+        </el-popover>-->
 
     <el-divider direction="vertical"/>
 
@@ -102,84 +84,82 @@
     </el-popover>
 
   </el-header>
-  <el-main class="main-class">
+  <el-main
+      class="main-class"
+      v-if="equipmentRunTime != null"
+  >
+    <el-row>
+      数据：
+    </el-row>
 
-
-    <div
-        v-if="equipmentRunTime != null"
+    <br>
+    <el-space
+        wrap
     >
-      <el-row>
-        数据：
-      </el-row>
-
-      <br>
-      <el-space
-          wrap
+      <div
+          v-for="item in equipmentRunTime.dataTypeRuntimeList"
+          :key="item.dataType.id"
+          :class=dataStyle(item)
       >
-        <div
-            v-for="item in equipmentRunTime.dataTypeRuntimeList"
-            :key="item.dataType.id"
-            :class=dataStyle(item)
-        >
 
-          {{ item.dataType.name }} : {{ item.dataType.percent ? item.value * 100 + "%" : item.value + item.dataType.suffix }}
+        {{ item.dataType.name }} : {{
+          item.dataType.percent ? item.value * 100 + "%" : item.value + item.dataType.suffix
+        }}
 
-          <!--          <div
-                        class="lowerp-left-corner"
+        <!--          <div
+                      class="lowerp-left-corner"
+                  >
+                    <el-popover
+                        width="300"
+                        trigger="click"
+                        placement="bottom"
+                        @before-enter="clickChangeRule(item)"
                     >
-                      <el-popover
-                          width="300"
-                          trigger="click"
-                          placement="bottom"
-                          @before-enter="clickChangeRule(item)"
-                      >
 
-                        <template #reference>
-                          <el-button style="margin-right: 16px">更改规则</el-button>
-                        </template>
-                        异常上界:
-                        <el-input-number v-model="newExceptionUpper" :min="newWarnUpper"/>
-                        <br>
-                        警告上界:
-                        <el-input-number v-model="newWarnUpper" :min="newWarnLower" :max="newExceptionUpper"/>
-                        <br>
-                        警告下界:
-                        <el-input-number v-model="newWarnLower" :min="newExceptionLower" :max="newWarnUpper"/>
-                        <br>
-                        异常下界:
-                        <el-input-number v-model="newExceptionLower" :max="newWarnLower"/>
-                        <br>
-                        <el-button @click=changeRule(item)>确定</el-button>
-                      </el-popover>
-                    </div>-->
+                      <template #reference>
+                        <el-button style="margin-right: 16px">更改规则</el-button>
+                      </template>
+                      异常上界:
+                      <el-input-number v-model="newExceptionUpper" :min="newWarnUpper"/>
+                      <br>
+                      警告上界:
+                      <el-input-number v-model="newWarnUpper" :min="newWarnLower" :max="newExceptionUpper"/>
+                      <br>
+                      警告下界:
+                      <el-input-number v-model="newWarnLower" :min="newExceptionLower" :max="newWarnUpper"/>
+                      <br>
+                      异常下界:
+                      <el-input-number v-model="newExceptionLower" :max="newWarnLower"/>
+                      <br>
+                      <el-button @click=changeRule(item)>确定</el-button>
+                    </el-popover>
+                  </div>-->
 
 
-        </div>
-      </el-space>
+      </div>
+    </el-space>
 
-      <el-row>
-        执行器：
-      </el-row>
+    <el-row>
+      执行器：
+    </el-row>
 
-      <br>
-      <el-space
-          wrap
-      >
-        <div
-            v-for="item in equipmentRunTime.actuatorRuntimeList"
-            :key="item.actuator.id"
-            class="scrollbar-demo-item-normal">
+    <br>
+    <el-space
+        wrap
+    >
+      <div
+          v-for="item in equipmentRunTime.actuatorRuntimeList"
+          :key="item.actuator.id"
+          class="scrollbar-demo-item-normal">
 
-          {{ item.actuator.name }} : &nbsp;&nbsp;&nbsp;
-          <el-switch
-              v-model="item.activated"
-              @change="switchActivated(item)"
-          />
+        {{ item.actuator.name }} : &nbsp;&nbsp;&nbsp;
+        <el-switch
+            v-model="item.activated"
+            @change="switchActivated(item)"
+        />
 
-        </div>
-      </el-space>
-
-    </div>
+      </div>
+    </el-space>
 
     <div
         v-if=hasScript

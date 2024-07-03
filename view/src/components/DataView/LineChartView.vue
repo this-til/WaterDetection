@@ -53,7 +53,6 @@ const update = () => {
     series.push({
       name: data.equipmentList[i].name,
       type: 'line',
-      stack: 'Total',
       data: data.value[i],
     })
     eName.push(data.equipmentList[i].name)

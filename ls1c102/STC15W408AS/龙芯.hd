@@ -1,0 +1,97 @@
+#define SYS_CLK 24000000L//设置定时器、串口频率参数
+#define DS18B20_DQ P1_5
+#define PH_PIN  ADC_P13
+#define ELEC_PIN ADC_P14
+#define TRUB_PIN ADC_P12
+
+#define DS18B20_DQ_MODE {P1M1&=~0x20;P1M0&=~0x20;} //双向IO口
+
+#include <STC15X.h>
+#include "lib/STC15_ADC.h"
+#include "lib/STC15_UART.h"
+#include "mylib/ds18b20.h"
+
+int32 TEMP = 0;
+uint32 RDPH = 0;
+uint32 ELEC = 0;
+uint32 TRUB = 0;
+uint8 RX_FLAG = 0;
+uint8 Cmd = 0;
+float TDS_voltage = 0;
+float compensationCoefficient = 0;
+float compensationVolatge = 0;
+float TDS_value = 0;
+
+void setup()
+{
+  ds18b20_init();//DS18B20初始化
+  adc_init(ADC_P12, ADC_90T, ADC_10BIT);//ADC初始化，三个参数ADC引脚，时钟分频双数2-32，输出值位数12BIT最大分率-12位的ADC输出12位，10位的输出10位
+  adc_init(ADC_P13, ADC_90T, ADC_10BIT);//ADC初始化，三个参数ADC引脚，时钟分频双数2-32，输出值位数12BIT最大分率-12位的ADC输出12位，10位的输出10位
+  adc_init(ADC_P14, ADC_90T, ADC_10BIT);//ADC初始化，三个参数ADC引脚，时钟分频双数2-32，输出值位数12BIT最大分率-12位的ADC输出12位，10位的输出10位
+  uart_init(UART_1, UART1_RX_P30, UART1_TX_P31, 9600, TIM_2);//初始化串口
+}
+
+
+void loop()
+{
+  RX_FLAG = UART1_GET_RX_FLAG;
+
+  
+  TEMP = (ds18b20_read_temperature() * 10000);
+  RDPH = ((-5.8887 * (((float)(adc_read(PH_PIN) / 1023.0 )) * 3.3 ) + 16.654) * 10000);
+  
+  TDS_voltage = (((float)(adc_read(ELEC_PIN) / 1023.0 )) * 3.3 );
+  compensationCoefficient = (1.0 + (0.02*(((float)TEMP/10000)-25.0)));
+  compensationVolatge = TDS_voltage/compensationCoefficient;
+  TDS_value=((133.42*(compensationVolatge*compensationVolatge*compensationVolatge) - 255.86*(compensationVolatge*compensationVolatge) + 857.39*compensationVolatge)*0.5*1);
+  ELEC = TDS_value * 10000;
+  
+  TRUB = ((-865.68 * (((float)(adc_read(TRUB_PIN) / 1023.0)) * 3.3 ) + 3291.3) * 10000);
+  Cmd = SBUF;
+  if(RX_FLAG != 0){
+    if(Cmd == 0x7f){
+      uart_putchar(UART_1, 0xaa);
+      uart_putchar(UART_1, 0xaa);
+      uart_putchar(UART_1, 0xaa);
+      uart_putchar(UART_1, (TEMP>>24));
+      uart_putchar(UART_1, (TEMP>>16));
+      uart_putchar(UART_1, (TEMP>>8));
+      uart_putchar(UART_1, (TEMP>>0));
+      uart_putchar(UART_1, (RDPH>>24));
+      uart_putchar(UART_1, (RDPH>>16));
+      uart_putchar(UART_1, (RDPH>>8));
+      uart_putchar(UART_1, (RDPH>>0));
+      uart_putchar(UART_1, (ELEC>>24));
+      uart_putchar(UART_1, (ELEC>>16));
+      uart_putchar(UART_1, (ELEC>>8));
+      uart_putchar(UART_1, (ELEC>>0));
+      uart_putchar(UART_1, (TRUB>>24));
+      uart_putchar(UART_1, (TRUB>>16));
+      uart_putchar(UART_1, (TRUB>>8));
+      uart_putchar(UART_1, (TRUB>>0));
+      uart_putchar(UART_1, 0xff);
+      uart_putchar(UART_1, 0xff);
+      uart_putchar(UART_1, 0xff);
+      TRUB = 0;
+      RDPH = 0;
+      ELEC = 0;
+      Cmd = 0;
+    }
+    UART1_CLEAR_RX_FLAG;
+  }
+}
+
+void main(void)
+{
+  setup();
+  while(1){
+    loop();
+  }
+}
+
+
+
+
+
+
+/** edittype="stc15code" */
