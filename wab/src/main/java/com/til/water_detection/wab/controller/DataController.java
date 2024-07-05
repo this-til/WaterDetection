@@ -153,7 +153,8 @@ public class DataController {
             int _ii = 0;
             for (Long aLong : timestampListLong) {
 
-                Float v = null;
+                float v = 0;
+                int c = 0;
 
                 while (true) {
 
@@ -167,15 +168,12 @@ public class DataController {
                         break;
                     }
 
-                    if (v == null) {
-                        v = data.getValue();
-                    } else {
-                        v = (v + data.getValue()) / 2;
-                    }
+                    v += data.getValue();
+                    c++;
 
                     _ii++;
                 }
-                floats.add(v);
+                floats.add(v / c);
             }
 
         }

@@ -1,9 +1,7 @@
 package com.til.water_detection.fictitious_data;
 
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.InstanceCreator;
+import com.google.gson.*;
 import com.til.water_detection.api.IAPI;
 import com.til.water_detection.data.*;
 import com.til.water_detection.data.state.ResultType;
@@ -13,6 +11,7 @@ import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +20,7 @@ public class Main {
 
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(Void.class, (InstanceCreator<Void>) type -> null);
+        gsonBuilder.registerTypeAdapter(Timestamp.class, (JsonSerializer<Timestamp>) (t, tt, c) -> new JsonPrimitive(t.getTime()));
         Gson gson = gsonBuilder.create();
 
         Retrofit retrofit = new Retrofit.Builder()
@@ -50,6 +50,26 @@ public class Main {
         assert allDataTypeBody.getData() != null;
         assert !allDataTypeBody.getData().isEmpty();
 
+        List<Data> datas = new ArrayList<>();
+
+        long l = System.currentTimeMillis();
+
+        for (int i = 0; i < 32000; i++) {
+
+            l -= 4 * 1000;
+
+            datas.add(new Data(0, 24, 9, new Timestamp(l), 26));
+            datas.add(new Data(0, 24, 10, new Timestamp(l), 7));
+            datas.add(new Data(0, 24, 11, new Timestamp(l), 10));
+            datas.add(new Data(0, 24, 12, new Timestamp(l), 2000));
+
+
+        }
+
+        iapi.addDataList(loginBody.getData(), datas).execute();
+
+
+/*
 
         while (true) {
 
@@ -63,6 +83,7 @@ public class Main {
 
             Thread.sleep(1000 * 3);
         }
+*/
 
     }
 
