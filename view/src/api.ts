@@ -139,7 +139,7 @@ export const EquipmentApi = {
             electronicFence,
             range
         }
-        
+
     }),
     /*    updateEquipmentScriptById: (id: number, script: string): Promise<AxiosResponse<Result<void>>> => api.put('/equipment/updateEquipmentScriptById', script, {
             params: {
@@ -189,6 +189,10 @@ export const ScriptApi = {
     }),
     getScriptById: (id: number): Promise<AxiosResponse<Result<string>>> => api.get('/script/getScriptById', {params: {id}})
 };
+
+export const AlarmMessageApi = {
+    getAlarmMessageList: (): Promise<AxiosResponse<Result<AlarmMessage[]>>> => api.post('/alarmMessage/getAlarmMessageList'),
+}
 
 export enum ResultType {
     SUCCESSFUL = "SUCCESSFUL",
@@ -274,3 +278,10 @@ export interface EquipmentRunTime {
     log: string
 
 }
+
+export interface AlarmMessage {
+    id: number,
+    message: string;
+    dataState: number;
+}
+

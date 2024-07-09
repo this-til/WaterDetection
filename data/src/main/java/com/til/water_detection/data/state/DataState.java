@@ -19,4 +19,5 @@ public enum DataState {
     DataState(int state) {
         this.state = state;
     }
+
 }

@@ -4,7 +4,10 @@ import com.til.water_detection.script.IDataType
 import com.til.water_detection.script.IEquipment
 
 static void main(IEquipment equipment) {
-    if (!equipment.haveUpdate()) {
+    for (final def d in equipment.getDataTypes()) {
+        d.setDataState(DataState.EXCEPTION_LOWER)
+    }
+    /*if (!equipment.haveUpdate()) {
         return
     }
     boolean hasException = false;
@@ -33,6 +36,6 @@ static void main(IEquipment equipment) {
                 actuator.start()
             }
         }
-    }
+    }*/
 }
 

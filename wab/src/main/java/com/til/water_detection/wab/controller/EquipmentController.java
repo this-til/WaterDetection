@@ -158,4 +158,5 @@ public class EquipmentController {
     public Result<List<Equipment>> getEquipmentByNameArray(@RequestParam String[] name) {
         return new Result<>(ResultType.SUCCESSFUL, null, equipmentService.getEquipmentByNameArray(name));
     }
+
 }

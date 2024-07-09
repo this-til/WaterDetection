@@ -139,9 +139,23 @@ import DataView from "@/components/DataView/DataView.vue";
 import OrderView from "@/components/OrderView.vue";
 import SetView from "@/components/SetView.vue";
 import EquipmentView from "@/components/EquipmentView/EquipmentView.vue"
-import {DataType, Equipment, DataApi, EquipmentApi, DataTypeApi, _token} from "@/api";
+import {
+  DataType,
+  Equipment,
+  DataApi,
+  EquipmentApi,
+  DataTypeApi,
+  _token,
+  AlarmMessageApi,
+  AlarmMessage,
+  DataTypeRunTime
+} from "@/api";
 import {useRouter} from "vue-router";
 import AllEquipmentView from "@/components/EquipmentView/AllEquipmentView.vue";
+import {ElMessage} from 'element-plus'
+import { h } from 'vue'
+import { ElNotification } from 'element-plus'
+
 
 const router = useRouter();
 
@@ -219,6 +233,29 @@ const up = () => {
   })
   EquipmentApi.getAllOnlineEquipmentId().then(r => {
     allOnlineEquipment.value = r.data.data == null ? [] : r.data.data
+  })
+  AlarmMessageApi.getAlarmMessageList().then(r => {
+    for (let a in r.data.data) {
+      const alarmMessage = r.data.data[a]
+      let error: string = ""
+      switch (alarmMessage.dataState) {
+        case 2:
+        case 4:
+          error = "warning"
+          break
+        case 1:
+        case 5:
+          error = "error"
+          break
+      }
+      ElNotification({
+        showClose: true,
+        message: alarmMessage.message,
+        type: error,
+        offset: 50 * a,
+        duration: 14000,
+      })
+    }
   })
 }
 

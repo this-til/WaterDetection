@@ -101,40 +101,9 @@
           :key="item.dataType.id"
           :class=dataStyle(item)
       >
-
         {{ item.dataType.name }} : {{
           item.dataType.percent ? item.value * 100 + "%" : item.value + item.dataType.suffix
         }}
-
-        <!--          <div
-                      class="lowerp-left-corner"
-                  >
-                    <el-popover
-                        width="300"
-                        trigger="click"
-                        placement="bottom"
-                        @before-enter="clickChangeRule(item)"
-                    >
-
-                      <template #reference>
-                        <el-button style="margin-right: 16px">更改规则</el-button>
-                      </template>
-                      异常上界:
-                      <el-input-number v-model="newExceptionUpper" :min="newWarnUpper"/>
-                      <br>
-                      警告上界:
-                      <el-input-number v-model="newWarnUpper" :min="newWarnLower" :max="newExceptionUpper"/>
-                      <br>
-                      警告下界:
-                      <el-input-number v-model="newWarnLower" :min="newExceptionLower" :max="newWarnUpper"/>
-                      <br>
-                      异常下界:
-                      <el-input-number v-model="newExceptionLower" :max="newWarnLower"/>
-                      <br>
-                      <el-button @click=changeRule(item)>确定</el-button>
-                    </el-popover>
-                  </div>-->
-
 
       </div>
     </el-space>
@@ -293,11 +262,6 @@ const up = () => {
     }
   })
 
-  /*if (script.value.length <= 0) {
-    ScriptApi.getScriptById(props.equipment.id).then(r => {
-      script.value = r.data.data
-    })
-  }*/
 
 }
 
