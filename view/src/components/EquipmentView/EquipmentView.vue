@@ -7,7 +7,7 @@
 
     <el-divider direction="vertical"/>
 
-    <el-popover
+<!--    <el-popover
         width="300"
         trigger="click"
         placement="bottom"
@@ -22,7 +22,7 @@
 
     </el-popover>
 
-    <el-divider direction="vertical"/>
+    <el-divider direction="vertical"/>-->
 
     最后更新时间：{{ new Date(equipment.upTime) }}
 

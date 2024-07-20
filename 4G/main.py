@@ -17,7 +17,7 @@ import net
 import quecgnss
 import gnss
 
-time.sleep(5)
+time.sleep(8)
 
 isDebug = True
 wdt = None

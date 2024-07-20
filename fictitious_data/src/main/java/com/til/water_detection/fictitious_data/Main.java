@@ -58,10 +58,10 @@ public class Main {
 
             l -= 4 * 1000;
 
-            datas.add(new Data(0, 24, 9, new Timestamp(l), 26));
-            datas.add(new Data(0, 24, 10, new Timestamp(l), 7));
-            datas.add(new Data(0, 24, 11, new Timestamp(l), 10));
-            datas.add(new Data(0, 24, 12, new Timestamp(l), 2000));
+            datas.add(new Data(0, 25, 9, new Timestamp(l), 26));
+            datas.add(new Data(0, 25, 10, new Timestamp(l), 7));
+            datas.add(new Data(0, 25, 11, new Timestamp(l), 10));
+            datas.add(new Data(0, 25, 12, new Timestamp(l), 2000));
 
 
         }
